@@ -1,34 +1,35 @@
 package imageinfo
 
-type Service struct {
-	validator *Validator
-	extractor *MetadataExtractor
+// ImageProcessor orchestrates image validation and metadata extraction
+type ImageProcessor struct {
+	validator *ImageValidator
+	extractor *ImageMetadataExtractor
 }
 
-// NewService creates a new image info service
-func NewService(config ValidationConfig) *Service {
-	return &Service{
-		validator: NewValidator(config),
-		extractor: NewMetadataExtractor(),
+// NewImageProcessor creates a new image processor
+func NewImageProcessor(config ValidationConfig) *ImageProcessor {
+	return &ImageProcessor{
+		validator: NewImageValidator(config),
+		extractor: NewImageMetadataExtractor(),
 	}
 }
 
 // Process validates an image and extracts its metadata
 // Returns ImageInfo if successful, or an error if validation fails
-func (s *Service) Process(path string) (*ImageInfo, error) {
+func (p *ImageProcessor) Process(path string) (*ImageInfo, error) {
 	// Step 1: Validate file (size, extension)
-	if err := s.validator.ValidateFile(path); err != nil {
+	if err := p.validator.ValidateFile(path); err != nil {
 		return nil, err
 	}
 
 	// Step 2: Extract metadata (including MIME type and dimensions)
-	info, err := s.extractor.Extract(path)
+	info, err := p.extractor.Extract(path)
 	if err != nil {
 		return nil, err
 	}
 
 	// Step 3: Validate MIME type (actual content type)
-	if err := s.validator.ValidateMIMEType(info.MIMEType); err != nil {
+	if err := p.validator.ValidateMIMEType(info.MIMEType); err != nil {
 		return nil, err
 	}
 

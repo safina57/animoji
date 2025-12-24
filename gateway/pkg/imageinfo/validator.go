@@ -7,18 +7,18 @@ import (
 	"strings"
 )
 
-// Validator handles image validation logic
-type Validator struct {
+// ImageValidator handles image validation logic
+type ImageValidator struct {
 	config ValidationConfig
 }
 
-// NewValidator creates a new validator with the given config
-func NewValidator(config ValidationConfig) *Validator {
-	return &Validator{config: config}
+// NewImageValidator creates a new image validator with the given config
+func NewImageValidator(config ValidationConfig) *ImageValidator {
+	return &ImageValidator{config: config}
 }
 
 // ValidateFile performs all validation checks on a file
-func (v *Validator) ValidateFile(path string) error {
+func (v *ImageValidator) ValidateFile(path string) error {
 	// Check file exists
 	stat, err := os.Stat(path)
 	if err != nil {
@@ -47,7 +47,7 @@ func (v *Validator) ValidateFile(path string) error {
 }
 
 // validateSize checks if file size is within limits
-func (v *Validator) validateSize(size int64) error {
+func (v *ImageValidator) validateSize(size int64) error {
 	if size > v.config.MaxSizeBytes {
 		return fmt.Errorf("%w: %d bytes (max: %d bytes)",
 			ErrFileTooLarge, size, v.config.MaxSizeBytes)
@@ -56,7 +56,7 @@ func (v *Validator) validateSize(size int64) error {
 }
 
 // validateExtension checks if file extension is allowed
-func (v *Validator) validateExtension(path string) error {
+func (v *ImageValidator) validateExtension(path string) error {
 	ext := strings.ToLower(strings.TrimPrefix(filepath.Ext(path), "."))
 
 	for _, allowed := range v.config.AllowedExtensions {
@@ -70,7 +70,7 @@ func (v *Validator) validateExtension(path string) error {
 }
 
 // ValidateMIMEType checks if MIME type is allowed
-func (v *Validator) ValidateMIMEType(mimeType string) error {
+func (v *ImageValidator) ValidateMIMEType(mimeType string) error {
 	for _, allowed := range v.config.AllowedMIMETypes {
 		if mimeType == allowed {
 			return nil

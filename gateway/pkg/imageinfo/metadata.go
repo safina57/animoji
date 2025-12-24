@@ -12,16 +12,16 @@ import (
 	_ "golang.org/x/image/webp"
 )
 
-// MetadataExtractor extracts image metadata
-type MetadataExtractor struct{}
+// ImageMetadataExtractor extracts image metadata
+type ImageMetadataExtractor struct{}
 
-// NewMetadataExtractor creates a new metadata extractor
-func NewMetadataExtractor() *MetadataExtractor {
-	return &MetadataExtractor{}
+// NewImageMetadataExtractor creates a new image metadata extractor
+func NewImageMetadataExtractor() *ImageMetadataExtractor {
+	return &ImageMetadataExtractor{}
 }
 
 // Extract gets all metadata from an image file
-func (e *MetadataExtractor) Extract(path string) (*ImageInfo, error) {
+func (e *ImageMetadataExtractor) Extract(path string) (*ImageInfo, error) {
 	stat, err := os.Stat(path)
 	if err != nil {
 		return nil, fmt.Errorf("cannot stat file: %w", err)
@@ -56,7 +56,7 @@ func (e *MetadataExtractor) Extract(path string) (*ImageInfo, error) {
 }
 
 // detectMIMEType uses the first 512 bytes to detect content type
-func (e *MetadataExtractor) detectMIMEType(path string) (string, error) {
+func (e *ImageMetadataExtractor) detectMIMEType(path string) (string, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return "", err
@@ -74,7 +74,7 @@ func (e *MetadataExtractor) detectMIMEType(path string) (string, error) {
 }
 
 // getDimensions decodes the image to get width and height
-func (e *MetadataExtractor) getDimensions(path string) (int, int, error) {
+func (e *ImageMetadataExtractor) getDimensions(path string) (int, int, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return 0, 0, err
