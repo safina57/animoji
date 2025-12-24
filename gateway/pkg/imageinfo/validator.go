@@ -2,6 +2,7 @@ package imageinfo
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -79,4 +80,19 @@ func (v *ImageValidator) ValidateMIMEType(mimeType string) error {
 
 	return fmt.Errorf("%w: %s (allowed: %v)",
 		ErrInvalidMIMEType, mimeType, v.config.AllowedMIMETypes)
+}
+
+// ValidateReader performs validation checks on an io.Reader with a given filename and size
+func (v *ImageValidator) ValidateReader(r io.Reader, filename string, size int64) error {
+	// Check file size
+	if err := v.validateSize(size); err != nil {
+		return err
+	}
+
+	// Check extension from filename
+	if err := v.validateExtension(filename); err != nil {
+		return err
+	}
+
+	return nil
 }

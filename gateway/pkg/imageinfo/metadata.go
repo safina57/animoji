@@ -1,10 +1,12 @@
 package imageinfo
 
 import (
+	"bytes"
 	"fmt"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -34,7 +36,13 @@ func (e *ImageMetadataExtractor) Extract(path string) (*ImageInfo, error) {
 	}
 
 	// Get dimensions
-	width, height, err := e.getDimensions(path)
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("cannot open file: %w", err)
+	}
+	defer file.Close()
+
+	width, height, err := e.getDimensionsFromReader(file)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", ErrCannotDecodeImage, err)
 	}
@@ -73,22 +81,6 @@ func (e *ImageMetadataExtractor) detectMIMEType(path string) (string, error) {
 	return http.DetectContentType(buffer[:n]), nil
 }
 
-// getDimensions decodes the image to get width and height
-func (e *ImageMetadataExtractor) getDimensions(path string) (int, int, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return 0, 0, err
-	}
-	defer file.Close()
-
-	config, _, err := image.DecodeConfig(file)
-	if err != nil {
-		return 0, 0, err
-	}
-
-	return config.Width, config.Height, nil
-}
-
 // formatBytes converts bytes to human-readable format
 func formatBytes(bytes int64) string {
 	const unit = 1024
@@ -101,4 +93,47 @@ func formatBytes(bytes int64) string {
 		exp++
 	}
 	return fmt.Sprintf("%.2f %cB", float64(bytes)/float64(div), "KMGTPE"[exp])
+}
+
+// ExtractFromReader gets all metadata from an io.Reader
+func (e *ImageMetadataExtractor) ExtractFromReader(r io.Reader, filename string, size int64) (*ImageInfo, error) {
+	// Read all data into memory
+	data, err := io.ReadAll(r)
+	if err != nil {
+		return nil, fmt.Errorf("cannot read data: %w", err)
+	}
+
+	// Get MIME type from data
+	mimeType := http.DetectContentType(data)
+
+	// Get dimensions by decoding image
+	width, height, err := e.getDimensionsFromReader(bytes.NewReader(data))
+	if err != nil {
+		return nil, fmt.Errorf("%w: %v", ErrCannotDecodeImage, err)
+	}
+
+	ext := filepath.Ext(filename)
+	if len(ext) > 0 {
+		ext = ext[1:] // Remove leading dot
+	}
+
+	return &ImageInfo{
+		Filename:     filename,
+		SizeBytes:    size,
+		Extension:    ext,
+		ReadableSize: formatBytes(size),
+		Width:        width,
+		Height:       height,
+		MIMEType:     mimeType,
+	}, nil
+}
+
+// getDimensionsFromReader decodes the image from a reader to get width and height
+func (e *ImageMetadataExtractor) getDimensionsFromReader(r io.Reader) (int, int, error) {
+	config, _, err := image.DecodeConfig(r)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return config.Width, config.Height, nil
 }
