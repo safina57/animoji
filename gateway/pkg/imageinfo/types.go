@@ -1,6 +1,10 @@
 package imageinfo
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/safina57/animoji/gateway/internal/constants"
+)
 
 // ImageInfo holds complete metadata about an image file
 type ImageInfo struct {
@@ -33,12 +37,8 @@ var (
 // DefaultConfig returns sensible defaults for image validation
 func DefaultConfig() ValidationConfig {
 	return ValidationConfig{
-		MaxSizeBytes: 10 << 20, // 10 MB
-		AllowedExtensions: []string{
-			"jpg", "jpeg", "png", "webp",
-		},
-		AllowedMIMETypes: []string{
-			"image/jpeg", "image/png", "image/webp",
-		},
+		MaxSizeBytes:      constants.MaxUploadSize,
+		AllowedExtensions: constants.AllowedImageExtensions,
+		AllowedMIMETypes:  constants.AllowedImageMIMETypes,
 	}
 }

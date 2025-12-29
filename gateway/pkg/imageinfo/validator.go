@@ -2,7 +2,7 @@ package imageinfo
 
 import (
 	"fmt"
-	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -82,8 +82,9 @@ func (v *ImageValidator) ValidateMIMEType(mimeType string) error {
 		ErrInvalidMIMEType, mimeType, v.config.AllowedMIMETypes)
 }
 
-// ValidateReader performs validation checks on an io.Reader with a given filename and size
-func (v *ImageValidator) ValidateReader(r io.Reader, filename string, size int64) error {
+// ValidateBufferedContent performs complete validation on buffered data
+// This validates size, extension, MIME type, and ensures the data is a valid image
+func (v *ImageValidator) ValidateBufferedContent(data []byte, filename string, size int64) error {
 	// Check file size
 	if err := v.validateSize(size); err != nil {
 		return err
@@ -94,5 +95,21 @@ func (v *ImageValidator) ValidateReader(r io.Reader, filename string, size int64
 		return err
 	}
 
+	// Detect actual MIME type from content (not just filename)
+	mimeType := detectMIMETypeFromData(data)
+	if err := v.ValidateMIMEType(mimeType); err != nil {
+		return err
+	}
+
 	return nil
+}
+
+// detectMIMETypeFromData detects MIME type from raw bytes
+func detectMIMETypeFromData(data []byte) string {
+	// http.DetectContentType reads at most first 512 bytes
+	size := len(data)
+	if size > 512 {
+		size = 512
+	}
+	return http.DetectContentType(data[:size])
 }

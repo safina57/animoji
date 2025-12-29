@@ -7,14 +7,16 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/safina57/animoji/gateway/internal/constants"
 	"github.com/safina57/animoji/gateway/internal/models"
 	"github.com/safina57/animoji/gateway/pkg/imageinfo"
+	"github.com/safina57/animoji/gateway/pkg/logger"
 )
 
 // HandleGenerate processes image upload and creates a generation job
 func HandleGenerate(w http.ResponseWriter, r *http.Request) {
 	// Parse multipart form with size limit
-	if err := r.ParseMultipartForm(10 << 20); err != nil {
+	if err := r.ParseMultipartForm(constants.MaxUploadSize); err != nil {
 		respondError(w, "File too large (max 10MB)", http.StatusBadRequest)
 		return
 	}
@@ -55,15 +57,20 @@ func HandleGenerate(w http.ResponseWriter, r *http.Request) {
 	jobID := uuid.New().String()
 
 	// TODO: Upload to MinIO and publish to NATS
-	// For now, just log the job creation
-	fmt.Printf("✓ Job created: %s\n", jobID)
-	fmt.Printf("  Prompt: %s\n", prompt)
-	fmt.Printf("  Image: %dx%d %s (%s)\n", info.Width, info.Height, info.MIMEType, info.ReadableSize)
+	// Log the job creation
+	logger.Info().
+		Str("job_id", jobID).
+		Str("prompt", prompt).
+		Int("width", info.Width).
+		Int("height", info.Height).
+		Str("mime_type", info.MIMEType).
+		Str("size", info.ReadableSize).
+		Msg("✓ Job created")
 
 	// Return response
 	response := models.GenerateResponse{
 		JobID:   jobID,
-		Status:  models.StatusQueued,
+		Status:  constants.StatusQueued,
 		Message: "Image uploaded successfully",
 	}
 

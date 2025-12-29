@@ -95,14 +95,8 @@ func formatBytes(bytes int64) string {
 	return fmt.Sprintf("%.2f %cB", float64(bytes)/float64(div), "KMGTPE"[exp])
 }
 
-// ExtractFromReader gets all metadata from an io.Reader
-func (e *ImageMetadataExtractor) ExtractFromReader(r io.Reader, filename string, size int64) (*ImageInfo, error) {
-	// Read all data into memory
-	data, err := io.ReadAll(r)
-	if err != nil {
-		return nil, fmt.Errorf("cannot read data: %w", err)
-	}
-
+// ExtractFromData gets all metadata from buffered image data
+func (e *ImageMetadataExtractor) ExtractFromData(data []byte, filename string, size int64) (*ImageInfo, error) {
 	// Get MIME type from data
 	mimeType := http.DetectContentType(data)
 

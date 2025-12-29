@@ -1,13 +1,17 @@
 package middleware
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/safina57/animoji/gateway/internal/constants"
+)
 
 // CORS adds Cross-Origin Resource Sharing headers for frontend integration
 func CORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Allow-Origin", constants.CORSAllowOrigin)
+		w.Header().Set("Access-Control-Allow-Methods", constants.CORSAllowMethods)
+		w.Header().Set("Access-Control-Allow-Headers", constants.CORSAllowHeaders)
 
 		// Handle preflight requests
 		if r.Method == "OPTIONS" {

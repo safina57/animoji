@@ -2,17 +2,21 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/safina57/animoji/gateway/internal/constants"
 	"github.com/safina57/animoji/gateway/internal/handlers"
 	appMiddleware "github.com/safina57/animoji/gateway/internal/middleware"
+	"github.com/safina57/animoji/gateway/pkg/logger"
 )
 
 func main() {
+	// Initialize logger
+	logger.Init()
+
 	r := chi.NewRouter()
 
 	// Middleware
@@ -31,12 +35,13 @@ func main() {
 	// Get port from environment or use default
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = constants.DefaultPort
 	}
 
 	// Start server
 	addr := fmt.Sprintf(":%s", port)
-	fmt.Println(`                                                 
+
+	logger.Info().Msgf(`
                                                  
                                                  
    ██   ██   █ █████  █▒  ▒█  ▓██▓    ███  █████ 
@@ -48,10 +53,14 @@ func main() {
  ▒████▒ █  ▓▒█   █    █    █ █░  ░█     █    █   
  ▓▒  ▒▓ █  ░██   █    █    █ ▒█  █▒ █░ ▒█    █   
  █░  ░█ █   ██ █████  █    █  ▓██▓  ▒███░  █████ 
-                                                 
-                                                 
-    `)
+                                                 `)
+
+	logger.Info().
+		Str("url", fmt.Sprintf("http://localhost%s", addr)).
+		Str("port", port).
+		Msg("🚀 Gateway API server starting")
+
 	if err := http.ListenAndServe(addr, r); err != nil {
-		log.Fatal(err)
+		logger.Fatal().Err(err).Msg("Server failed to start")
 	}
 }
