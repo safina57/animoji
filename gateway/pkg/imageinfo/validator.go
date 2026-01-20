@@ -1,6 +1,7 @@
 package imageinfo
 
 import (
+	"slices"
 	"fmt"
 	"net/http"
 	"os"
@@ -72,11 +73,9 @@ func (v *ImageValidator) validateExtension(path string) error {
 
 // ValidateMIMEType checks if MIME type is allowed
 func (v *ImageValidator) ValidateMIMEType(mimeType string) error {
-	for _, allowed := range v.config.AllowedMIMETypes {
-		if mimeType == allowed {
+	if slices.Contains(v.config.AllowedMIMETypes, mimeType) {
 			return nil
 		}
-	}
 
 	return fmt.Errorf("%w: %s (allowed: %v)",
 		ErrInvalidMIMEType, mimeType, v.config.AllowedMIMETypes)
@@ -107,9 +106,6 @@ func (v *ImageValidator) ValidateBufferedContent(data []byte, filename string, s
 // detectMIMETypeFromData detects MIME type from raw bytes
 func detectMIMETypeFromData(data []byte) string {
 	// http.DetectContentType reads at most first 512 bytes
-	size := len(data)
-	if size > 512 {
-		size = 512
-	}
+	size := min(len(data), 512)
 	return http.DetectContentType(data[:size])
 }

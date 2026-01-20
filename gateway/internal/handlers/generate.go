@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/dustin/go-humanize"
 	"github.com/google/uuid"
 	"github.com/safina57/animoji/gateway/internal/constants"
 	"github.com/safina57/animoji/gateway/internal/models"
@@ -17,7 +18,7 @@ import (
 func HandleGenerate(w http.ResponseWriter, r *http.Request) {
 	// Parse multipart form with size limit
 	if err := r.ParseMultipartForm(constants.MaxUploadSize); err != nil {
-		respondError(w, fmt.Sprintf("File too large (max %dMB)", constants.MaxUploadSize/(1024*1024)), http.StatusBadRequest)
+		respondError(w, fmt.Sprintf("File too large (max %s)", humanize.Bytes(uint64(constants.MaxUploadSize))), http.StatusBadRequest)
 		return
 	}
 
@@ -65,7 +66,7 @@ func HandleGenerate(w http.ResponseWriter, r *http.Request) {
 		Int("height", info.Height).
 		Str("mime_type", info.MIMEType).
 		Str("size", info.ReadableSize).
-		Msg("✓ Job created")
+		Msg("Job created")
 
 	// Return response
 	response := models.GenerateResponse{

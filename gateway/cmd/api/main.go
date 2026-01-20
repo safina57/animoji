@@ -58,7 +58,7 @@ func main() {
 	logger.Info().
 		Str("url", fmt.Sprintf("http://localhost%s", addr)).
 		Str("port", port).
-		Msg("🚀 Gateway API server starting")
+		Msg("Gateway API server starting")
 
 	if err := http.ListenAndServe(addr, r); err != nil {
 		logger.Fatal().Err(err).Msg("Server failed to start")

@@ -40,12 +40,8 @@ func (p *ImageProcessor) Process(path string) (*ImageInfo, error) {
 
 // ProcessReader validates an image from an io.Reader and extracts its metadata
 // Returns ImageInfo if successful, or an error if validation fails
-// Security: Buffers the entire content first to enable complete validation
-// including MIME type detection before any processing occurs
 func (p *ImageProcessor) ProcessReader(r io.Reader, filename string, size int64) (*ImageInfo, error) {
 	// Step 1: Buffer the entire content into memory
-	// This allows us to perform complete validation including MIME type
-	// before any processing, preventing malicious files from bypassing validation
 	data, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
@@ -61,7 +57,7 @@ func (p *ImageProcessor) ProcessReader(r io.Reader, filename string, size int64)
 		return nil, err
 	}
 
-	// Step 3: Extract metadata (we already have the data buffered)
+	// Step 3: Extract metadata
 	info, err := p.extractor.ExtractFromData(data, filename, size)
 	if err != nil {
 		return nil, err
