@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/dustin/go-humanize"
 	_ "golang.org/x/image/webp"
 )
 
@@ -56,7 +57,7 @@ func (e *ImageMetadataExtractor) Extract(path string) (*ImageInfo, error) {
 		Filename:     stat.Name(),
 		SizeBytes:    stat.Size(),
 		Extension:    ext,
-		ReadableSize: formatBytes(stat.Size()),
+		ReadableSize: humanize.Bytes(uint64(stat.Size())),
 		Width:        width,
 		Height:       height,
 		MIMEType:     mimeType,
@@ -81,20 +82,6 @@ func (e *ImageMetadataExtractor) detectMIMEType(path string) (string, error) {
 	return http.DetectContentType(buffer[:n]), nil
 }
 
-// formatBytes converts bytes to human-readable format
-func formatBytes(bytes int64) string {
-	const unit = 1024
-	if bytes < unit {
-		return fmt.Sprintf("%d B", bytes)
-	}
-	div, exp := int64(unit), 0
-	for n := bytes / unit; n >= unit; n /= unit {
-		div *= unit
-		exp++
-	}
-	return fmt.Sprintf("%.2f %cB", float64(bytes)/float64(div), "KMGTPE"[exp])
-}
-
 // ExtractFromData gets all metadata from buffered image data
 func (e *ImageMetadataExtractor) ExtractFromData(data []byte, filename string, size int64) (*ImageInfo, error) {
 	// Get MIME type from data
@@ -115,7 +102,7 @@ func (e *ImageMetadataExtractor) ExtractFromData(data []byte, filename string, s
 		Filename:     filename,
 		SizeBytes:    size,
 		Extension:    ext,
-		ReadableSize: formatBytes(size),
+		ReadableSize: humanize.Bytes(uint64(size)),
 		Width:        width,
 		Height:       height,
 		MIMEType:     mimeType,

@@ -65,7 +65,7 @@ func HandleGenerate(w http.ResponseWriter, r *http.Request) {
 		Int("height", info.Height).
 		Str("mime_type", info.MIMEType).
 		Str("size", info.ReadableSize).
-		Msg("✓ Job created")
+		Msg("Job created")
 
 	// Return response
 	response := models.GenerateResponse{
