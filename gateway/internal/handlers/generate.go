@@ -17,7 +17,7 @@ import (
 func HandleGenerate(w http.ResponseWriter, r *http.Request) {
 	// Parse multipart form with size limit
 	if err := r.ParseMultipartForm(constants.MaxUploadSize); err != nil {
-		respondError(w, "File too large (max 10MB)", http.StatusBadRequest)
+		respondError(w, fmt.Sprintf("File too large (max %dMB)", constants.MaxUploadSize/(1024*1024)), http.StatusBadRequest)
 		return
 	}
 
