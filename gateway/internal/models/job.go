@@ -26,3 +26,9 @@ type Job struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+// NatsJobMessage is published to NATS when a job is submitted.
+type NatsJobMessage struct {
+	JobID    string `json:"job_id"`
+	InputKey string `json:"input_key"`
+}

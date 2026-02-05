@@ -32,9 +32,15 @@ var (
 
 // MinIO storage configuration
 const (
-	BucketName = "animoji-images"
-	PrefixOriginals  = "originals/"
-	PrefixGenerated  = "generated/"
+	BucketName      = "animoji-images"
+	PrefixOriginals = "originals/"
+	PrefixGenerated = "generated/"
+)
+
+// NATS configuration
+const (
+	DefaultNatsURL      = "nats://nats:4222"
+	NatsSubjectGenerate = "anime.generate"
 )
 
 // CORS configuration

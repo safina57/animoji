@@ -9,6 +9,7 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/google/uuid"
 	"github.com/safina57/animoji/gateway/internal/constants"
+	"github.com/safina57/animoji/gateway/internal/messaging"
 	"github.com/safina57/animoji/gateway/internal/models"
 	"github.com/safina57/animoji/gateway/pkg/imageinfo"
 	"github.com/safina57/animoji/gateway/pkg/logger"
@@ -73,7 +74,29 @@ func HandleSubmitJob(w http.ResponseWriter, r *http.Request) {
 	}
 	info.ClearData()
 
-	// TODO: Publish job to NATS queue for AI processing
+	// Publish job to NATS queue for AI processing
+	natsClient := messaging.MustGetClient()
+	message := models.NatsJobMessage{
+		JobID:    jobID,
+		InputKey: inputKey,
+	}
+	payload, err := json.Marshal(message)
+	if err != nil {
+		logger.Error().Err(err).
+			Str("job_id", jobID).
+			Msg("Failed to serialize NATS message")
+		respondError(w, "Failed to submit job", http.StatusInternalServerError)
+		return
+	}
+
+	if err := natsClient.Publish(constants.NatsSubjectGenerate, payload); err != nil {
+		logger.Error().Err(err).
+			Str("job_id", jobID).
+			Str("subject", constants.NatsSubjectGenerate).
+			Msg("Failed to publish job to NATS")
+		respondError(w, "Failed to submit job", http.StatusInternalServerError)
+		return
+	}
 
 	// Log job submission
 	logger.Info().
