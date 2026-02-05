@@ -1,1 +1,41 @@
 .github/copilot-instructions.md
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# MinIO data
+minio-data/
+
+# Build artifacts
+gateway/bin/
+gateway/tmp/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python (future AI worker)
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+*.egg-info/
+
+# Node modules (future frontend)
+node_modules/
+dist/
+build/
+
+# Logs
+*.log
+logs/
