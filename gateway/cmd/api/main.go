@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/safina57/animoji/gateway/internal/constants"
 	"github.com/safina57/animoji/gateway/internal/handlers"
+	"github.com/safina57/animoji/gateway/internal/messaging"
 	appMiddleware "github.com/safina57/animoji/gateway/internal/middleware"
 	"github.com/safina57/animoji/gateway/pkg/logger"
 	"github.com/safina57/animoji/gateway/pkg/storage"
@@ -21,6 +22,11 @@ func main() {
 	// Initialize storage
 	if _, err := storage.GetClient(); err != nil {
 		logger.Fatal().Err(err).Msg("Failed to initialize storage")
+	}
+
+	// Initialize NATS
+	if _, err := messaging.GetClient(); err != nil {
+		logger.Fatal().Err(err).Msg("Failed to initialize NATS")
 	}
 
 	// Setup routes

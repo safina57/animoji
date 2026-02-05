@@ -7,6 +7,7 @@ require (
 	github.com/go-chi/chi/v5 v5.2.3
 	github.com/google/uuid v1.6.0
 	github.com/minio/minio-go/v7 v7.0.98
+	github.com/nats-io/nats.go v1.40.0
 	github.com/rs/zerolog v1.34.0
 	golang.org/x/image v0.34.0
 )
@@ -21,6 +22,8 @@ require (
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/minio/crc64nvme v1.1.1 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
+	github.com/nats-io/nkeys v0.4.9 // indirect
+	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/philhofer/fwd v1.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rs/xid v1.6.0 // indirect

@@ -13,9 +13,12 @@ services:
       - MINIO_ENDPOINT=${MINIO_ENDPOINT}
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - NATS_URL=${NATS_URL}
     depends_on:
       minio-init:
         condition: service_completed_successfully
+      nats:
+        condition: service_healthy
     networks:
       - animoji-network
 
@@ -57,6 +60,22 @@ services:
       "
     networks:
       - animoji-network
+
+  # NATS Message Broker
+  nats:
+    image: nats:2.10-alpine
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    command: ["-m", "8222"]
+    networks:
+      - animoji-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
 
 volumes:
   minio-data:

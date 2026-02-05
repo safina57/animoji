@@ -29,6 +29,7 @@ go run ./cmd/api/main.go
 The service can be configured using environment variables:
 
 - `PORT` - Server port (default: 8080)
+- `NATS_URL` - NATS connection URL (default: nats://nats:4222)
 
 ## API Endpoints
 
