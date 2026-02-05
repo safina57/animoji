@@ -13,9 +13,12 @@ services:
       - MINIO_ENDPOINT=${MINIO_ENDPOINT}
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - NATS_URL=${NATS_URL}
     depends_on:
       minio-init:
         condition: service_completed_successfully
+      nats:
+        condition: service_started
     networks:
       - animoji-network
 
@@ -55,6 +58,14 @@ services:
       mc mb myminio/animoji-images --ignore-existing;
       echo 'Bucket animoji-images initialized successfully';
       "
+    networks:
+      - animoji-network
+
+  # NATS Message Broker
+  nats:
+    image: nats:2.10
+    ports:
+      - "4222:4222"
     networks:
       - animoji-network
 
