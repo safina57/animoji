@@ -43,7 +43,7 @@ func initializeClient(ctx context.Context) (*MinIOClient, error) {
 	secretKey := os.Getenv("MINIO_SECRET_KEY")
 
 	if endpoint == "" || accessKey == "" || secretKey == "" {
-		return nil, fmt.Errorf("One or more required environment variables are missing for MinIO configuration")
+		return nil, fmt.Errorf("one or more required environment variables are missing for MinIO configuration")
 	}
 
 	minioClient, err := minio.New(endpoint, &minio.Options{

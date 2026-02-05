@@ -5,12 +5,8 @@ import (
 	"io"
 )
 
-// bytesReader wraps bytes in a ReadSeeker
-type bytesReader struct {
-	*bytes.Reader
-}
-
 // NewBytesReader creates a ReadSeeker from byte slice
+// bytes.Reader already implements io.ReadSeeker, so we return it directly
 func NewBytesReader(data []byte) io.ReadSeeker {
-	return &bytesReader{bytes.NewReader(data)}
+	return bytes.NewReader(data)
 }

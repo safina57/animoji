@@ -11,10 +11,9 @@ type GenerateRequest struct {
 
 // SubmitJobResponse is returned when a job is successfully submitted to the queue
 type SubmitJobResponse struct {
-	JobID    string `json:"job_id"`
-	Status   string `json:"status"`
-	Message  string `json:"message"`
-	InputKey string `json:"input_key"`
+	JobID   string `json:"job_id"`
+	Status  string `json:"status"`
+	Message string `json:"message"`
 }
 
 // Job represents a generation job with all its metadata

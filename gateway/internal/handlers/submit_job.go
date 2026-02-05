@@ -71,6 +71,7 @@ func HandleSubmitJob(w http.ResponseWriter, r *http.Request) {
 		respondError(w, "Failed to store image", http.StatusInternalServerError)
 		return
 	}
+	info.ClearData()
 
 	// TODO: Publish job to NATS queue for AI processing
 
@@ -87,10 +88,9 @@ func HandleSubmitJob(w http.ResponseWriter, r *http.Request) {
 
 	// Return response
 	response := models.SubmitJobResponse{
-		JobID:    jobID,
-		Status:   constants.StatusQueued,
-		Message:  "Job submitted successfully",
-		InputKey: inputKey,
+		JobID:   jobID,
+		Status:  constants.StatusQueued,
+		Message: "Job submitted successfully",
 	}
 
 	respondJSON(w, response, http.StatusAccepted)

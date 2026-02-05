@@ -18,6 +18,11 @@ type ImageInfo struct {
 	Data         []byte `json:"-"`
 }
 
+// ClearData releases the buffered image data from memory
+func (i *ImageInfo) ClearData() {
+	i.Data = nil
+}
+
 // ValidationConfig holds validation rules
 type ValidationConfig struct {
 	MaxSizeBytes      int64
