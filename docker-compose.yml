@@ -18,7 +18,7 @@ services:
       minio-init:
         condition: service_completed_successfully
       nats:
-        condition: service_started
+        condition: service_healthy
     networks:
       - animoji-network
 
@@ -63,11 +63,19 @@ services:
 
   # NATS Message Broker
   nats:
-    image: nats:2.10
+    image: nats:2.10-alpine
     ports:
       - "4222:4222"
+      - "8222:8222"
+    command: ["-m", "8222"]
     networks:
       - animoji-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
 
 volumes:
   minio-data:
