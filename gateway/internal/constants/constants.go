@@ -30,6 +30,13 @@ var (
 	}
 )
 
+// MinIO storage configuration
+const (
+	BucketName = "animoji-images"
+	PrefixOriginals  = "originals/"
+	PrefixGenerated  = "generated/"
+)
+
 // CORS configuration
 const (
 	CORSAllowOrigin  = "*"

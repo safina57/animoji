@@ -11,12 +11,26 @@ import (
 	"github.com/safina57/animoji/gateway/internal/handlers"
 	appMiddleware "github.com/safina57/animoji/gateway/internal/middleware"
 	"github.com/safina57/animoji/gateway/pkg/logger"
+	"github.com/safina57/animoji/gateway/pkg/storage"
 )
 
 func main() {
 	// Initialize logger
 	logger.Init()
 
+	// Initialize storage
+	if _, err := storage.GetClient(); err != nil {
+		logger.Fatal().Err(err).Msg("Failed to initialize storage")
+	}
+
+	// Setup routes
+	r := setupRouter()
+
+	// Start server
+	startServer(r)
+}
+
+func setupRouter() *chi.Mux {
 	r := chi.NewRouter()
 
 	// Middleware
@@ -30,15 +44,18 @@ func main() {
 
 	// Routes
 	r.Get("/health", handlers.HandleHealth)
-	r.Post("/generate", handlers.HandleGenerate)
+	r.Post("/submit-job", handlers.HandleSubmitJob)
 
+	return r
+}
+
+func startServer(r *chi.Mux) {
 	// Get port from environment or use default
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = constants.DefaultPort
 	}
 
-	// Start server
 	addr := fmt.Sprintf(":%s", port)
 
 	logger.Info().Msgf(`

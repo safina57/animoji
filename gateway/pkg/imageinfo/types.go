@@ -15,6 +15,7 @@ type ImageInfo struct {
 	Width        int    `json:"width"`
 	Height       int    `json:"height"`
 	MIMEType     string `json:"mime_type"`
+	Data         []byte `json:"-"`
 }
 
 // ValidationConfig holds validation rules
