@@ -1,7 +1,6 @@
 package imageinfo
 
 import (
-	"bytes"
 	"fmt"
 	"image"
 	_ "image/jpeg"
@@ -12,6 +11,7 @@ import (
 	"path/filepath"
 
 	"github.com/dustin/go-humanize"
+	"github.com/safina57/animoji/gateway/pkg/storage"
 	_ "golang.org/x/image/webp"
 )
 
@@ -88,7 +88,7 @@ func (e *ImageMetadataExtractor) ExtractFromData(data []byte, filename string, s
 	mimeType := http.DetectContentType(data)
 
 	// Get dimensions by decoding image
-	width, height, err := e.getDimensionsFromReader(bytes.NewReader(data))
+	width, height, err := e.getDimensionsFromReader(storage.NewBytesReader(data))
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", ErrCannotDecodeImage, err)
 	}
@@ -106,6 +106,7 @@ func (e *ImageMetadataExtractor) ExtractFromData(data []byte, filename string, s
 		Width:        width,
 		Height:       height,
 		MIMEType:     mimeType,
+		Data:         data,
 	}, nil
 }
 

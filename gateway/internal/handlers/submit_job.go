@@ -12,10 +12,14 @@ import (
 	"github.com/safina57/animoji/gateway/internal/models"
 	"github.com/safina57/animoji/gateway/pkg/imageinfo"
 	"github.com/safina57/animoji/gateway/pkg/logger"
+	"github.com/safina57/animoji/gateway/pkg/storage"
 )
 
-// HandleGenerate processes image upload and creates a generation job
-func HandleGenerate(w http.ResponseWriter, r *http.Request) {
+// HandleSubmitJob handles image upload, validation, storage, and job queue submission
+func HandleSubmitJob(w http.ResponseWriter, r *http.Request) {
+	// Initialize MinIO storage service
+	minioService := storage.NewMinIOService()
+
 	// Parse multipart form with size limit
 	if err := r.ParseMultipartForm(constants.MaxUploadSize); err != nil {
 		respondError(w, fmt.Sprintf("File too large (max %s)", humanize.Bytes(uint64(constants.MaxUploadSize))), http.StatusBadRequest)
@@ -57,22 +61,36 @@ func HandleGenerate(w http.ResponseWriter, r *http.Request) {
 	// Generate job ID
 	jobID := uuid.New().String()
 
-	// TODO: Upload to MinIO and publish to NATS
-	// Log the job creation
+	// Upload original image to storage
+	ctx := r.Context()
+	inputKey, err := minioService.UploadOriginalImage(ctx, jobID, info.Data, header.Filename, info.MIMEType)
+	if err != nil {
+		logger.Error().Err(err).
+			Str("job_id", jobID).
+			Msg("Failed to upload image to storage")
+		respondError(w, "Failed to store image", http.StatusInternalServerError)
+		return
+	}
+	info.ClearData()
+
+	// TODO: Publish job to NATS queue for AI processing
+
+	// Log job submission
 	logger.Info().
 		Str("job_id", jobID).
 		Str("prompt", prompt).
+		Str("input_key", inputKey).
 		Int("width", info.Width).
 		Int("height", info.Height).
 		Str("mime_type", info.MIMEType).
 		Str("size", info.ReadableSize).
-		Msg("Job created")
+		Msg("Job submitted and image stored successfully")
 
 	// Return response
-	response := models.GenerateResponse{
+	response := models.SubmitJobResponse{
 		JobID:   jobID,
 		Status:  constants.StatusQueued,
-		Message: "Image uploaded successfully",
+		Message: "Job submitted successfully",
 	}
 
 	respondJSON(w, response, http.StatusAccepted)

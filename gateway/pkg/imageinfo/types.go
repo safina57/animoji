@@ -15,6 +15,12 @@ type ImageInfo struct {
 	Width        int    `json:"width"`
 	Height       int    `json:"height"`
 	MIMEType     string `json:"mime_type"`
+	Data         []byte `json:"-"`
+}
+
+// ClearData releases the buffered image data from memory
+func (i *ImageInfo) ClearData() {
+	i.Data = nil
 }
 
 // ValidationConfig holds validation rules

@@ -9,8 +9,8 @@ type GenerateRequest struct {
 	Prompt string `json:"prompt"`
 }
 
-// GenerateResponse is returned when a generation job is created
-type GenerateResponse struct {
+// SubmitJobResponse is returned when a job is successfully submitted to the queue
+type SubmitJobResponse struct {
 	JobID   string `json:"job_id"`
 	Status  string `json:"status"`
 	Message string `json:"message"`
