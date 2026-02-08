@@ -35,7 +35,7 @@ class NatsClient:
                 "Connected to NATS",
                 extra={
                     "url": self.settings.nats_url,
-                    "client_id": self.client._client_id if self.client else None,
+                    "client_name": "ai-worker",
                 },
             )
         except Exception as e:

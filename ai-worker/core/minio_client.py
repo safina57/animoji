@@ -1,5 +1,6 @@
 """MinIO S3 client wrapper for object storage operations."""
 
+import asyncio
 from io import BytesIO
 
 from minio import Minio
@@ -34,9 +35,19 @@ class MinioClient:
             logger.error(f"Failed to initialize MinIO client: {e}", extra={"error": str(e)})
             raise
 
-    def download_file(self, key: str) -> bytes:
+    def _download_sync(self, key: str) -> bytes:
+        """Synchronous download helper."""
+        response = self.client.get_object(self.bucket, key)
+        data = response.read()
+        response.close()
+        response.release_conn()
+        return data
+
+    async def download_file(self, key: str) -> bytes:
         """
-        Download a file from MinIO.
+        Download a file from MinIO asynchronously.
+        
+        Offloads blocking I/O to thread pool to avoid blocking event loop.
 
         Args:
             key: Object key in MinIO bucket
@@ -48,11 +59,7 @@ class MinioClient:
             S3Error: If download fails
         """
         try:
-            response = self.client.get_object(self.bucket, key)
-            data = response.read()
-            response.close()
-            response.release_conn()
-
+            data = await asyncio.to_thread(self._download_sync, key)
             logger.info(f"Downloaded file from MinIO", extra={"key": key, "size": len(data)})
             return data
 
@@ -63,9 +70,25 @@ class MinioClient:
             )
             raise
 
-    def upload_file(self, key: str, data: bytes, content_type: str = "image/png") -> str:
+    def _upload_sync(self, key: str, data: bytes, content_type: str) -> str:
+        """Synchronous upload helper."""
+        data_stream = BytesIO(data)
+        length = len(data)
+
+        self.client.put_object(
+            bucket_name=self.bucket,
+            object_name=key,
+            data=data_stream,
+            length=length,
+            content_type=content_type,
+        )
+        return key
+
+    async def upload_file(self, key: str, data: bytes, content_type: str = "image/png") -> str:
         """
-        Upload a file to MinIO.
+        Upload a file to MinIO asynchronously.
+        
+        Offloads blocking I/O to thread pool to avoid blocking event loop.
 
         Args:
             key: Object key for the uploaded file
@@ -79,16 +102,8 @@ class MinioClient:
             S3Error: If upload fails
         """
         try:
-            data_stream = BytesIO(data)
             length = len(data)
-
-            self.client.put_object(
-                bucket_name=self.bucket,
-                object_name=key,
-                data=data_stream,
-                length=length,
-                content_type=content_type,
-            )
+            await asyncio.to_thread(self._upload_sync, key, data, content_type)
 
             logger.info(
                 f"Uploaded file to MinIO",

@@ -92,7 +92,7 @@ class JobConsumer:
 
             # Download original image from MinIO
             self.logger.info("Downloading original image", extra={"job_id": job_id})
-            image_data = self.minio_client.download_file(job_message.input_key)
+            image_data = await self.minio_client.download_file(job_message.input_key)
 
             # Process the image with AI model
             self.logger.info("Processing image", extra={"job_id": job_id})
@@ -106,7 +106,7 @@ class JobConsumer:
                 "Uploading processed image",
                 extra={"job_id": job_id, "output_key": output_key},
             )
-            self.minio_client.upload_file(output_key, processed_data, content_type)
+            await self.minio_client.upload_file(output_key, processed_data, content_type)
 
             self.logger.info(
                 "Job completed successfully",
