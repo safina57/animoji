@@ -79,6 +79,7 @@ func HandleSubmitJob(w http.ResponseWriter, r *http.Request) {
 	message := models.NatsJobMessage{
 		JobID:    jobID,
 		InputKey: inputKey,
+		Prompt:   prompt,
 	}
 	payload, err := json.Marshal(message)
 	if err != nil {

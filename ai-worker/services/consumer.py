@@ -4,11 +4,12 @@ import json
 import logging
 from nats.aio.msg import Msg
 
-from core.minio_client import MinioClient
-from core.nats_client import NatsClient
-from core.settings import Settings
+from core.minio_client import MinioClient, get_minio_client
+from core.nats_client import NatsClient, get_nats_client
+from core.settings import Settings, get_settings
 from models.job import JobMessage
-from services.image_processor import ImageProcessor
+from core.logger import get_logger
+from services.image_processor import ImageProcessor, get_image_processor
 
 
 class JobConsumer:
@@ -90,14 +91,19 @@ class JobConsumer:
                 },
             )
 
-            # Download original image from MinIO
+            # Download original image from MinIO (stored for reference)
             self.logger.info("Downloading original image", extra={"job_id": job_id})
-            image_data = await self.minio_client.download_file(job_message.input_key)
+            _image_data = await self.minio_client.download_file(job_message.input_key)
+            self.logger.info(
+                "Original image downloaded",
+                extra={"job_id": job_id, "size": len(_image_data)},
+            )
 
             # Process the image with AI model
             self.logger.info("Processing image", extra={"job_id": job_id})
             processed_data, content_type = await self.image_processor.process_image(
-                job_id, image_data
+                job_id=job_id,
+                user_prompt=job_message.prompt,
             )
 
             # Upload processed image to MinIO
@@ -129,3 +135,21 @@ class JobConsumer:
                 extra={"job_id": job_id, "error": str(e)},
                 exc_info=True,
             )
+
+_job_consumer: JobConsumer | None = None
+
+
+def get_job_consumer() -> JobConsumer:
+    """Get the singleton JobConsumer instance."""
+    global _job_consumer
+    if _job_consumer is not None:
+        return _job_consumer
+
+    _job_consumer = JobConsumer(
+        nats_client=get_nats_client(),
+        minio_client=get_minio_client(),
+        image_processor=get_image_processor(),
+        settings=get_settings(),
+        logger=get_logger(),
+    )
+    return _job_consumer

@@ -12,3 +12,7 @@ class JobMessage(BaseModel):
 
     job_id: str = Field(..., description="Unique job identifier (UUID)")
     input_key: str = Field(..., description="MinIO object key for the input image")
+    prompt: str = Field(
+        default="anime style portrait",
+        description="User's text prompt for image generation",
+    )
