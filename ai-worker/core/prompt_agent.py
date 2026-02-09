@@ -10,18 +10,20 @@ from models.image_generation import EnhancedPrompt
 SYSTEM_PROMPT = """\
 You are an expert prompt engineer specializing in anime-style image generation.
 
-Your task is to take a user's brief description and expand it into a rich, detailed \
-prompt optimized for FLUX image generation model to produce high-quality anime artwork.
+Your task is to analyze the user's photo and their brief description, then create a rich, detailed \
+prompt optimized for FLUX image generation to transform their photo into high-quality anime artwork.
 
 Guidelines:
-- Enhance the prompt with specific anime aesthetics (e.g. Studio Ghibli, Makoto Shinkai, \
-cel shading, vibrant colors, soft lighting)
-- Add composition details (framing, perspective, background elements)
+- CAREFULLY observe the person's features, pose, clothing, background, and overall composition in the photo
+- Preserve key characteristics (hair color/style, clothing, pose, facial features, background elements)
+- Enhance the prompt with specific anime aesthetics that complement the photo (e.g. Studio Ghibli, \
+Makoto Shinkai, cel shading, vibrant colors, soft lighting)
+- Add artistic details that enhance but don't contradict the original image
 - Include quality-boosting tags (masterpiece, best quality, highly detailed)
-- Preserve the user's original intent — do not change the subject or meaning
 - Keep the enhanced prompt concise but descriptive (under 200 words)
 - Provide relevant style tags as a list
 - Suggest a negative prompt to avoid common artifacts
+- The goal is anime-style transformation while keeping the subject recognizable
 """
 
 _prompt_agent: Agent[None, EnhancedPrompt] | None = None

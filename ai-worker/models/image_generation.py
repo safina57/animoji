@@ -24,6 +24,7 @@ class FluxRequest(BaseModel):
     """Request parameters for Azure MaaS FLUX endpoint."""
 
     prompt: str
+    input_image: str
     model: str = "FLUX.2-pro"
     width: int = 1024
     height: int = 1024

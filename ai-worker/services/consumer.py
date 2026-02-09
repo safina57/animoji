@@ -101,10 +101,12 @@ class JobConsumer:
 
             # Process the image with AI model
             self.logger.info("Processing image", extra={"job_id": job_id})
-            processed_data, content_type = await self.image_processor.process_image(
+            result = await self.image_processor.process_image(
                 job_id=job_id,
                 user_prompt=job_message.prompt,
+                input_image_data=_image_data,
             )
+            processed_data, content_type = result.image_data, result.content_type
 
             # Upload processed image to MinIO
             output_key = f"generated/{job_id}/result.png"

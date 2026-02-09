@@ -73,6 +73,16 @@ class FluxClient:
             await asyncio.sleep(retry_after)
             return await self._call_api(request, attempt + 1)
 
+        if not response.is_success:
+            # Log error details before raising
+            self.logger.error(
+                "FLUX API request failed",
+                extra={
+                    "status_code": response.status_code,
+                    "response_body": response.text,
+                    "request_payload": request.model_dump(),
+                },
+            )
         response.raise_for_status()
         data = response.json()
 
