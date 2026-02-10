@@ -37,6 +37,10 @@ func HandleSubmitJob(w http.ResponseWriter, r *http.Request) {
 
 	// Get prompt from form field
 	prompt := r.FormValue("prompt")
+	if prompt == "" {
+		respondError(w, "Prompt is required", http.StatusBadRequest)
+		return
+	}
 
 	// Validate the image using our imageinfo package
 	processor := imageinfo.NewImageProcessor(imageinfo.DefaultConfig())

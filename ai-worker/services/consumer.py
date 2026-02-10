@@ -93,10 +93,10 @@ class JobConsumer:
 
             # Download original image from MinIO (stored for reference)
             self.logger.info("Downloading original image", extra={"job_id": job_id})
-            _image_data = await self.minio_client.download_file(job_message.input_key)
+            image_data = await self.minio_client.download_file(job_message.input_key)
             self.logger.info(
                 "Original image downloaded",
-                extra={"job_id": job_id, "size": len(_image_data)},
+                extra={"job_id": job_id, "size": len(image_data)},
             )
 
             # Process the image with AI model
@@ -104,7 +104,7 @@ class JobConsumer:
             result = await self.image_processor.process_image(
                 job_id=job_id,
                 user_prompt=job_message.prompt,
-                input_image_data=_image_data,
+                input_image_data=image_data,
             )
             processed_data, content_type = result.image_data, result.content_type
 

@@ -105,7 +105,12 @@ class ImageProcessor:
             metadata={
                 "job_id": job_id,
                 "enhanced_prompt": enhanced.enhanced_text,
-                "flux_params": flux_request.model_dump(),
+                "flux_params": {
+                    "model": flux_request.model,
+                    "width": flux_request.width,
+                    "height": flux_request.height,
+                    "input_image_size": len(input_image_b64),
+                },
                 "generated_at": datetime.now(timezone.utc).isoformat(),
             },
         )

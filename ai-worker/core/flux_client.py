@@ -79,8 +79,7 @@ class FluxClient:
                 "FLUX API request failed",
                 extra={
                     "status_code": response.status_code,
-                    "response_body": response.text,
-                    "request_payload": request.model_dump(),
+                    "response_body": response.text
                 },
             )
         response.raise_for_status()
