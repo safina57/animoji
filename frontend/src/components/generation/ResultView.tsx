@@ -1,6 +1,6 @@
-import ReactCompareImage from "react-compare-image";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { resetGeneration } from "../../store/slices/generationSlice";
+import ImageCompareSlider from "./ImageCompareSlider";
 
 export default function ResultView() {
   const dispatch = useAppDispatch();
@@ -14,7 +14,7 @@ export default function ResultView() {
     <div className="flex-1 flex gap-8 items-center justify-center min-h-0 animate-slide-up">
       {/* Main image area */}
       <div className="relative h-full flex items-center justify-center flex-1">
-        <div className="relative group max-h-full w-full max-w-2xl">
+        <div className="relative group max-h-full w-full max-w-xl">
           {/* Header */}
           <div className="flex justify-between items-end mb-4 px-2">
             <div>
@@ -47,14 +47,9 @@ export default function ResultView() {
           {/* Compare slider container */}
           <div className="japanese-frame rounded-xl overflow-hidden transition-transform duration-500 hover:scale-[1.005]">
             <div className="rounded-lg overflow-hidden">
-              <ReactCompareImage
+              <ImageCompareSlider
                 leftImage={originalImageUrl}
                 rightImage={generatedImageUrl}
-                leftImageLabel="Original"
-                rightImageLabel="Anime"
-                sliderLineColor="#E63946"
-                sliderLineWidth={3}
-                handle={<SliderHandle />}
               />
             </div>
           </div>
@@ -103,12 +98,3 @@ function ActionButton({ icon, label }: { icon: string; label: string }) {
   );
 }
 
-function SliderHandle() {
-  return (
-    <div className="w-10 h-10 rounded-full bg-primary border-2 border-white shadow-lg flex items-center justify-center cursor-ew-resize">
-      <span className="material-symbols-outlined text-white text-lg">
-        drag_indicator
-      </span>
-    </div>
-  );
-}
