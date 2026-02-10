@@ -31,4 +31,5 @@ type Job struct {
 type NatsJobMessage struct {
 	JobID    string `json:"job_id"`
 	InputKey string `json:"input_key"`
+	Prompt   string `json:"prompt"`
 }

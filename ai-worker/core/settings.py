@@ -17,6 +17,19 @@ class Settings(BaseSettings):
     minio_bucket: str = "animoji-images"
     minio_secure: bool = False
 
+    # Azure OpenAI Configuration
+    azure_openai_endpoint: str = ""
+    azure_openai_api_key: str = ""
+    azure_openai_deployment: str = "gpt-4o"
+    azure_openai_api_version: str = "2024-07-01-preview"
+
+    # Azure FLUX Configuration
+    azure_flux_endpoint: str = ""
+    azure_flux_api_key: str = ""
+    flux_model: str = "FLUX.2-pro"
+    flux_width: int = 1024
+    flux_height: int = 1024
+
     # Application Configuration
     log_level: str = "INFO"
     worker_port: int = 8000
