@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+/* ─── Theme Tokens ─── */
+@theme {
+  --color-primary: #E63946;
+  --color-background-light: #FAF7F2;
+  --color-background-dark: #0F111A;
+  --color-paper-light: #FFFBF5;
+  --color-paper-dark: #1A1D29;
+
+  --font-display: "Playfair Display", serif;
+  --font-japanese: "Noto Serif JP", serif;
+  --font-sans: "Inter", sans-serif;
+}
+
+/* ─── Base ─── */
+html {
+  font-family: var(--font-sans);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--color-background-light);
+  color: #1e293b;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.dark body {
+  background-color: var(--color-background-dark);
+  color: #e2e8f0;
+}
+
+/* ─── Material Icons tuning ─── */
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 300, "GRAD" 0, "opsz" 24;
+}
+
+/* ─── Japanese Frame ─── */
+.japanese-frame {
+  position: relative;
+  padding: 12px;
+  background: #fff;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+}
+
+.dark .japanese-frame {
+  background: var(--color-paper-dark);
+}
+
+.japanese-frame::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(230, 57, 70, 0.2);
+  pointer-events: none;
+}
+
+/* ─── Paper texture ─── */
+.paper-texture {
+  background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCvci7c8oxXaoRKQJneDRdgZ_fMx8wGJZP4mmSDLWI2QJX9p1V2n-Lz5u7ejD8idQjLNt63k_9rFnM1f7NbVOlk3mnqijyCW4dkD_KXYwTQTuAlqdLovwdnV-Dy8023yVHHpAEd1ayUo568nOXVJ1WXDmyv7j1L7oGYvEQjZqN-sm-zW5bOstwqSV-AzyGBLqnDHjUKBeY0GcIftW1TBT3rNZngdEVP-tgBR4KVJHSHf_pPschbNw82teu5jF0dU_ZcUEC-IY2c5As");
+  background-blend-mode: overlay;
+}
+
+/* ─── Custom scrollbar ─── */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 10px;
+}
+
+/* ─── Smoke keyframes (for loading) ─── */
+@keyframes smoke-drift {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-18px) scale(1.2);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(-36px) scale(1.5);
+    opacity: 0;
+  }
+}
+
+.smoke-particle {
+  animation: smoke-drift 2.5s ease-out infinite;
+}
+.smoke-particle:nth-child(2) {
+  animation-delay: 0.8s;
+}
+.smoke-particle:nth-child(3) {
+  animation-delay: 1.6s;
+}
+
+/* ─── Slide transitions ─── */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.6s ease-out both;
+}
+
+.animate-slide-down {
+  animation: slide-down 0.6s ease-out both;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out both;
+}
