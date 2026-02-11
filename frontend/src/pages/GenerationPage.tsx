@@ -1,6 +1,6 @@
 import { useAppSelector } from "../hooks/redux";
 import GenerationInput from "../components/generation/GenerationInput";
-import LoadingScreen from "../components/generation/LoadingScreen";
+import LoadingScreen from "../components/generation/loading-screen/LoadingScreen";
 import ResultView from "../components/generation/ResultView";
 
 export default function GenerationPage() {
