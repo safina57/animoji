@@ -69,6 +69,35 @@ class JobConsumer:
             self.logger.error(f"Failed to start job consumer: {e}", extra={"error": str(e)})
             raise
 
+    async def _publish_status(
+        self, job_id: str, status: str, result_key: str | None = None
+    ) -> None:
+        """
+        Publish job status to NATS for gateway SSE.
+
+        Args:
+            job_id: Job identifier
+            status: Job status ("processing", "completed", "failed")
+            result_key: Optional MinIO key for result
+        """
+        try:
+            payload = {"status": status}
+            if result_key:
+                payload["result_key"] = result_key
+
+            subject = f"anime.status.{job_id}"
+            await self.nats_client.publish(subject, json.dumps(payload).encode())
+
+            self.logger.info(
+                "Published status to NATS",
+                extra={"job_id": job_id, "status": status, "subject": subject},
+            )
+        except Exception as e:
+            self.logger.error(
+                f"Failed to publish status: {e}",
+                extra={"job_id": job_id, "status": status, "error": str(e)},
+            )
+
     async def _handle_message(self, msg: Msg) -> None:
         """
         Handle incoming NATS message.
@@ -90,6 +119,8 @@ class JobConsumer:
                     "input_key": job_message.input_key,
                 },
             )
+
+            await self._publish_status(job_id, "processing")
 
             # Download original image from MinIO (stored for reference)
             self.logger.info("Downloading original image", extra={"job_id": job_id})
@@ -116,6 +147,8 @@ class JobConsumer:
             )
             await self.minio_client.upload_file(output_key, processed_data, content_type)
 
+            await self._publish_status(job_id, "completed", output_key)
+
             self.logger.info(
                 "Job completed successfully",
                 extra={
@@ -137,6 +170,8 @@ class JobConsumer:
                 extra={"job_id": job_id, "error": str(e)},
                 exc_info=True,
             )
+            if job_id:
+                await self._publish_status(job_id, "failed")
 
 _job_consumer: JobConsumer | None = None
 
