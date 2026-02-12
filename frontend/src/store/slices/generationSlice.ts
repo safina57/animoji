@@ -47,6 +47,13 @@ const generationSlice = createSlice({
     startGeneration(state) {
       state.stage = "loading";
       state.error = null;
+      state.jobId = null; // Clear previous job
+      state.originalImageUrl = null;
+      state.generatedImageUrl = null;
+    },
+
+    setJobId(state, action: PayloadAction<string>) {
+      state.jobId = action.payload;
     },
 
     completeGeneration(
@@ -78,6 +85,7 @@ export const {
   setPrompt,
   setReferenceImage,
   startGeneration,
+  setJobId,
   completeGeneration,
   failGeneration,
   resetGeneration,
