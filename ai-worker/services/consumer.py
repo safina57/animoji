@@ -77,7 +77,7 @@ class JobConsumer:
 
         Args:
             job_id: Job identifier
-            status: Job status ("processing", "completed", "failed")
+            status: Job status ("completed", "failed")
             result_key: Optional MinIO key for result
         """
         try:
@@ -119,8 +119,6 @@ class JobConsumer:
                     "input_key": job_message.input_key,
                 },
             )
-
-            await self._publish_status(job_id, "processing")
 
             # Download original image from MinIO (stored for reference)
             self.logger.info("Downloading original image", extra={"job_id": job_id})

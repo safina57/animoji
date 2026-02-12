@@ -14,10 +14,8 @@ const (
 
 // Job status constants
 const (
-	StatusQueued     = "queued"
-	StatusProcessing = "processing"
-	StatusCompleted  = "completed"
-	StatusFailed     = "failed"
+	StatusCompleted = "completed"
+	StatusFailed    = "failed"
 )
 
 // Allowed file types for image uploads
