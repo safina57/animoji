@@ -94,20 +94,20 @@ export default function ImageCompareSlider({
       <img
         src={rightImage}
         alt={rightLabel}
-        className="block w-full h-auto"
+        className="block w-full h-auto pointer-events-none"
         draggable={false}
       />
 
-      {/* Left image (clipped overlay) */}
+      {/* Left image (clipped overlay) - positioned absolutely to overlap perfectly */}
       <div
-        className="absolute inset-0 overflow-hidden"
+        className="absolute top-0 left-0 bottom-0 overflow-hidden pointer-events-none"
         style={{ width: `${position}%` }}
       >
         <img
           src={leftImage}
           alt={leftLabel}
-          className="block h-full object-cover object-left"
-          style={{ width: containerWidth > 0 ? `${containerWidth}px` : "100%" }}
+          className="block w-auto h-auto max-w-none"
+          style={{ width: containerWidth > 0 ? `${containerWidth}px` : "auto" }}
           draggable={false}
         />
       </div>

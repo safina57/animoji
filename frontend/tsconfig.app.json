@@ -22,8 +22,11 @@
       "@assets/*": ["./src/assets/*"],
       "@components/*": ["./src/components/*"],
       "@features/*": ["./src/features/*"],
-      "@shared/*": ["./src/shared/*"],
-      "@store/*": ["./src/store/*"]
+      "@hooks/*": ["./src/hooks/*"],
+      "@services/*": ["./src/services/*"],
+      "@store/*": ["./src/store/*"],
+      "@customTypes/*": ["./src/types/*"],
+      "@lib/*": ["./src/lib/*"]
     },
 
     /* Linting */

@@ -1,51 +1,36 @@
-import { useRef, useEffect, type ChangeEvent, type KeyboardEvent } from "react";
-import { useAppDispatch, useAppSelector } from "../../hooks/redux";
+import { useRef, type ChangeEvent, type KeyboardEvent } from "react";
+import { Send } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "@hooks/redux";
 import {
   setPrompt,
   setReferenceImage,
   startGeneration,
-  completeGeneration,
+  setJobId,
   failGeneration,
-} from "../../store/slices/generationSlice";
-import { submitGenerationJob } from "../../services/mockApi";
+} from "@store/slices/generationSlice";
+import { submitJob } from "@services/apiClient";
+import { Button } from "@lib/ui/button";
 
 const SUGGESTIONS = ["Cyberpunk Tokyo", "Studio Ghibli Forest", "90s Retro Anime"];
 
 export default function GenerationInput() {
   const dispatch = useAppDispatch();
-  const { prompt, referencePreviewUrl, stage } = useAppSelector(
+  const { prompt, referenceImage, referencePreviewUrl, stage } = useAppSelector(
     (s) => s.generation
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isBottom = stage === "result";
 
-  useEffect(() => {
-    return () => {
-      if (referencePreviewUrl) {
-        URL.revokeObjectURL(referencePreviewUrl);
-      }
-    };
-  }, [referencePreviewUrl]);
-
   /* ── File selection ── */
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    
-    if (referencePreviewUrl) {
-      URL.revokeObjectURL(referencePreviewUrl);
-    }
-    
     const previewUrl = URL.createObjectURL(file);
     dispatch(setReferenceImage({ file, previewUrl }));
   }
 
   function removeImage() {
-    if (referencePreviewUrl) {
-      URL.revokeObjectURL(referencePreviewUrl);
-    }
-    
     dispatch(setReferenceImage(null));
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
@@ -53,12 +38,22 @@ export default function GenerationInput() {
   /* ── Generation ── */
   async function generate() {
     if (!prompt.trim()) return;
+    if (!referenceImage) {
+      dispatch(failGeneration("Please upload an image first"));
+      return;
+    }
+
     dispatch(startGeneration());
+
     try {
-      const result = await submitGenerationJob(null, prompt);
-      dispatch(completeGeneration(result));
-    } catch {
-      dispatch(failGeneration("Something went wrong. Please try again."));
+      const result = await submitJob(referenceImage, prompt);
+      dispatch(setJobId(result.job_id)); // Store job_id to trigger SSE connection
+    } catch (error) {
+      dispatch(
+        failGeneration(
+          error instanceof Error ? error.message : "Something went wrong. Please try again."
+        )
+      );
     }
   }
 
@@ -152,18 +147,15 @@ export default function GenerationInput() {
               />
 
               {/* Generate button */}
-              <button
+              <Button
                 onClick={generate}
                 disabled={!prompt.trim()}
-                className="bg-primary hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center gap-2 px-6 py-3 rounded-2xl transition-all active:scale-[0.98] shadow-lg shadow-primary/20 shrink-0"
+                size="icon"
+                className="shrink-0"
+                aria-label="Generate image"
               >
-                <span className="font-bold uppercase tracking-widest text-sm">
-                  Generate
-                </span>
-                <span className="material-symbols-outlined text-xl">
-                  {isBottom ? "send" : "auto_awesome"}
-                </span>
-              </button>
+                <Send className="h-5 w-5" />
+              </Button>
             </div>
           </div>
 

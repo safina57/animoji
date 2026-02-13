@@ -2,20 +2,34 @@
 
 /* ─── Theme Tokens ─── */
 @theme {
+  /* Primary - Vermillion (Torii Gate Red) */
   --color-primary: #E63946;
+
+  /* Backgrounds - Washi Paper & Night Sky */
   --color-background-light: #FAF7F2;
   --color-background-dark: #0F111A;
   --color-paper-light: #FFFBF5;
   --color-paper-dark: #1A1D29;
 
-  /* Sakura Scene Colors */
+  /* Japan Traditional Palette */
   --color-sakura-pink: #FFB5C2;
+  --color-fuji-blue: #5B7C99;
+  --color-matcha-green: #7D9E53;
+  --color-indigo-deep: #2B3A67;
+  --color-gold-accent: #D4AF37;
   --color-water-blue: #A8D5DE;
   --color-wood-dark: #5D4037;
-  --color-moss-green: #7D9E53;
   --color-torii-red: #E63946;
   --color-stone-gray: #BDBDBD;
+  --color-ink-black: #1A1A1A;
 
+  /* Anime Vibrant Accents */
+  --color-neon-pink: #FF6B9D;
+  --color-neon-blue: #4ECDC4;
+  --color-neon-yellow: #FFE66D;
+  --color-neon-purple: #A8E6CF;
+
+  /* Typography - Japanese Aesthetic */
   --font-display: "Playfair Display", serif;
   --font-japanese: "Noto Serif JP", serif;
   --font-sans: "Inter", sans-serif;
@@ -70,6 +84,50 @@ body {
 .paper-texture {
   background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCvci7c8oxXaoRKQJneDRdgZ_fMx8wGJZP4mmSDLWI2QJX9p1V2n-Lz5u7ejD8idQjLNt63k_9rFnM1f7NbVOlk3mnqijyCW4dkD_KXYwTQTuAlqdLovwdnV-Dy8023yVHHpAEd1ayUo568nOXVJ1WXDmyv7j1L7oGYvEQjZqN-sm-zW5bOstwqSV-AzyGBLqnDHjUKBeY0GcIftW1TBT3rNZngdEVP-tgBR4KVJHSHf_pPschbNw82teu5jF0dU_ZcUEC-IY2c5As");
   background-blend-mode: overlay;
+}
+
+/* ─── Japanese Patterns ─── */
+
+/* Seigaiha (Wave pattern) */
+.pattern-seigaiha {
+  background-image: radial-gradient(
+      circle at 100% 150%,
+      transparent 24%,
+      rgba(230, 57, 70, 0.05) 25%,
+      rgba(230, 57, 70, 0.05) 26%,
+      transparent 27%,
+      transparent 74%,
+      rgba(230, 57, 70, 0.05) 75%,
+      rgba(230, 57, 70, 0.05) 76%,
+      transparent 77%,
+      transparent
+    ),
+    radial-gradient(
+      circle at 0% 150%,
+      transparent 24%,
+      rgba(230, 57, 70, 0.05) 25%,
+      rgba(230, 57, 70, 0.05) 26%,
+      transparent 27%,
+      transparent 74%,
+      rgba(230, 57, 70, 0.05) 75%,
+      rgba(230, 57, 70, 0.05) 76%,
+      transparent 77%,
+      transparent
+    );
+  background-size: 40px 40px;
+  background-position: 0 0, 20px 20px;
+}
+
+/* Asanoha (Hemp leaf pattern) */
+.pattern-asanoha {
+  background-image: linear-gradient(30deg, rgba(230, 57, 70, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(230, 57, 70, 0.03) 87.5%, rgba(230, 57, 70, 0.03)),
+    linear-gradient(150deg, rgba(230, 57, 70, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(230, 57, 70, 0.03) 87.5%, rgba(230, 57, 70, 0.03)),
+    linear-gradient(30deg, rgba(230, 57, 70, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(230, 57, 70, 0.03) 87.5%, rgba(230, 57, 70, 0.03)),
+    linear-gradient(150deg, rgba(230, 57, 70, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(230, 57, 70, 0.03) 87.5%, rgba(230, 57, 70, 0.03)),
+    linear-gradient(60deg, rgba(230, 57, 70, 0.05) 25%, transparent 25.5%, transparent 75%, rgba(230, 57, 70, 0.05) 75%, rgba(230, 57, 70, 0.05)),
+    linear-gradient(60deg, rgba(230, 57, 70, 0.05) 25%, transparent 25.5%, transparent 75%, rgba(230, 57, 70, 0.05) 75%, rgba(230, 57, 70, 0.05));
+  background-size: 80px 140px;
+  background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;
 }
 
 /* ─── Custom scrollbar ─── */
