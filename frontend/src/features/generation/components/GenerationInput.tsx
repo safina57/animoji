@@ -1,13 +1,13 @@
 import { useRef, type ChangeEvent, type KeyboardEvent } from "react";
-import { useAppDispatch, useAppSelector } from "../../../shared/hooks/redux";
+import { useAppDispatch, useAppSelector } from "@shared/hooks/redux";
 import {
   setPrompt,
   setReferenceImage,
   startGeneration,
   setJobId,
   failGeneration,
-} from "../../../store/slices/generationSlice";
-import { submitJob } from "../../../shared/services/apiClient";
+} from "@store/slices/generationSlice";
+import { submitJob } from "@shared/services/apiClient";
 
 const SUGGESTIONS = ["Cyberpunk Tokyo", "Studio Ghibli Forest", "90s Retro Anime"];
 

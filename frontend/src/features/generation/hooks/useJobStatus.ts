@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
-import { useSSE } from '../../../shared/hooks/useSSE';
-import { useAppDispatch } from '../../../shared/hooks/redux';
-import { completeGeneration, failGeneration } from '../../../store/slices/generationSlice';
-import { getJobStatusStreamUrl, type StatusEvent } from '../../../shared/services/apiClient';
+import { useSSE } from '@shared/hooks/useSSE';
+import { useAppDispatch } from '@shared/hooks/redux';
+import { completeGeneration, failGeneration } from '@store/slices/generationSlice';
+import { getJobStatusStreamUrl, type StatusEvent } from '@shared/services/apiClient';
 
 export function useJobStatus(jobId: string | null, enabled: boolean) {
   const dispatch = useAppDispatch();
