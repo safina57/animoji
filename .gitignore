@@ -39,3 +39,7 @@ build/
 # Logs
 *.log
 logs/
+
+example/
+
+CLAUDE.md
