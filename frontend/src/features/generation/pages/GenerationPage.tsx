@@ -1,5 +1,5 @@
 import { useAppSelector } from "../../../shared/hooks/redux";
-import { useJobStatusStream } from "../../../shared/hooks/useJobStatusStream";
+import { useJobStatus } from "../hooks/useJobStatus";
 import GenerationInput from "../components/GenerationInput";
 import { LoadingScreen } from "../components/loading-screen";
 import ResultView from "../components/ResultView";
@@ -9,7 +9,7 @@ export default function GenerationPage() {
   const jobId = useAppSelector((s) => s.generation.jobId);
 
   // Listen for SSE status updates during the loading stage.
-  useJobStatusStream(jobId, stage === "loading");
+  useJobStatus(jobId, stage === "loading");
 
   return (
     <main className="flex-1 flex flex-col overflow-hidden">

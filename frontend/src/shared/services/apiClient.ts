@@ -19,6 +19,10 @@ export interface StatusEvent {
   error?: string;
 }
 
+export function getJobStatusStreamUrl(jobId: string): string {
+  return `${API_URL}/job-status/${jobId}/stream`;
+}
+
 export async function submitJob(image: File, prompt: string): Promise<SubmitJobResponse> {
   const formData = new FormData();
   formData.append('image', image);
@@ -35,49 +39,4 @@ export async function submitJob(image: File, prompt: string): Promise<SubmitJobR
   }
 
   return response.json();
-}
-
-export function createJobStatusStream(
-  jobId: string,
-  onStatus: (event: StatusEvent) => void,
-  onError: (error: string) => void
-): () => void {
-  const url = `${API_URL}/job-status/${jobId}/stream`;
-  console.log('[SSE] Creating EventSource:', url);
-
-  const eventSource = new EventSource(url);
-
-  eventSource.addEventListener('open', () => {
-    console.log('[SSE] Connection opened');
-  });
-
-  eventSource.addEventListener('status', (e) => {
-    console.log('[SSE] Received status event:', e.data);
-    try {
-      const data: StatusEvent = JSON.parse(e.data);
-      onStatus(data);
-
-      // Close connection on terminal states
-      if (data.status === 'completed' || data.status === 'failed') {
-        console.log('[SSE] Closing connection (terminal state)');
-        eventSource.close();
-      }
-    } catch (err) {
-      console.error('[SSE] Failed to parse event:', err);
-      onError('Failed to parse status event');
-      eventSource.close();
-    }
-  });
-
-  eventSource.addEventListener('error', (e) => {
-    console.error('[SSE] Connection error:', e);
-    onError('Failed to connect to status stream');
-    eventSource.close();
-  });
-
-  // Return cleanup function
-  return () => {
-    console.log('[SSE] Cleaning up connection');
-    eventSource.close();
-  };
 }

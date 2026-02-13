@@ -12,6 +12,7 @@ func CORS(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Origin", constants.CORSAllowOrigin)
 		w.Header().Set("Access-Control-Allow-Methods", constants.CORSAllowMethods)
 		w.Header().Set("Access-Control-Allow-Headers", constants.CORSAllowHeaders)
+		w.Header().Set("Access-Control-Expose-Headers", constants.CORSExposeHeaders)
 
 		// Handle preflight requests
 		if r.Method == "OPTIONS" {

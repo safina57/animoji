@@ -43,7 +43,9 @@ const (
 
 // CORS configuration
 const (
-	CORSAllowOrigin  = "*"
-	CORSAllowMethods = "GET, POST, PUT, DELETE, OPTIONS"
-	CORSAllowHeaders = "Content-Type, Authorization"
+	CORSAllowOrigin      = "*"
+	CORSAllowMethods     = "GET, POST, PUT, DELETE, OPTIONS"
+	CORSAllowHeaders     = "Content-Type, Authorization, Cache-Control"
+	CORSExposeHeaders    = "Content-Type, Cache-Control, Connection"
+	CORSAllowCredentials = "true"
 )
