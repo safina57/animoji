@@ -32,7 +32,6 @@ export function useSSE(url: string | null, options: UseSSEOptions = {}) {
   // Disconnect from SSE endpoint
   const disconnect = useCallback(() => {
     if (eventSourceRef.current) {
-      console.log('[SSE] Disconnecting');
       eventSourceRef.current.close();
       eventSourceRef.current = null;
     }
@@ -48,13 +47,11 @@ export function useSSE(url: string | null, options: UseSSEOptions = {}) {
       eventSourceRef.current.close();
     }
 
-    console.log('[SSE] Connecting to:', url);
     const eventSource = new EventSource(url);
     eventSourceRef.current = eventSource;
 
     // Handle successful connection
     eventSource.onopen = () => {
-      console.log('[SSE] Connection opened');
       setIsConnected(true);
       setError(null);
       onOpenRef.current?.();
@@ -64,11 +61,9 @@ export function useSSE(url: string | null, options: UseSSEOptions = {}) {
     eventSource.onmessage = (event) => {
       try {
         const parsedData = JSON.parse(event.data);
-        console.log('[SSE] Received message:', parsedData);
         setData(parsedData);
         onMessageRef.current?.(parsedData);
       } catch (parseError) {
-        console.error('[SSE] Error parsing event data:', parseError);
         const errorMsg = 'Failed to parse event data';
         setError(errorMsg);
         onErrorRef.current?.(errorMsg);
@@ -76,8 +71,7 @@ export function useSSE(url: string | null, options: UseSSEOptions = {}) {
     };
 
     // Handle errors
-    eventSource.onerror = (event) => {
-      console.error('[SSE] Connection error:', event);
+    eventSource.onerror = () => {
       setIsConnected(false);
 
       // Only report as error if connection is completely closed
@@ -90,7 +84,6 @@ export function useSSE(url: string | null, options: UseSSEOptions = {}) {
 
     // Cleanup on unmount or URL change
     return () => {
-      console.log('[SSE] Cleaning up connection');
       eventSource.close();
       eventSourceRef.current = null;
       setIsConnected(false);

@@ -41,11 +41,6 @@ func (s *NatsSubscriber) SubscribeToStatusEvents(ctx context.Context) error {
 		}
 		jobID := parts[2]
 
-		logger.Info().
-			Str("job_id", jobID).
-			Str("status", event.Status).
-			Msg("Received status event from NATS")
-
 		// Route event to all connections waiting for this job_id
 		s.eventManager.NotifyJob(jobID, event)
 	})

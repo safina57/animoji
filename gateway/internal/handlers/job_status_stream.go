@@ -51,8 +51,6 @@ func HandleJobStatusStream(w http.ResponseWriter, r *http.Request, eventManager 
 
 	ctx := r.Context()
 
-	logger.Info().Str("job_id", jobID).Msg("SSE connection established")
-
 	// Send an initial comment to flush headers and confirm the connection is alive
 	// SSE comments (lines starting with ':') are ignored by EventSource but force the HTTP response to start
 	fmt.Fprintf(w, ": connected\n\n")
@@ -68,11 +66,6 @@ func HandleJobStatusStream(w http.ResponseWriter, r *http.Request, eventManager 
 	for {
 		select {
 		case event := <-eventChan:
-			logger.Info().
-				Str("job_id", jobID).
-				Str("status", event.Status).
-				Msg("Sending status event to SSE client")
-
 			if event.Status == constants.StatusCompleted {
 				sendCompletedEvent(w, flusher, jobID, storageService)
 			}
@@ -85,7 +78,6 @@ func HandleJobStatusStream(w http.ResponseWriter, r *http.Request, eventManager 
 
 			// Don't return immediately — wait for the client to disconnect
 			// so Go doesn't kill the chunked response before the browser processes the data.
-			logger.Info().Str("job_id", jobID).Msg("Final event sent, waiting for client to close")
 			<-ctx.Done()
 			return
 
@@ -96,8 +88,6 @@ func HandleJobStatusStream(w http.ResponseWriter, r *http.Request, eventManager 
 			return
 
 		case <-ctx.Done():
-			// Client disconnected
-			logger.Info().Str("job_id", jobID).Msg("SSE client disconnected")
 			return
 		}
 	}
@@ -130,8 +120,6 @@ func sendCompletedEvent(w http.ResponseWriter, flusher http.Flusher, jobID strin
 		"result_url":   resultURL,
 	}
 	sendSSEEvent(w, flusher, eventData)
-
-	logger.Info().Str("job_id", jobID).Msg("Sent completed event to SSE client")
 }
 
 // sendSSEEvent sends an SSE event

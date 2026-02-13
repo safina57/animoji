@@ -78,10 +78,6 @@ func (m *EventManager) NotifyJob(jobID string, event models.StatusEvent) {
 	// Send to the waiting connection
 	select {
 	case ch <- event:
-		logger.Info().
-			Str("job_id", jobID).
-			Str("status", event.Status).
-			Msg("Event sent to active SSE connection")
 	default:
 		// Channel full, skip
 		logger.Warn().Str("job_id", jobID).Msg("Channel full, skipping event")

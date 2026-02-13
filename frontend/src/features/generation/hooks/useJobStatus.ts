@@ -21,7 +21,6 @@ export function useJobStatus(jobId: string | null, enabled: boolean) {
   useEffect(() => {
     // Prevent duplicate connections for the same job
     if (enabled && jobId && handledJobRef.current === jobId) {
-      console.log('[useJobStatus] Already handling this job, skipping:', jobId);
       return;
     }
 
@@ -31,13 +30,7 @@ export function useJobStatus(jobId: string | null, enabled: boolean) {
   }, [jobId, enabled]);
 
   const { isConnected, disconnect } = useSSE(url, {
-    onOpen: () => {
-      console.log('[useJobStatus] Connected to job status stream:', jobId);
-    },
-
     onMessage: (data: StatusEvent) => {
-      console.log('[useJobStatus] Received status event:', data);
-
       if (data.status === 'completed') {
         dispatch(
           completeGeneration({
@@ -56,7 +49,6 @@ export function useJobStatus(jobId: string | null, enabled: boolean) {
     },
 
     onError: (error: string) => {
-      console.error('[useJobStatus] SSE error:', error);
       dispatch(failGeneration(error));
       handledJobRef.current = null;
     },
