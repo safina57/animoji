@@ -1,15 +1,23 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { GenerationStage } from "../../types/generation";
+import type { GenerationStage } from "@customTypes/generation";
+
+export interface GenerationResult {
+  jobId: string;
+  prompt: string;
+  originalImageUrl: string;
+  generatedImageUrl: string;
+  timestamp: number;
+}
 
 interface GenerationState {
   stage: GenerationStage;
   prompt: string;
   referenceImage: File | null;
   referencePreviewUrl: string | null;
-  originalImageUrl: string | null;
-  generatedImageUrl: string | null;
   jobId: string | null;
   error: string | null;
+  results: GenerationResult[]; // Array of all generation results
+  currentPrompt: string; // The prompt used for current generation
 }
 
 const initialState: GenerationState = {
@@ -17,10 +25,10 @@ const initialState: GenerationState = {
   prompt: "",
   referenceImage: null,
   referencePreviewUrl: null,
-  originalImageUrl: null,
-  generatedImageUrl: null,
   jobId: null,
   error: null,
+  results: [],
+  currentPrompt: "",
 };
 
 const generationSlice = createSlice({
@@ -48,8 +56,7 @@ const generationSlice = createSlice({
       state.stage = "loading";
       state.error = null;
       state.jobId = null;
-      state.originalImageUrl = null;
-      state.generatedImageUrl = null;
+      state.currentPrompt = state.prompt; // Save current prompt
       if (state.referencePreviewUrl) {
         URL.revokeObjectURL(state.referencePreviewUrl);
         state.referencePreviewUrl = null;
@@ -71,12 +78,24 @@ const generationSlice = createSlice({
     ) {
       state.stage = "result";
       state.jobId = action.payload.jobId;
-      state.originalImageUrl = action.payload.originalImageUrl;
-      state.generatedImageUrl = action.payload.generatedImageUrl;
+
+      // Add new result to the array
+      state.results.push({
+        jobId: action.payload.jobId,
+        prompt: state.currentPrompt,
+        originalImageUrl: action.payload.originalImageUrl,
+        generatedImageUrl: action.payload.generatedImageUrl,
+        timestamp: Date.now(),
+      });
+
+      // Clear prompt for next refinement
+      state.prompt = "";
     },
 
-    failGeneration(state, action: PayloadAction<string>) {
-      state.stage = "input";
+    failGeneration(state, action: PayloadAction<string | null>) {
+      if (action.payload) {
+        state.stage = "input";
+      }
       state.error = action.payload;
     },
 
