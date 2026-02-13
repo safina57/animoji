@@ -117,7 +117,6 @@ func HandleSubmitJob(w http.ResponseWriter, r *http.Request) {
 	// Return response
 	response := models.SubmitJobResponse{
 		JobID:   jobID,
-		Status:  constants.StatusQueued,
 		Message: "Job submitted successfully",
 	}
 

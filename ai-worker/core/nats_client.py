@@ -65,6 +65,27 @@ class NatsClient:
             )
             raise
 
+    async def publish(self, subject: str, data: bytes) -> None:
+        """
+        Publish a message to a NATS subject.
+
+        Args:
+            subject: NATS subject to publish to
+            data: Message payload as bytes
+        """
+        if not self.client or not self.client.is_connected:
+            raise RuntimeError("NATS client not connected. Call connect() first.")
+
+        try:
+            await self.client.publish(subject, data)
+            logger.debug(f"Published to NATS subject", extra={"subject": subject})
+        except Exception as e:
+            logger.error(
+                f"Failed to publish to NATS subject",
+                extra={"subject": subject, "error": str(e)},
+            )
+            raise
+
     async def close(self) -> None:
         """Close the NATS connection."""
         if self.client and self.client.is_connected:

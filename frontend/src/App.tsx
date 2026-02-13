@@ -1,7 +1,7 @@
 import { Provider } from "react-redux";
-import { store } from "./store/store";
-import Navbar from "./shared/components/layout/Navbar";
-import GenerationPage from "./features/generation/pages/GenerationPage";
+import { store } from "@store/store";
+import Navbar from "@shared/components/layout/Navbar";
+import GenerationPage from "@features/generation/pages/GenerationPage";
 
 export default function App() {
   return (

@@ -1,10 +1,16 @@
-import { useAppSelector } from "../../../shared/hooks/redux";
+import { useAppSelector } from "@shared/hooks/redux";
+import { useJobStatus } from "../hooks/useJobStatus";
 import GenerationInput from "../components/GenerationInput";
 import { LoadingScreen } from "../components/loading-screen";
 import ResultView from "../components/ResultView";
+import SakuraDecorationIcon from "@assets/icons/sakura-decoration.svg?react";
 
 export default function GenerationPage() {
   const stage = useAppSelector((s) => s.generation.stage);
+  const jobId = useAppSelector((s) => s.generation.jobId);
+
+  // Listen for SSE status updates during the loading stage.
+  useJobStatus(jobId, stage === "loading");
 
   return (
     <main className="flex-1 flex flex-col overflow-hidden">
@@ -36,12 +42,7 @@ function DecorationOrbs() {
 
       {/* Sakura petal top-left */}
       <div className="fixed top-1/4 left-10 pointer-events-none opacity-10 dark:opacity-5 hidden xl:block">
-        <svg width="120" height="120" viewBox="0 0 100 100" fill="none">
-          <path
-            d="M50 10C50 10 55 30 75 30C95 30 100 50 80 60C60 70 50 90 50 90C50 90 40 70 20 60C0 50 5 30 25 30C45 30 50 10 50 10Z"
-            fill="#E63946"
-          />
-        </svg>
+        <SakuraDecorationIcon />
       </div>
 
       {/* Circle bottom-right */}

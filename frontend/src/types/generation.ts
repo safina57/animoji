@@ -4,7 +4,6 @@ export type GenerationStage = "input" | "loading" | "result";
 /** Matches Go SubmitJobResponse */
 export interface SubmitJobResponse {
   job_id: string;
-  status: string;
   message: string;
 }
 

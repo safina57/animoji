@@ -1,3 +1,5 @@
+import SakuraPetalIcon from "@assets/icons/sakura-petal.svg?react";
+
 export interface PetalProps {
   delay: string;
   left: string;
@@ -26,12 +28,7 @@ export default function SakuraPetal({
         animationDuration: duration,
       }}
     >
-      <svg
-        viewBox="0 0 100 130"
-        className="w-full h-full fill-[var(--color-sakura-pink)] drop-shadow-sm"
-      >
-        <path d="M50 0 C60 30 100 50 100 80 C100 110 80 130 50 130 C20 130 0 110 0 80 C0 50 40 30 50 0 Z" />
-      </svg>
+      <SakuraPetalIcon className="w-full h-full fill-[var(--color-sakura-pink)] drop-shadow-sm" />
     </div>
   );
 }

@@ -1,5 +1,5 @@
-import { useAppDispatch, useAppSelector } from "../../../shared/hooks/redux";
-import { resetGeneration } from "../../../store/slices/generationSlice";
+import { useAppDispatch, useAppSelector } from "@shared/hooks/redux";
+import { resetGeneration } from "@store/slices/generationSlice";
 import ImageCompareSlider from "./ImageCompareSlider";
 
 export default function ResultView() {

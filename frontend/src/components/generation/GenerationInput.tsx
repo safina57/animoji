@@ -1,4 +1,4 @@
-import { useRef, type ChangeEvent, type KeyboardEvent } from "react";
+import { useRef, useEffect, type ChangeEvent, type KeyboardEvent } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import {
   setPrompt,
@@ -20,15 +20,32 @@ export default function GenerationInput() {
 
   const isBottom = stage === "result";
 
+  useEffect(() => {
+    return () => {
+      if (referencePreviewUrl) {
+        URL.revokeObjectURL(referencePreviewUrl);
+      }
+    };
+  }, [referencePreviewUrl]);
+
   /* ── File selection ── */
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    
+    if (referencePreviewUrl) {
+      URL.revokeObjectURL(referencePreviewUrl);
+    }
+    
     const previewUrl = URL.createObjectURL(file);
     dispatch(setReferenceImage({ file, previewUrl }));
   }
 
   function removeImage() {
+    if (referencePreviewUrl) {
+      URL.revokeObjectURL(referencePreviewUrl);
+    }
+    
     dispatch(setReferenceImage(null));
     if (fileInputRef.current) fileInputRef.current.value = "";
   }

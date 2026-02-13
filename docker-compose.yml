@@ -1,4 +1,18 @@
 services:
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${API_URL}
+    ports:
+      - "3000:80"
+    depends_on:
+      - gateway
+    networks:
+      - animoji-network
+
   # API Gateway
   gateway:
     build:
@@ -34,6 +48,18 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "${NGINX_PUBLIC_PORT}:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - minio
+    networks:
+      - animoji-network
 
   # MinIO Initialization
   minio-init:

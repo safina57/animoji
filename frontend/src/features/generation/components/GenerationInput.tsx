@@ -1,19 +1,19 @@
 import { useRef, type ChangeEvent, type KeyboardEvent } from "react";
-import { useAppDispatch, useAppSelector } from "../../../shared/hooks/redux";
+import { useAppDispatch, useAppSelector } from "@shared/hooks/redux";
 import {
   setPrompt,
   setReferenceImage,
   startGeneration,
-  completeGeneration,
+  setJobId,
   failGeneration,
-} from "../../../store/slices/generationSlice";
-import { submitGenerationJob } from "../../../shared/services/mockApi";
+} from "@store/slices/generationSlice";
+import { submitJob } from "@shared/services/apiClient";
 
 const SUGGESTIONS = ["Cyberpunk Tokyo", "Studio Ghibli Forest", "90s Retro Anime"];
 
 export default function GenerationInput() {
   const dispatch = useAppDispatch();
-  const { prompt, referencePreviewUrl, stage } = useAppSelector(
+  const { prompt, referenceImage, referencePreviewUrl, stage } = useAppSelector(
     (s) => s.generation
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -36,12 +36,22 @@ export default function GenerationInput() {
   /* ── Generation ── */
   async function generate() {
     if (!prompt.trim()) return;
+    if (!referenceImage) {
+      dispatch(failGeneration("Please upload an image first"));
+      return;
+    }
+
     dispatch(startGeneration());
+
     try {
-      const result = await submitGenerationJob(null, prompt);
-      dispatch(completeGeneration(result));
-    } catch {
-      dispatch(failGeneration("Something went wrong. Please try again."));
+      const result = await submitJob(referenceImage, prompt);
+      dispatch(setJobId(result.job_id)); // Store job_id to trigger SSE connection
+    } catch (error) {
+      dispatch(
+        failGeneration(
+          error instanceof Error ? error.message : "Something went wrong. Please try again."
+        )
+      );
     }
   }
 

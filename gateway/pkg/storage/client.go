@@ -3,49 +3,73 @@ package storage
 import (
 	"context"
 	"fmt"
+	"strings"
+	"time"
 
 	"github.com/minio/minio-go/v7"
 )
 
 // MinIOClient wraps the MinIO client with low-level storage operations
 type MinIOClient struct {
-	minio *minio.Client
+	client          *minio.Client
+	internalBaseURL string
+	publicBaseURL   string
 }
 
 // EnsureBucket checks if the specified bucket exists
 func (c *MinIOClient) EnsureBucket(ctx context.Context, bucketName string) error {
-	exists, err := c.minio.BucketExists(ctx, bucketName)
+	exists, err := c.client.BucketExists(ctx, bucketName)
 	if err != nil {
 		return fmt.Errorf("failed to check bucket existence: %w", err)
 	}
-
 	if !exists {
-		return fmt.Errorf("bucket '%s' does not exist - please create it before starting the gateway", bucketName)
+		return fmt.Errorf("bucket '%s' does not exist", bucketName)
 	}
-
 	return nil
 }
 
 // UploadFile uploads a file to the specified bucket and object key
-func (c *MinIOClient) UploadFile(ctx context.Context, bucketName string, objectKey string, data []byte, contentType string) error {
-	info, err := c.minio.PutObject(
-		ctx,
-		bucketName,
-		objectKey,
-		NewBytesReader(data),
-		int64(len(data)),
-		minio.PutObjectOptions{
-			ContentType: contentType,
-		},
-	)
+func (c *MinIOClient) UploadFile(ctx context.Context, bucketName, objectKey string, data []byte, contentType string) error {
+	_, err := c.client.PutObject(ctx, bucketName, objectKey, NewBytesReader(data), int64(len(data)), minio.PutObjectOptions{
+		ContentType: contentType,
+	})
 	if err != nil {
 		return fmt.Errorf("failed to upload object: %w", err)
 	}
+	return nil
+}
 
-	// Verify upload
-	if info.Size != int64(len(data)) {
-		return fmt.Errorf("upload size mismatch: expected %d bytes, uploaded %d bytes", len(data), info.Size)
+// ObjectExists checks if an object exists in MinIO
+func (c *MinIOClient) ObjectExists(ctx context.Context, bucketName, objectKey string) (bool, error) {
+	_, err := c.client.StatObject(ctx, bucketName, objectKey, minio.StatObjectOptions{})
+	if err != nil {
+		if minio.ToErrorResponse(err).Code == "NoSuchKey" {
+			return false, nil
+		}
+		return false, fmt.Errorf("failed to check object existence: %w", err)
+	}
+	return true, nil
+}
+
+// GetPresignedURL generates a presigned GET URL using public client
+func (c *MinIOClient) GetPresignedURL(ctx context.Context, bucketName, objectKey string, expiry time.Duration) (string, error) {
+	url, err := c.client.PresignedGetObject(ctx, bucketName, objectKey, expiry, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate presigned URL: %w", err)
 	}
 
-	return nil
+	presignedURL := url.String()
+
+	// Replace internal endpoint with public URL
+	presignedURL = strings.Replace(presignedURL, c.internalBaseURL, c.publicBaseURL, 1)
+
+	return presignedURL, nil
+}
+
+// ListObjects lists objects with a given prefix
+func (c *MinIOClient) ListObjects(ctx context.Context, bucketName, prefix string) <-chan minio.ObjectInfo {
+	return c.client.ListObjects(ctx, bucketName, minio.ListObjectsOptions{
+		Prefix:    prefix,
+		Recursive: true,
+	})
 }

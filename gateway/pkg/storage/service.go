@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"time"
 
 	"github.com/safina57/animoji/gateway/internal/constants"
 )
@@ -35,3 +36,33 @@ func (s *MinIOService) UploadOriginalImage(ctx context.Context, jobID string, da
 	return objectKey, nil
 }
 
+// CheckResultExists checks if a result image exists for a job
+func (s *MinIOService) CheckResultExists(ctx context.Context, jobID string) (bool, error) {
+	objectKey := fmt.Sprintf("%s%s/result.png", constants.PrefixGenerated, jobID)
+	return s.client.ObjectExists(ctx, constants.BucketName, objectKey)
+}
+
+// GetPresignedURLForOriginal generates a presigned URL for the original image
+func (s *MinIOService) GetPresignedURLForOriginal(ctx context.Context, jobID string, expiry time.Duration) (string, error) {
+	// Find the extension by listing objects in the original's prefix
+	prefix := fmt.Sprintf("%s%s/", constants.PrefixOriginals, jobID)
+	objectCh := s.client.ListObjects(ctx, constants.BucketName, prefix)
+
+	object, ok := <-objectCh
+	if !ok {
+		return "", fmt.Errorf("original not found for job %s", jobID)
+	}
+	if object.Err != nil {
+		return "", fmt.Errorf("failed to list objects: %w", object.Err)
+	}
+
+	ext := filepath.Ext(object.Key)
+	objectKey := fmt.Sprintf("%s%s/input%s", constants.PrefixOriginals, jobID, ext)
+	return s.client.GetPresignedURL(ctx, constants.BucketName, objectKey, expiry)
+}
+
+// GetPresignedURLForResult generates a presigned URL for the result image
+func (s *MinIOService) GetPresignedURLForResult(ctx context.Context, jobID string, expiry time.Duration) (string, error) {
+	objectKey := fmt.Sprintf("%s%s/result.png", constants.PrefixGenerated, jobID)
+	return s.client.GetPresignedURL(ctx, constants.BucketName, objectKey, expiry)
+}

@@ -41,9 +41,10 @@ func initializeClient(ctx context.Context) (*MinIOClient, error) {
 	endpoint := os.Getenv("MINIO_ENDPOINT")
 	accessKey := os.Getenv("MINIO_ACCESS_KEY")
 	secretKey := os.Getenv("MINIO_SECRET_KEY")
+	publicURL := os.Getenv("MINIO_PUBLIC_URL")
 
 	if endpoint == "" || accessKey == "" || secretKey == "" {
-		return nil, fmt.Errorf("one or more required environment variables are missing for MinIO configuration")
+		return nil, fmt.Errorf("missing required MinIO environment variables")
 	}
 
 	minioClient, err := minio.New(endpoint, &minio.Options{
@@ -54,17 +55,22 @@ func initializeClient(ctx context.Context) (*MinIOClient, error) {
 		return nil, fmt.Errorf("failed to initialize MinIO client: %w", err)
 	}
 
-	client := &MinIOClient{minio: minioClient}
+	internalBaseURL := "http://" + endpoint
+	publicBaseURL := publicURL
 
-	// Verify bucket exists
+	client := &MinIOClient{
+		client:          minioClient,
+		internalBaseURL: internalBaseURL,
+		publicBaseURL:   publicBaseURL,
+	}
+
 	if err := client.EnsureBucket(ctx, constants.BucketName); err != nil {
-		return nil, fmt.Errorf("bucket validation failed: %w", err)
+		return nil, err
 	}
 
 	logger.Info().
 		Str("bucket", constants.BucketName).
-		Str("endpoint", endpoint).
-		Msg("MinIO client initialized successfully")
+		Msg("MinIO client initialized")
 
 	return client, nil
 }
