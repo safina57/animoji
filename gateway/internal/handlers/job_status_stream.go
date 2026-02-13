@@ -65,9 +65,12 @@ func HandleJobStatusStream(w http.ResponseWriter, r *http.Request, eventManager 
 
 	for {
 		select {
-		case event := <-eventChan:
+		case event, ok := <-eventChan:
+			if !ok {
+				return
+			}
 			if event.Status == constants.StatusCompleted {
-				sendCompletedEvent(w, flusher, jobID, storageService)
+				sendCompletedEvent(w, flusher, jobID, storageService, r.Context())
 			}
 			if event.Status == constants.StatusFailed {
 				eventData := map[string]string{
@@ -94,9 +97,7 @@ func HandleJobStatusStream(w http.ResponseWriter, r *http.Request, eventManager 
 }
 
 // sendCompletedEvent sends a completed status event with presigned URLs
-func sendCompletedEvent(w http.ResponseWriter, flusher http.Flusher, jobID string, storageService *storage.MinIOService) {
-	ctx := context.Background()
-
+func sendCompletedEvent(w http.ResponseWriter, flusher http.Flusher, jobID string, storageService *storage.MinIOService, ctx context.Context) {
 	// Generate presigned URLs
 	originalURL, err := storageService.GetPresignedURLForOriginal(ctx, jobID, presignedURLExpiry)
 	if err != nil {
@@ -135,7 +136,10 @@ func sendSSEEvent(w http.ResponseWriter, flusher http.Flusher, data any) {
 	flusher.Flush()
 }
 
-// sendSSEError sends an error event and closes the connection
+// sendSSEError sends an error event with status: failed and closes the connection
 func sendSSEError(w http.ResponseWriter, flusher http.Flusher, message string) {
-	sendSSEEvent(w, flusher, map[string]string{"error": message})
+	sendSSEEvent(w, flusher, map[string]string{
+		"status": constants.StatusFailed,
+		"error":  message,
+	})
 }

@@ -47,9 +47,14 @@ const generationSlice = createSlice({
     startGeneration(state) {
       state.stage = "loading";
       state.error = null;
-      state.jobId = null; // Clear previous job
+      state.jobId = null;
       state.originalImageUrl = null;
       state.generatedImageUrl = null;
+      if (state.referencePreviewUrl) {
+        URL.revokeObjectURL(state.referencePreviewUrl);
+        state.referencePreviewUrl = null;
+        state.referenceImage = null;
+      }
     },
 
     setJobId(state, action: PayloadAction<string>) {
