@@ -30,6 +30,11 @@ func New(ctx context.Context) (*App, error) {
 	// Pass all models that need to be migrated
 	db, err := database.Init(
 		&models.User{},
+		&models.Image{},
+		&models.Like{},
+		&models.Collection{},
+		&models.CollectionItem{},
+		&models.ShareLink{},
 	)
 	if err != nil {
 		return nil, err
