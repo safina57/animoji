@@ -12,6 +12,7 @@
 7. [API Reference](#api-reference)
 8. [Collaborative Filtering Algorithm](#collaborative-filtering-algorithm)
 9. [Environment Setup](#environment-setup)
+10. [📸 Image Loading & CDN Strategy](./IMAGE_LOADING_STRATEGY.md) - **Important for Community Feed**
 
 ---
 
