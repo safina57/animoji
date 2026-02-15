@@ -43,7 +43,7 @@ func (r *Repository) UnlikeImage(ctx context.Context, userID, imageID uuid.UUID)
 		}
 
 		if result.RowsAffected == 0 {
-			return fmt.Errorf("like not found")
+			return NewNotFoundError("like", fmt.Sprintf("user:%s,image:%s", userID, imageID))
 		}
 
 		// Decrement likes count
@@ -73,15 +73,18 @@ func (r *Repository) HasUserLikedImage(ctx context.Context, userID, imageID uuid
 }
 
 // GetImageLikes retrieves all likes for an image with user information
-func (r *Repository) GetImageLikes(ctx context.Context, imageID uuid.UUID, limit, offset int) ([]*models.Like, error) {
+func (r *Repository) GetImageLikes(ctx context.Context, imageID uuid.UUID, params PaginationParams) ([]*models.Like, error) {
+	// Normalize pagination parameters
+	params.Normalize()
+
 	var likes []*models.Like
 
 	if err := r.db.WithContext(ctx).
 		Preload("User").
 		Where("image_id = ?", imageID).
 		Order("created_at DESC").
-		Limit(limit).
-		Offset(offset).
+		Limit(params.Limit).
+		Offset(params.Offset).
 		Find(&likes).Error; err != nil {
 		return nil, fmt.Errorf("failed to get image likes: %w", err)
 	}
@@ -90,7 +93,10 @@ func (r *Repository) GetImageLikes(ctx context.Context, imageID uuid.UUID, limit
 }
 
 // GetUserLikes retrieves all images liked by a user
-func (r *Repository) GetUserLikes(ctx context.Context, userID uuid.UUID, limit, offset int) ([]*models.Image, error) {
+func (r *Repository) GetUserLikes(ctx context.Context, userID uuid.UUID, params PaginationParams) ([]*models.Image, error) {
+	// Normalize pagination parameters
+	params.Normalize()
+
 	var images []*models.Image
 
 	if err := r.db.WithContext(ctx).
@@ -98,8 +104,8 @@ func (r *Repository) GetUserLikes(ctx context.Context, userID uuid.UUID, limit, 
 		Where("likes.user_id = ?", userID).
 		Preload("User").
 		Order("likes.created_at DESC").
-		Limit(limit).
-		Offset(offset).
+		Limit(params.Limit).
+		Offset(params.Offset).
 		Find(&images).Error; err != nil {
 		return nil, fmt.Errorf("failed to get user likes: %w", err)
 	}

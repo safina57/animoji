@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/safina57/animoji/gateway/internal/models"
-	"gorm.io/gorm"
 )
 
 // CreateUser creates a new user in the database
@@ -30,10 +29,7 @@ func (r *Repository) GetUserByID(ctx context.Context, userID uuid.UUID) (*models
 	var user models.User
 
 	if err := r.db.WithContext(ctx).Where("id = ?", userID).First(&user).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("user not found")
-		}
-		return nil, fmt.Errorf("failed to get user: %w", err)
+		return nil, WrapDBError(err, "user")
 	}
 
 	return &user, nil
@@ -44,10 +40,7 @@ func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*models.
 	var user models.User
 
 	if err := r.db.WithContext(ctx).Where("email = ?", email).First(&user).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("user not found")
-		}
-		return nil, fmt.Errorf("failed to get user: %w", err)
+		return nil, WrapDBError(err, "user")
 	}
 
 	return &user, nil
@@ -58,10 +51,7 @@ func (r *Repository) GetUserByGoogleID(ctx context.Context, googleID string) (*m
 	var user models.User
 
 	if err := r.db.WithContext(ctx).Where("google_id = ?", googleID).First(&user).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("user not found")
-		}
-		return nil, fmt.Errorf("failed to get user: %w", err)
+		return nil, WrapDBError(err, "user")
 	}
 
 	return &user, nil
@@ -74,13 +64,14 @@ func (r *Repository) CreateOrUpdateUser(ctx context.Context, googleID, email, na
 	// Try to find existing user by Google ID
 	err := r.db.WithContext(ctx).Where("google_id = ?", googleID).First(&user).Error
 
-	if err == gorm.ErrRecordNotFound {
-		// User doesn't exist, create new one
-		return r.CreateUser(ctx, googleID, email, name, avatarURL)
-	}
-
+	// Check if this is a NotFoundError (user doesn't exist)
 	if err != nil {
-		return nil, fmt.Errorf("failed to check existing user: %w", err)
+		wrappedErr := WrapDBError(err, "user")
+		if IsNotFoundError(wrappedErr) {
+			// User doesn't exist, create new one
+			return r.CreateUser(ctx, googleID, email, name, avatarURL)
+		}
+		return nil, fmt.Errorf("failed to check existing user: %w", wrappedErr)
 	}
 
 	// User exists, update their info
@@ -112,10 +103,13 @@ func (r *Repository) DeleteUser(ctx context.Context, userID uuid.UUID) error {
 }
 
 // ListUsers retrieves all users with pagination
-func (r *Repository) ListUsers(ctx context.Context, limit, offset int) ([]*models.User, error) {
+func (r *Repository) ListUsers(ctx context.Context, params PaginationParams) ([]*models.User, error) {
+	// Normalize pagination parameters
+	params.Normalize()
+
 	var users []*models.User
 
-	if err := r.db.WithContext(ctx).Limit(limit).Offset(offset).Find(&users).Error; err != nil {
+	if err := r.db.WithContext(ctx).Limit(params.Limit).Offset(params.Offset).Find(&users).Error; err != nil {
 		return nil, fmt.Errorf("failed to list users: %w", err)
 	}
 

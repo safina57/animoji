@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/safina57/animoji/gateway/internal/models"
-	"gorm.io/gorm"
 )
 
 // CreateCollection creates a new collection
@@ -25,24 +24,24 @@ func (r *Repository) GetCollectionByID(ctx context.Context, collectionID uuid.UU
 		Preload("User").
 		Where("id = ?", collectionID).
 		First(&collection).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("collection not found")
-		}
-		return nil, fmt.Errorf("failed to get collection: %w", err)
+		return nil, WrapDBError(err, "collection")
 	}
 
 	return &collection, nil
 }
 
 // GetUserCollections retrieves all collections for a user
-func (r *Repository) GetUserCollections(ctx context.Context, userID uuid.UUID, limit, offset int) ([]*models.Collection, error) {
+func (r *Repository) GetUserCollections(ctx context.Context, userID uuid.UUID, params PaginationParams) ([]*models.Collection, error) {
+	// Normalize pagination parameters
+	params.Normalize()
+
 	var collections []*models.Collection
 
 	if err := r.db.WithContext(ctx).
 		Where("user_id = ?", userID).
 		Order("created_at DESC").
-		Limit(limit).
-		Offset(offset).
+		Limit(params.Limit).
+		Offset(params.Offset).
 		Find(&collections).Error; err != nil {
 		return nil, fmt.Errorf("failed to get user collections: %w", err)
 	}
@@ -51,15 +50,18 @@ func (r *Repository) GetUserCollections(ctx context.Context, userID uuid.UUID, l
 }
 
 // GetPublicCollections retrieves public collections
-func (r *Repository) GetPublicCollections(ctx context.Context, limit, offset int) ([]*models.Collection, error) {
+func (r *Repository) GetPublicCollections(ctx context.Context, params PaginationParams) ([]*models.Collection, error) {
+	// Normalize pagination parameters
+	params.Normalize()
+
 	var collections []*models.Collection
 
 	if err := r.db.WithContext(ctx).
 		Preload("User").
 		Where("is_public = ?", true).
 		Order("created_at DESC").
-		Limit(limit).
-		Offset(offset).
+		Limit(params.Limit).
+		Offset(params.Offset).
 		Find(&collections).Error; err != nil {
 		return nil, fmt.Errorf("failed to get public collections: %w", err)
 	}
@@ -107,14 +109,17 @@ func (r *Repository) RemoveImageFromCollection(ctx context.Context, collectionID
 	}
 
 	if result.RowsAffected == 0 {
-		return fmt.Errorf("image not found in collection")
+		return NewNotFoundError("collection item", fmt.Sprintf("collection:%s,image:%s", collectionID, imageID))
 	}
 
 	return nil
 }
 
 // GetCollectionImages retrieves all images in a collection
-func (r *Repository) GetCollectionImages(ctx context.Context, collectionID uuid.UUID, limit, offset int) ([]*models.Image, error) {
+func (r *Repository) GetCollectionImages(ctx context.Context, collectionID uuid.UUID, params PaginationParams) ([]*models.Image, error) {
+	// Normalize pagination parameters
+	params.Normalize()
+
 	var images []*models.Image
 
 	if err := r.db.WithContext(ctx).
@@ -122,8 +127,8 @@ func (r *Repository) GetCollectionImages(ctx context.Context, collectionID uuid.
 		Where("collection_items.collection_id = ?", collectionID).
 		Preload("User").
 		Order("collection_items.added_at DESC").
-		Limit(limit).
-		Offset(offset).
+		Limit(params.Limit).
+		Offset(params.Offset).
 		Find(&images).Error; err != nil {
 		return nil, fmt.Errorf("failed to get collection images: %w", err)
 	}

@@ -27,5 +27,5 @@ func (ShareLink) TableName() string {
 
 // IsExpired checks if the share link has expired
 func (s *ShareLink) IsExpired() bool {
-	return time.Now().After(s.ExpiresAt)
+	return time.Now().UTC().After(s.ExpiresAt)
 }

@@ -22,10 +22,7 @@ func (r *Repository) GetImageByID(ctx context.Context, imageID uuid.UUID) (*mode
 	var image models.Image
 
 	if err := r.db.WithContext(ctx).Preload("User").Where("id = ?", imageID).First(&image).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("image not found")
-		}
-		return nil, fmt.Errorf("failed to get image: %w", err)
+		return nil, WrapDBError(err, "image")
 	}
 
 	return &image, nil
@@ -36,17 +33,17 @@ func (r *Repository) GetImageByJobID(ctx context.Context, jobID string) (*models
 	var image models.Image
 
 	if err := r.db.WithContext(ctx).Preload("User").Where("job_id = ?", jobID).First(&image).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("image not found")
-		}
-		return nil, fmt.Errorf("failed to get image: %w", err)
+		return nil, WrapDBError(err, "image")
 	}
 
 	return &image, nil
 }
 
 // GetUserImages retrieves all images for a user with optional visibility filter
-func (r *Repository) GetUserImages(ctx context.Context, userID uuid.UUID, visibility string, limit, offset int) ([]*models.Image, error) {
+func (r *Repository) GetUserImages(ctx context.Context, userID uuid.UUID, visibility string, params PaginationParams) ([]*models.Image, error) {
+	// Normalize pagination parameters
+	params.Normalize()
+
 	var images []*models.Image
 
 	query := r.db.WithContext(ctx).Where("user_id = ?", userID)
@@ -55,7 +52,7 @@ func (r *Repository) GetUserImages(ctx context.Context, userID uuid.UUID, visibi
 		query = query.Where("visibility = ?", visibility)
 	}
 
-	if err := query.Order("created_at DESC").Limit(limit).Offset(offset).Find(&images).Error; err != nil {
+	if err := query.Order("created_at DESC").Limit(params.Limit).Offset(params.Offset).Find(&images).Error; err != nil {
 		return nil, fmt.Errorf("failed to get user images: %w", err)
 	}
 
@@ -63,15 +60,18 @@ func (r *Repository) GetUserImages(ctx context.Context, userID uuid.UUID, visibi
 }
 
 // GetPublicImages retrieves public images with pagination
-func (r *Repository) GetPublicImages(ctx context.Context, limit, offset int) ([]*models.Image, error) {
+func (r *Repository) GetPublicImages(ctx context.Context, params PaginationParams) ([]*models.Image, error) {
+	// Normalize pagination parameters
+	params.Normalize()
+
 	var images []*models.Image
 
 	if err := r.db.WithContext(ctx).
 		Preload("User").
 		Where("visibility = ?", models.VisibilityPublic).
 		Order("created_at DESC").
-		Limit(limit).
-		Offset(offset).
+		Limit(params.Limit).
+		Offset(params.Offset).
 		Find(&images).Error; err != nil {
 		return nil, fmt.Errorf("failed to get public images: %w", err)
 	}
@@ -102,29 +102,6 @@ func (r *Repository) UpdateImageVisibility(ctx context.Context, imageID uuid.UUI
 func (r *Repository) DeleteImage(ctx context.Context, imageID uuid.UUID) error {
 	if err := r.db.WithContext(ctx).Delete(&models.Image{}, imageID).Error; err != nil {
 		return fmt.Errorf("failed to delete image: %w", err)
-	}
-	return nil
-}
-
-// IncrementLikesCount increments the likes count for an image
-func (r *Repository) IncrementLikesCount(ctx context.Context, imageID uuid.UUID) error {
-	if err := r.db.WithContext(ctx).
-		Model(&models.Image{}).
-		Where("id = ?", imageID).
-		UpdateColumn("likes_count", gorm.Expr("likes_count + ?", 1)).Error; err != nil {
-		return fmt.Errorf("failed to increment likes count: %w", err)
-	}
-	return nil
-}
-
-// DecrementLikesCount decrements the likes count for an image
-func (r *Repository) DecrementLikesCount(ctx context.Context, imageID uuid.UUID) error {
-	if err := r.db.WithContext(ctx).
-		Model(&models.Image{}).
-		Where("id = ?", imageID).
-		Where("likes_count > ?", 0).
-		UpdateColumn("likes_count", gorm.Expr("likes_count - ?", 1)).Error; err != nil {
-		return fmt.Errorf("failed to decrement likes count: %w", err)
 	}
 	return nil
 }

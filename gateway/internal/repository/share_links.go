@@ -9,7 +9,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/safina57/animoji/gateway/internal/models"
-	"gorm.io/gorm"
 )
 
 // CreateShareLink creates a new share link with a 1-hour expiration
@@ -24,7 +23,7 @@ func (r *Repository) CreateShareLink(ctx context.Context, imageID, userID uuid.U
 		Token:     token,
 		ImageID:   imageID,
 		CreatedBy: userID,
-		ExpiresAt: time.Now().Add(1 * time.Hour), // 1-hour expiration
+		ExpiresAt: time.Now().UTC().Add(1 * time.Hour), // 1-hour expiration
 	}
 
 	if err := r.db.WithContext(ctx).Create(shareLink).Error; err != nil {
@@ -45,7 +44,7 @@ func (r *Repository) CreateShareLinkWithDuration(ctx context.Context, imageID, u
 		Token:     token,
 		ImageID:   imageID,
 		CreatedBy: userID,
-		ExpiresAt: time.Now().Add(duration),
+		ExpiresAt: time.Now().UTC().Add(duration),
 	}
 
 	if err := r.db.WithContext(ctx).Create(shareLink).Error; err != nil {
@@ -64,10 +63,7 @@ func (r *Repository) GetShareLinkByToken(ctx context.Context, token string) (*mo
 		Preload("Image.User").
 		Where("token = ?", token).
 		First(&shareLink).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("share link not found")
-		}
-		return nil, fmt.Errorf("failed to get share link: %w", err)
+		return nil, WrapDBError(err, "share link")
 	}
 
 	return &shareLink, nil
@@ -103,15 +99,18 @@ func (r *Repository) GetShareLinksForImage(ctx context.Context, imageID uuid.UUI
 }
 
 // GetUserShareLinks retrieves all share links created by a user
-func (r *Repository) GetUserShareLinks(ctx context.Context, userID uuid.UUID, limit, offset int) ([]*models.ShareLink, error) {
+func (r *Repository) GetUserShareLinks(ctx context.Context, userID uuid.UUID, params PaginationParams) ([]*models.ShareLink, error) {
+	// Normalize pagination parameters
+	params.Normalize()
+
 	var shareLinks []*models.ShareLink
 
 	if err := r.db.WithContext(ctx).
 		Preload("Image").
 		Where("created_by = ?", userID).
 		Order("created_at DESC").
-		Limit(limit).
-		Offset(offset).
+		Limit(params.Limit).
+		Offset(params.Offset).
 		Find(&shareLinks).Error; err != nil {
 		return nil, fmt.Errorf("failed to get user share links: %w", err)
 	}
@@ -128,7 +127,7 @@ func (r *Repository) DeleteShareLink(ctx context.Context, token string) error {
 	}
 
 	if result.RowsAffected == 0 {
-		return fmt.Errorf("share link not found")
+		return NewNotFoundError("share link", token)
 	}
 
 	return nil
@@ -137,7 +136,7 @@ func (r *Repository) DeleteShareLink(ctx context.Context, token string) error {
 // CleanupExpiredShareLinks deletes all expired share links
 func (r *Repository) CleanupExpiredShareLinks(ctx context.Context) (int64, error) {
 	result := r.db.WithContext(ctx).
-		Where("expires_at < ?", time.Now()).
+		Where("expires_at < ?", time.Now().UTC()).
 		Delete(&models.ShareLink{})
 
 	if result.Error != nil {

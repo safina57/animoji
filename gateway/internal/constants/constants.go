@@ -49,3 +49,9 @@ const (
 	CORSExposeHeaders    = "Content-Type, Cache-Control, Connection"
 	CORSAllowCredentials = "true"
 )
+
+// Pagination constants
+const (
+	MaxPageLimit = 100
+	DefaultPageLimit = 20
+)

@@ -46,8 +46,8 @@ User (Google OAuth) → Upload Image → Gateway → PostgreSQL + MinIO → NATS
 **Backend:**
 - Go 1.21+ with chi router
 - PostgreSQL 16 (relational database)
-- pgx v5 (PostgreSQL driver)
-- golang-migrate v4 (migrations)
+- GORM v1.25+ (ORM with auto-migrations)
+- PostgreSQL driver for GORM (gorm.io/driver/postgres)
 - golang-jwt v5 (JWT tokens)
 - Google OAuth2 (authentication)
 
@@ -79,7 +79,7 @@ CREATE TABLE images (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     job_id VARCHAR(255) UNIQUE NOT NULL,
-    prompt TEXT NOT NULL,
+    prompts TEXT[] NOT NULL,
     enhanced_prompt TEXT,
     original_key VARCHAR(500) NOT NULL,
     generated_key VARCHAR(500) NOT NULL,
@@ -201,31 +201,41 @@ volumes:
 
 ```bash
 cd gateway
-go get github.com/jackc/pgx/v5
-go get github.com/golang-migrate/migrate/v4
+go get gorm.io/gorm
+go get gorm.io/driver/postgres
 go get github.com/golang-jwt/jwt/v5
 go get golang.org/x/oauth2
 go get golang.org/x/oauth2/google
 ```
 
-#### 3. Create Migration Files
+#### 3. Create User Model
 
-**File:** `gateway/migrations/000001_create_users.up.sql`
-```sql
-CREATE TABLE IF NOT EXISTS users (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    google_id VARCHAR(255) UNIQUE NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    avatar_url TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-```
+**File:** `gateway/internal/models/user.go`
 
-**File:** `gateway/migrations/000001_create_users.down.sql`
-```sql
-DROP TABLE IF EXISTS users;
+```go
+package models
+
+import (
+    "time"
+
+    "github.com/google/uuid"
+    "gorm.io/gorm"
+)
+
+type User struct {
+    ID        uuid.UUID      `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+    GoogleID  string         `gorm:"uniqueIndex;not null" json:"google_id"`
+    Email     string         `gorm:"uniqueIndex;not null" json:"email"`
+    Name      string         `gorm:"not null" json:"name"`
+    AvatarURL *string        `gorm:"type:text" json:"avatar_url,omitempty"`
+    CreatedAt time.Time      `gorm:"not null;default:now()" json:"created_at"`
+    UpdatedAt time.Time      `gorm:"not null;default:now()" json:"updated_at"`
+    DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+func (User) TableName() string {
+    return "users"
+}
 ```
 
 #### 4. Create Database Package
@@ -236,83 +246,83 @@ DROP TABLE IF EXISTS users;
 package database
 
 import (
-    "context"
+    "database/sql"
     "fmt"
+    "os"
     "sync"
+    "time"
 
-    "github.com/jackc/pgx/v5/pgxpool"
     "github.com/rs/zerolog/log"
+    "gorm.io/driver/postgres"
+    "gorm.io/gorm"
+    "gorm.io/gorm/logger"
 )
 
 var (
-    dbInstance *pgxpool.Pool
+    dbInstance *gorm.DB
     dbOnce     sync.Once
 )
 
-func InitDB(ctx context.Context, databaseURL string) (*pgxpool.Pool, error) {
+// Init initializes the database connection and runs auto-migrations
+func Init(models ...interface{}) (*gorm.DB, error) {
     var err error
+
     dbOnce.Do(func() {
-        config, parseErr := pgxpool.ParseConfig(databaseURL)
-        if parseErr != nil {
-            err = fmt.Errorf("unable to parse database URL: %w", parseErr)
+        databaseURL := os.Getenv("DATABASE_URL")
+        if databaseURL == "" {
+            err = fmt.Errorf("DATABASE_URL environment variable is not set")
             return
         }
 
-        config.MaxConns = 25
-        config.MinConns = 5
+        // Configure GORM logger
+        gormLogger := logger.New(
+            log.Logger,
+            logger.Config{
+                SlowThreshold:             200 * time.Millisecond,
+                LogLevel:                  logger.Warn,
+                IgnoreRecordNotFoundError: true,
+                Colorful:                  false,
+            },
+        )
 
-        dbInstance, err = pgxpool.NewWithConfig(ctx, config)
+        // Connect to database
+        config := &gorm.Config{
+            Logger:                 gormLogger,
+            SkipDefaultTransaction: true,
+            PrepareStmt:            true,
+        }
+
+        dbInstance, err = gorm.Open(postgres.Open(databaseURL), config)
         if err != nil {
-            err = fmt.Errorf("unable to create connection pool: %w", err)
+            err = fmt.Errorf("failed to connect to database: %w", err)
             return
         }
 
-        if pingErr := dbInstance.Ping(ctx); pingErr != nil {
-            err = fmt.Errorf("unable to ping database: %w", pingErr)
+        // Run auto-migrations
+        if err = dbInstance.AutoMigrate(models...); err != nil {
+            err = fmt.Errorf("failed to run auto-migrations: %w", err)
             return
         }
 
-        log.Info().Msg("Database connection pool initialized")
+        // Configure connection pool
+        sqlDB, sqlErr := dbInstance.DB()
+        if sqlErr != nil {
+            err = fmt.Errorf("failed to get underlying SQL DB: %w", sqlErr)
+            return
+        }
+
+        sqlDB.SetMaxOpenConns(25)
+        sqlDB.SetMaxIdleConns(5)
+        sqlDB.SetConnMaxLifetime(5 * time.Minute)
+
+        log.Info().Msg("Database connection initialized with auto-migrations")
     })
 
     return dbInstance, err
 }
 
-func GetDB() *pgxpool.Pool {
+func GetDB() *gorm.DB {
     return dbInstance
-}
-```
-
-**File:** `gateway/pkg/database/migrations.go`
-
-```go
-package database
-
-import (
-    "errors"
-    "fmt"
-
-    "github.com/golang-migrate/migrate/v4"
-    _ "github.com/golang-migrate/migrate/v4/database/postgres"
-    _ "github.com/golang-migrate/migrate/v4/source/file"
-    "github.com/rs/zerolog/log"
-)
-
-func RunMigrations(databaseURL string) error {
-    m, err := migrate.New(
-        "file://migrations",
-        databaseURL,
-    )
-    if err != nil {
-        return fmt.Errorf("failed to create migrate instance: %w", err)
-    }
-
-    if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
-        return fmt.Errorf("failed to run migrations: %w", err)
-    }
-
-    log.Info().Msg("Database migrations completed successfully")
-    return nil
 }
 ```
 
