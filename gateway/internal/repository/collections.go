@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/safina57/animoji/gateway/internal/dto"
 	"github.com/safina57/animoji/gateway/internal/models"
 )
 
@@ -31,10 +32,7 @@ func (r *Repository) GetCollectionByID(ctx context.Context, collectionID uuid.UU
 }
 
 // GetUserCollections retrieves all collections for a user
-func (r *Repository) GetUserCollections(ctx context.Context, userID uuid.UUID, params PaginationParams) ([]*models.Collection, error) {
-	// Normalize pagination parameters
-	params.Normalize()
-
+func (r *Repository) GetUserCollections(ctx context.Context, userID uuid.UUID, params dto.PaginationParams) ([]*models.Collection, error) {
 	var collections []*models.Collection
 
 	if err := r.db.WithContext(ctx).
@@ -50,9 +48,7 @@ func (r *Repository) GetUserCollections(ctx context.Context, userID uuid.UUID, p
 }
 
 // GetPublicCollections retrieves public collections
-func (r *Repository) GetPublicCollections(ctx context.Context, params PaginationParams) ([]*models.Collection, error) {
-	// Normalize pagination parameters
-	params.Normalize()
+func (r *Repository) GetPublicCollections(ctx context.Context, params dto.PaginationParams) ([]*models.Collection, error) {
 
 	var collections []*models.Collection
 
@@ -116,9 +112,7 @@ func (r *Repository) RemoveImageFromCollection(ctx context.Context, collectionID
 }
 
 // GetCollectionImages retrieves all images in a collection
-func (r *Repository) GetCollectionImages(ctx context.Context, collectionID uuid.UUID, params PaginationParams) ([]*models.Image, error) {
-	// Normalize pagination parameters
-	params.Normalize()
+func (r *Repository) GetCollectionImages(ctx context.Context, collectionID uuid.UUID, params dto.PaginationParams) ([]*models.Image, error) {
 
 	var images []*models.Image
 

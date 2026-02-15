@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/safina57/animoji/gateway/internal/auth"
 	"github.com/safina57/animoji/gateway/internal/messaging"
 	"github.com/safina57/animoji/gateway/internal/models"
 	"github.com/safina57/animoji/gateway/internal/repository"
@@ -23,6 +24,7 @@ type App struct {
 	eventManager   *messaging.EventManager
 	storageService *storage.MinIOService
 	natsSubscriber *messaging.NatsSubscriber
+	authConfig     *auth.AuthConfig
 }
 
 // New initializes and returns a configured App instance
@@ -61,6 +63,12 @@ func New(ctx context.Context) (*App, error) {
 	// Create NATS subscriber and pass dependencies
 	natsSubscriber := messaging.NewNatsSubscriber(natsClient, eventManager)
 
+	// Initialize authentication system
+	authConfig, err := auth.Init()
+	if err != nil {
+		return nil, err
+	}
+
 	return &App{
 		db:             db,
 		repo:           repo,
@@ -68,6 +76,7 @@ func New(ctx context.Context) (*App, error) {
 		eventManager:   eventManager,
 		storageService: storageService,
 		natsSubscriber: natsSubscriber,
+		authConfig:     authConfig,
 	}, nil
 }
 
@@ -81,7 +90,12 @@ func (a *App) Start(ctx context.Context) http.Handler {
 	}()
 
 	// Setup and return router
-	a.router = newRouter(a.eventManager, a.storageService)
+	a.router = newRouter(
+		a.eventManager,
+		a.storageService,
+		a.repo,
+		a.authConfig,
+	)
 	return a.router
 }
 

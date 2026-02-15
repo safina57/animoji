@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/safina57/animoji/gateway/internal/dto"
 	"github.com/safina57/animoji/gateway/internal/models"
 )
 
@@ -99,9 +100,7 @@ func (r *Repository) GetShareLinksForImage(ctx context.Context, imageID uuid.UUI
 }
 
 // GetUserShareLinks retrieves all share links created by a user
-func (r *Repository) GetUserShareLinks(ctx context.Context, userID uuid.UUID, params PaginationParams) ([]*models.ShareLink, error) {
-	// Normalize pagination parameters
-	params.Normalize()
+func (r *Repository) GetUserShareLinks(ctx context.Context, userID uuid.UUID, params dto.PaginationParams) ([]*models.ShareLink, error) {
 
 	var shareLinks []*models.ShareLink
 

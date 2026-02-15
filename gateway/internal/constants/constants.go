@@ -50,8 +50,8 @@ const (
 	CORSAllowCredentials = "true"
 )
 
-// Pagination constants
+// Authentication constants
 const (
-	MaxPageLimit = 100
-	DefaultPageLimit = 20
+	DefaultJWTExpiryHours = 24 
+	StateExpiryMinutes    = 5
 )

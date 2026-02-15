@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/safina57/animoji/gateway/internal/dto"
 	"github.com/safina57/animoji/gateway/internal/models"
 	"gorm.io/gorm"
 )
@@ -73,9 +74,7 @@ func (r *Repository) HasUserLikedImage(ctx context.Context, userID, imageID uuid
 }
 
 // GetImageLikes retrieves all likes for an image with user information
-func (r *Repository) GetImageLikes(ctx context.Context, imageID uuid.UUID, params PaginationParams) ([]*models.Like, error) {
-	// Normalize pagination parameters
-	params.Normalize()
+func (r *Repository) GetImageLikes(ctx context.Context, imageID uuid.UUID, params dto.PaginationParams) ([]*models.Like, error) {
 
 	var likes []*models.Like
 
@@ -93,9 +92,7 @@ func (r *Repository) GetImageLikes(ctx context.Context, imageID uuid.UUID, param
 }
 
 // GetUserLikes retrieves all images liked by a user
-func (r *Repository) GetUserLikes(ctx context.Context, userID uuid.UUID, params PaginationParams) ([]*models.Image, error) {
-	// Normalize pagination parameters
-	params.Normalize()
+func (r *Repository) GetUserLikes(ctx context.Context, userID uuid.UUID, params dto.PaginationParams) ([]*models.Image, error) {
 
 	var images []*models.Image
 
