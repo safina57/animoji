@@ -47,7 +47,9 @@ export function useSSE(url: string | null, options: UseSSEOptions = {}) {
       eventSourceRef.current.close();
     }
 
-    const eventSource = new EventSource(url);
+    const eventSource = new EventSource(url, {
+        withCredentials: true}
+    );
     eventSourceRef.current = eventSource;
 
     // Handle successful connection

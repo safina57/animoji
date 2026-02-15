@@ -1,5 +1,18 @@
 import { useState, useEffect } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
+import { useAppSelector, useAppDispatch } from "@hooks/redux";
+import { logout } from "@store/slices/authSlice";
+import { authService } from "@services/authService";
+import { Button } from "@lib/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@lib/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@lib/ui/avatar";
 
 export default function Navbar() {
   const [dark, setDark] = useState(() => {
@@ -9,10 +22,27 @@ export default function Navbar() {
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
   });
 
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
     localStorage.setItem("theme", dark ? "dark" : "light");
   }, [dark]);
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      dispatch(logout());
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      dispatch(logout());
+      navigate("/");
+    }
+  };
 
   return (
     <nav className="border-b border-primary/10 bg-white/50 dark:bg-black/20 backdrop-blur-md sticky top-0 z-50">
@@ -52,7 +82,7 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Right: dark toggle + avatar */}
+        {/* Right: dark toggle + user menu */}
         <div className="flex items-center gap-4">
           <button
             onClick={() => setDark((d) => !d)}
@@ -68,11 +98,50 @@ export default function Navbar() {
             )}
           </button>
 
-          <div className="h-8 w-8 rounded-full overflow-hidden border border-primary/20 bg-primary/10 flex items-center justify-center">
-            <span className="material-symbols-outlined text-primary text-lg">
-              person
-            </span>
-          </div>
+          {isAuthenticated && user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="rounded-full border-2 border-primary/20 hover:border-primary/40 transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50">
+                  <Avatar>
+                    <AvatarImage src={user.avatar_url} alt={user.name} />
+                    <AvatarFallback className="bg-primary/10">
+                      <span className="material-symbols-outlined text-primary text-lg">
+                        person
+                      </span>
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="font-medium text-sm">{user.name}</p>
+                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="cursor-pointer text-primary data-[highlighted]:!text-primary data-[highlighted]:!bg-primary/10 dark:data-[highlighted]:!bg-primary/20"
+                >
+                  <span className="material-symbols-outlined text-base mr-2">logout</span>
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button
+              onClick={() => {
+                if (location.pathname !== "/auth") {
+                  navigate("/auth");
+                }
+              }}
+              variant="outline"
+              className="h-8 px-4 text-sm border-primary/20 hover:border-primary/40 hover:bg-primary/5 text-gray-900 dark:text-white hover:text-primary dark:hover:text-primary"
+            >
+              Sign In
+            </Button>
+          )}
         </div>
       </div>
     </nav>

@@ -8,7 +8,9 @@ import (
 
 	"github.com/dustin/go-humanize"
 	"github.com/google/uuid"
+	"github.com/safina57/animoji/gateway/internal/auth"
 	"github.com/safina57/animoji/gateway/internal/constants"
+	"github.com/safina57/animoji/gateway/internal/dto"
 	"github.com/safina57/animoji/gateway/internal/messaging"
 	"github.com/safina57/animoji/gateway/internal/models"
 	"github.com/safina57/animoji/gateway/pkg/imageinfo"
@@ -18,6 +20,13 @@ import (
 
 // HandleSubmitJob handles image upload, validation, storage, and job queue submission
 func HandleSubmitJob(w http.ResponseWriter, r *http.Request) {
+	// Extract authenticated user from context
+	claims, err := auth.GetUserFromContext(r.Context())
+	if err != nil {
+		respondError(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	// Initialize MinIO storage service
 	minioService := storage.NewMinIOService()
 
@@ -106,6 +115,8 @@ func HandleSubmitJob(w http.ResponseWriter, r *http.Request) {
 	// Log job submission
 	logger.Info().
 		Str("job_id", jobID).
+		Str("user_id", claims.UserID.String()).
+		Str("email", claims.Email).
 		Str("prompt", prompt).
 		Str("input_key", inputKey).
 		Int("width", info.Width).
@@ -115,7 +126,7 @@ func HandleSubmitJob(w http.ResponseWriter, r *http.Request) {
 		Msg("Job submitted and image stored successfully")
 
 	// Return response
-	response := models.SubmitJobResponse{
+	response := dto.SubmitJobResponse{
 		JobID:   jobID,
 		Message: "Job submitted successfully",
 	}

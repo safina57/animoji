@@ -1,22 +1,6 @@
-/**
- * Real API client for communicating with the Gateway backend.
- * Handles job submission and SSE-based status updates.
- */
+import type { SubmitJobResponse } from "@customTypes/generation";
 
 const API_URL = import.meta.env.VITE_API_URL;
-
-export interface SubmitJobResponse {
-  job_id: string;
-  message: string;
-}
-
-export interface StatusEvent {
-  status: 'completed' | 'failed';
-  job_id?: string;
-  original_url?: string;
-  result_url?: string;
-  error?: string;
-}
 
 export function getJobStatusStreamUrl(jobId: string): string {
   return `${API_URL}/job-status/${jobId}/stream`;
@@ -29,6 +13,7 @@ export async function submitJob(image: File, prompt: string): Promise<SubmitJobR
 
   const response = await fetch(`${API_URL}/submit-job`, {
     method: 'POST',
+    credentials: 'include', // Send cookies with request
     body: formData,
   });
 

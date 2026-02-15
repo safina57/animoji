@@ -1,7 +1,7 @@
 import { useAppDispatch, useAppSelector } from "@hooks/redux";
 import { resetGeneration } from "@store/slices/generationSlice";
 import ImageCompareSlider from "./ImageCompareSlider";
-import type { GenerationResult } from "@store/slices/generationSlice";
+import type { GenerationResult } from "@customTypes/generation";
 
 export default function ResultView() {
   const dispatch = useAppDispatch();
