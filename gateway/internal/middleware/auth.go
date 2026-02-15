@@ -6,27 +6,36 @@ import (
 	"strings"
 
 	"github.com/safina57/animoji/gateway/internal/auth"
+	"github.com/safina57/animoji/gateway/internal/constants"
 )
 
 // Authenticate is a middleware that validates JWT tokens and injects user claims into context
 func Authenticate(publicKey *rsa.PublicKey) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Extract Authorization header
-			authHeader := r.Header.Get("Authorization")
-			if authHeader == "" {
-				http.Error(w, `{"error":"missing authorization header"}`, http.StatusUnauthorized)
-				return
-			}
+			var tokenString string
 
-			// Check Bearer token format
-			parts := strings.Split(authHeader, " ")
-			if len(parts) != 2 || parts[0] != "Bearer" {
-				http.Error(w, `{"error":"invalid authorization header format"}`, http.StatusUnauthorized)
-				return
-			}
+			// Try to get token from cookie first
+			cookie, err := r.Cookie(constants.CookieNameAuthToken)
+			if err == nil {
+				tokenString = cookie.Value
+			} else {
+				// Fallback to Authorization header (for API clients)
+				authHeader := r.Header.Get("Authorization")
+				if authHeader == "" {
+					http.Error(w, `{"error":"missing authentication"}`, http.StatusUnauthorized)
+					return
+				}
 
-			tokenString := parts[1]
+				// Check Bearer token format
+				parts := strings.Split(authHeader, " ")
+				if len(parts) != 2 || parts[0] != "Bearer" {
+					http.Error(w, `{"error":"invalid authorization header format"}`, http.StatusUnauthorized)
+					return
+				}
+
+				tokenString = parts[1]
+			}
 
 			// Validate JWT
 			claims, err := auth.ValidateJWT(tokenString, publicKey)

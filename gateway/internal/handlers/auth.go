@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
 	"os"
 	"sync"
 	"time"
@@ -106,7 +105,7 @@ func NewAuthHandlers(
 	repo *repository.Repository,
 	privateKey *rsa.PrivateKey,
 	jwtExpiry int,
-) (http.HandlerFunc, http.HandlerFunc, http.HandlerFunc) {
+) (http.HandlerFunc, http.HandlerFunc, http.HandlerFunc, http.HandlerFunc) {
 	h := &AuthHandlers{
 		googleConfig: googleConfig,
 		repo:         repo,
@@ -115,7 +114,7 @@ func NewAuthHandlers(
 		stateStore:   newStateStore(),
 	}
 
-	return h.handleGoogleLogin, h.handleGoogleCallback, h.handleGetMe
+	return h.handleGoogleLogin, h.handleGoogleCallback, h.handleGetMe, h.handleLogout
 }
 
 // handleGoogleLogin redirects user to Google OAuth consent screen
@@ -190,11 +189,23 @@ func (h *AuthHandlers) handleGoogleCallback(w http.ResponseWriter, r *http.Reque
 		Str("email", user.Email).
 		Msg("User authenticated via Google OAuth")
 
+	// Set JWT as HTTP-only cookie
+	maxAge := h.jwtExpiry * 60 * 60 // Convert hours to seconds
+	http.SetCookie(w, &http.Cookie{
+		Name:     constants.CookieNameAuthToken,
+		Value:    jwtToken,
+		Path:     "/",
+		MaxAge:   maxAge,
+		HttpOnly: true,                      // Prevents JavaScript access (XSS protection)
+		Secure:   os.Getenv("ENV") == "production", // HTTPS only in production
+		SameSite: http.SameSiteLaxMode,     // CSRF protection
+	})
+
 	// Get frontend URL from environment
 	frontendURL := os.Getenv("FRONTEND_URL")
 
-	// Redirect to frontend with token
-	callbackURL := fmt.Sprintf("%s/auth/callback?token=%s", frontendURL, url.QueryEscape(jwtToken))
+	// Redirect to frontend without token in URL
+	callbackURL := fmt.Sprintf("%s/auth/callback", frontendURL)
 	http.Redirect(w, r, callbackURL, http.StatusTemporaryRedirect)
 }
 
@@ -230,4 +241,24 @@ func (h *AuthHandlers) handleGetMe(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, `{"error":"internal server error"}`, http.StatusInternalServerError)
 		return
 	}
+}
+
+// handleLogout clears the authentication cookie
+func (h *AuthHandlers) handleLogout(w http.ResponseWriter, r *http.Request) {
+	// Clear the auth cookie by setting MaxAge to -1
+	http.SetCookie(w, &http.Cookie{
+		Name:     constants.CookieNameAuthToken,
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   os.Getenv("ENV") == "production",
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	log.Info().Msg("User logged out")
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "logged out successfully"})
 }

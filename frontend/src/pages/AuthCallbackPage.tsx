@@ -1,28 +1,19 @@
 import { useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "@hooks/redux";
 import { loginSuccess, loginFailure, setLoading } from "@store/slices/authSlice";
 import { authService } from "@services/authService";
 
 export default function AuthCallbackPage() {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    const token = searchParams.get("token");
-
-    if (!token) {
-      dispatch(loginFailure("No authentication token received"));
-      navigate("/auth");
-      return;
-    }
-
     const fetchUser = async () => {
       try {
         dispatch(setLoading(true));
-        const user = await authService.getMe(token);
-        dispatch(loginSuccess({ user, token }));
+        const user = await authService.getMe();
+        dispatch(loginSuccess({ user }));
         navigate("/create");
       } catch (error) {
         console.error("Failed to fetch user:", error);
@@ -32,7 +23,7 @@ export default function AuthCallbackPage() {
     };
 
     fetchUser();
-  }, [searchParams, dispatch, navigate]);
+  }, [dispatch, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">

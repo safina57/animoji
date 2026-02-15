@@ -7,13 +7,13 @@ export const authService = {
     window.location.href = `${API_URL}/auth/google/login`;
   },
 
-  getMe: async (token: string): Promise<User> => {
+  getMe: async (): Promise<User> => {
     const response = await fetch(`${API_URL}/auth/me`, {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json",
       },
+      credentials: "include", // Send cookies with request
     });
 
     if (!response.ok) {
@@ -21,5 +21,19 @@ export const authService = {
     }
 
     return response.json();
+  },
+
+  logout: async (): Promise<void> => {
+    const response = await fetch(`${API_URL}/auth/logout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include", // Send cookies with request
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to logout");
+    }
   },
 };

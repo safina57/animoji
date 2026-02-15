@@ -11,19 +11,15 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const token = localStorage.getItem("auth_token");
-    if (token) {
-      dispatch(setLoading(true));
-      authService
-        .getMe(token)
-        .then((user) => {
-          dispatch(loginSuccess({ user, token }));
-        })
-        .catch(() => {
-          dispatch(loginFailure("Session expired"));
-          localStorage.removeItem("auth_token");
-        });
-    }
+    dispatch(setLoading(true));
+    authService
+      .getMe()
+      .then((user) => {
+        dispatch(loginSuccess({ user }));
+      })
+      .catch(() => {
+        dispatch(loginFailure("Not authenticated"));
+      });
   }, [dispatch]);
 
   return <>{children}</>;

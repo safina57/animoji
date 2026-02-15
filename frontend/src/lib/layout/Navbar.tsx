@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "@hooks/redux";
 import { logout } from "@store/slices/authSlice";
+import { authService } from "@services/authService";
 import { Button } from "@lib/ui/button";
 import {
   DropdownMenu,
@@ -31,9 +32,16 @@ export default function Navbar() {
     localStorage.setItem("theme", dark ? "dark" : "light");
   }, [dark]);
 
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      dispatch(logout());
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      dispatch(logout());
+      navigate("/");
+    }
   };
 
   return (

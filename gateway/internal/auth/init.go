@@ -42,7 +42,7 @@ func Init() (*AuthConfig, error) {
 			return
 		}
 
-		// Parse JWT expiry hours (default to 168 hours / 7 days)
+		// Parse JWT expiry hours (default to 24 hours / 1 days)
 		jwtExpiry := constants.DefaultJWTExpiryHours
 		if expiryStr := os.Getenv("JWT_EXPIRY_HOURS"); expiryStr != "" {
 			if parsed, err := strconv.Atoi(expiryStr); err == nil && parsed > 0 {

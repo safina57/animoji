@@ -32,7 +32,7 @@ func newRouter(
 	r.Use(appMiddleware.CORS)
 
 	// Create auth handlers
-	googleLogin, googleCallback, getMe := handlers.NewAuthHandlers(
+	googleLogin, googleCallback, getMe, logout := handlers.NewAuthHandlers(
 		authConfig.GoogleConfig,
 		repo,
 		authConfig.PrivateKey,
@@ -49,6 +49,7 @@ func newRouter(
 		r.Use(appMiddleware.Authenticate(authConfig.PublicKey))
 
 		r.Get("/auth/me", getMe)
+		r.Post("/auth/logout", logout)
 		r.Post("/submit-job", handlers.HandleSubmitJob)
 		r.Get("/job-status/{job_id}/stream", func(w http.ResponseWriter, r *http.Request) {
 			handlers.HandleJobStatusStream(w, r, eventManager, storageService)

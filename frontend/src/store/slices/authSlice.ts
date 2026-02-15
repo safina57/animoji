@@ -3,7 +3,6 @@ import type { User } from "@customTypes/auth";
 
 interface AuthState {
   user: User | null;
-  token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -11,8 +10,7 @@ interface AuthState {
 
 const initialState: AuthState = {
   user: null,
-  token: localStorage.getItem("auth_token"),
-  isAuthenticated: !!localStorage.getItem("auth_token"),
+  isAuthenticated: false,
   isLoading: false,
   error: null,
 };
@@ -25,32 +23,26 @@ const authSlice = createSlice({
       state.isLoading = action.payload;
       state.error = null;
     },
-    loginSuccess: (state, action: PayloadAction<{ user: User; token: string }>) => {
+    loginSuccess: (state, action: PayloadAction<{ user: User }>) => {
       state.user = action.payload.user;
-      state.token = action.payload.token;
       state.isAuthenticated = true;
       state.isLoading = false;
       state.error = null;
-      localStorage.setItem("auth_token", action.payload.token);
     },
     loginFailure: (state, action: PayloadAction<string>) => {
       state.user = null;
-      state.token = null;
       state.isAuthenticated = false;
       state.isLoading = false;
       state.error = action.payload;
-      localStorage.removeItem("auth_token");
     },
     setUser: (state, action: PayloadAction<User>) => {
       state.user = action.payload;
     },
     logout: (state) => {
       state.user = null;
-      state.token = null;
       state.isAuthenticated = false;
       state.isLoading = false;
       state.error = null;
-      localStorage.removeItem("auth_token");
     },
     clearError: (state) => {
       state.error = null;
