@@ -12,7 +12,6 @@ type GenerateRequest struct {
 // SubmitJobResponse is returned when a job is successfully submitted to the queue
 type SubmitJobResponse struct {
 	JobID   string `json:"job_id"`
-	Status  string `json:"status"`
 	Message string `json:"message"`
 }
 
@@ -31,4 +30,19 @@ type Job struct {
 type NatsJobMessage struct {
 	JobID    string `json:"job_id"`
 	InputKey string `json:"input_key"`
+	Prompt   string `json:"prompt"`
+}
+
+// StatusEvent represents a job status event received from NATS
+type StatusEvent struct {
+	Status    string `json:"status"`
+	ResultKey string `json:"result_key"`
+}
+
+// JobStatusResponse is returned by the job status endpoint
+type JobStatusResponse struct {
+	JobID       string `json:"job_id"`
+	Status      string `json:"status"`
+	OriginalURL string `json:"original_url,omitempty"`
+	ResultURL   string `json:"result_url,omitempty"`
 }

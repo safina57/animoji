@@ -37,6 +37,10 @@ func HandleSubmitJob(w http.ResponseWriter, r *http.Request) {
 
 	// Get prompt from form field
 	prompt := r.FormValue("prompt")
+	if prompt == "" {
+		respondError(w, "Prompt is required", http.StatusBadRequest)
+		return
+	}
 
 	// Validate the image using our imageinfo package
 	processor := imageinfo.NewImageProcessor(imageinfo.DefaultConfig())
@@ -79,6 +83,7 @@ func HandleSubmitJob(w http.ResponseWriter, r *http.Request) {
 	message := models.NatsJobMessage{
 		JobID:    jobID,
 		InputKey: inputKey,
+		Prompt:   prompt,
 	}
 	payload, err := json.Marshal(message)
 	if err != nil {
@@ -112,7 +117,6 @@ func HandleSubmitJob(w http.ResponseWriter, r *http.Request) {
 	// Return response
 	response := models.SubmitJobResponse{
 		JobID:   jobID,
-		Status:  constants.StatusQueued,
 		Message: "Job submitted successfully",
 	}
 

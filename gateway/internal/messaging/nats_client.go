@@ -52,6 +52,13 @@ func (c *NatsClient) Publish(subject string, payload []byte) error {
 	return nil
 }
 
+// Close closes the NATS connection.
+func (c *NatsClient) Close() {
+	if c != nil && c.conn != nil {
+		c.conn.Close()
+	}
+}
+
 func initializeClient() (*NatsClient, error) {
 	url := os.Getenv("NATS_URL")
 	if url == "" {

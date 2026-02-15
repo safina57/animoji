@@ -14,10 +14,8 @@ const (
 
 // Job status constants
 const (
-	StatusQueued     = "queued"
-	StatusProcessing = "processing"
-	StatusCompleted  = "completed"
-	StatusFailed     = "failed"
+	StatusCompleted = "completed"
+	StatusFailed    = "failed"
 )
 
 // Allowed file types for image uploads
@@ -45,7 +43,15 @@ const (
 
 // CORS configuration
 const (
-	CORSAllowOrigin  = "*"
-	CORSAllowMethods = "GET, POST, PUT, DELETE, OPTIONS"
-	CORSAllowHeaders = "Content-Type, Authorization"
+	CORSAllowOrigin      = "*"
+	CORSAllowMethods     = "GET, POST, PUT, DELETE, OPTIONS"
+	CORSAllowHeaders     = "Content-Type, Authorization, Cache-Control"
+	CORSExposeHeaders    = "Content-Type, Cache-Control, Connection"
+	CORSAllowCredentials = "true"
+)
+
+// Pagination constants
+const (
+	MaxPageLimit = 100
+	DefaultPageLimit = 20
 )
