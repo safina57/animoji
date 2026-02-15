@@ -43,13 +43,13 @@ func newRouter(
 	r.Get("/health", handlers.HandleHealth)
 	r.Get("/auth/google/login", googleLogin)
 	r.Get("/auth/google/callback", googleCallback)
+	r.Post("/auth/logout", logout)
 
 	// Protected routes
 	r.Group(func(r chi.Router) {
 		r.Use(appMiddleware.Authenticate(authConfig.PublicKey))
 
 		r.Get("/auth/me", getMe)
-		r.Post("/auth/logout", logout)
 		r.Post("/submit-job", handlers.HandleSubmitJob)
 		r.Get("/job-status/{job_id}/stream", func(w http.ResponseWriter, r *http.Request) {
 			handlers.HandleJobStatusStream(w, r, eventManager, storageService)
