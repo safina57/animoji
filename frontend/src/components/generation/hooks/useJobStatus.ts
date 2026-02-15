@@ -2,7 +2,8 @@ import { useEffect, useRef } from 'react';
 import { useSSE } from '@hooks/useSSE';
 import { useAppDispatch } from '@hooks/redux';
 import { completeGeneration, failGeneration } from '@store/slices/generationSlice';
-import { getJobStatusStreamUrl, type StatusEvent } from '@services/apiClient';
+import { getJobStatusStreamUrl } from '@services/generationService';
+import type { StatusEvent } from '@customTypes/generation';
 
 export function useJobStatus(jobId: string | null, enabled: boolean) {
   const dispatch = useAppDispatch();

@@ -1,24 +1,20 @@
-/**
- * Real API client for communicating with the Gateway backend.
- * Handles job submission and SSE-based status updates.
- */
+import type { SubmitJobResponse } from "@customTypes/generation";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-export interface SubmitJobResponse {
-  job_id: string;
-  message: string;
-}
-
-export interface StatusEvent {
-  status: 'completed' | 'failed';
-  job_id?: string;
-  original_url?: string;
-  result_url?: string;
-  error?: string;
+function getAuthHeaders(): HeadersInit {
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    return {
+      'Authorization': `Bearer ${token}`,
+    };
+  }
+  return {};
 }
 
 export function getJobStatusStreamUrl(jobId: string): string {
+  // Note: EventSource doesn't support custom headers, so we can't add Authorization header
+  // For production, consider using token in query param or websocket with auth handshake
   return `${API_URL}/job-status/${jobId}/stream`;
 }
 
@@ -29,6 +25,7 @@ export async function submitJob(image: File, prompt: string): Promise<SubmitJobR
 
   const response = await fetch(`${API_URL}/submit-job`, {
     method: 'POST',
+    headers: getAuthHeaders(),
     body: formData,
   });
 

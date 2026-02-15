@@ -8,7 +8,7 @@ import {
   setJobId,
   failGeneration,
 } from "@store/slices/generationSlice";
-import { submitJob } from "@services/apiClient";
+import { submitJob } from "@services/generationService";
 import { Button } from "@lib/ui/button";
 
 const SUGGESTIONS = ["Cyberpunk Tokyo", "Studio Ghibli Forest", "90s Retro Anime"];

@@ -67,13 +67,22 @@ func LoadRSAKeys() (*rsa.PrivateKey, *rsa.PublicKey, error) {
 			return
 		}
 
-		publicKeyInterface, err := x509.ParsePKIXPublicKey(publicBlock.Bytes)
+		publicKey, err := x509.ParsePKCS1PublicKey(publicBlock.Bytes)
 		if err != nil {
-			keysError = fmt.Errorf("failed to parse public key: %w", err)
-			return
+			publicKeyInterface, err := x509.ParsePKIXPublicKey(publicBlock.Bytes)
+			if err != nil {
+				keysError = fmt.Errorf("failed to parse public key: %w", err)
+				return
+			}
+			var ok bool
+			publicKey, ok = publicKeyInterface.(*rsa.PublicKey)
+			if !ok {
+				keysError = fmt.Errorf("public key is not RSA format")
+				return
+			}
 		}
 
-		publicKeyInstance = publicKeyInterface.(*rsa.PublicKey)
+		publicKeyInstance = publicKey
 
 		log.Info().Msg("RSA keys loaded successfully")
 	})

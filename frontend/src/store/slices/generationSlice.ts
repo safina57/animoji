@@ -1,13 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { GenerationStage } from "@customTypes/generation";
-
-export interface GenerationResult {
-  jobId: string;
-  prompt: string;
-  originalImageUrl: string;
-  generatedImageUrl: string;
-  timestamp: number;
-}
+import type { GenerationStage, GenerationResult } from "@customTypes/generation";
 
 interface GenerationState {
   stage: GenerationStage;
