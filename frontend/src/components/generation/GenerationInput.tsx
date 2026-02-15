@@ -151,7 +151,8 @@ export default function GenerationInput() {
                 onClick={generate}
                 disabled={!prompt.trim()}
                 size="icon"
-                className="shrink-0"
+                variant="outline"
+                className="shrink-0 -ml-1 bg-white dark:bg-paper-dark border border-primary/10 rounded-2xl text-primary hover:border-primary/30 hover:bg-primary hover:text-white disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-primary disabled:hover:border-primary/10 dark:disabled:hover:bg-paper-dark transition-all"
                 aria-label="Generate image"
               >
                 <Send className="h-5 w-5" />
