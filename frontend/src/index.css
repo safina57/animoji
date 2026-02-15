@@ -29,6 +29,16 @@
   --color-neon-yellow: #FFE66D;
   --color-neon-purple: #A8E6CF;
 
+  /* shadcn/ui CSS Variables */
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #1e293b;
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #64748b;
+  --color-accent: #f1f5f9;
+  --color-accent-foreground: #1e293b;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #FFFFFF;
+
   /* Typography - Japanese Aesthetic */
   --font-display: "Playfair Display", serif;
   --font-japanese: "Noto Serif JP", serif;
@@ -36,6 +46,18 @@
 }
 
 @variant dark (&:where(.dark, .dark *));
+
+@theme dark {
+  /* shadcn/ui Dark Mode Variables */
+  --color-popover: #1A1D29;
+  --color-popover-foreground: #e2e8f0;
+  --color-muted: #1e293b;
+  --color-muted-foreground: #94a3b8;
+  --color-accent: #1e293b;
+  --color-accent-foreground: #e2e8f0;
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #FFFFFF;
+}
 
 /* ─── Base ─── */
 html {

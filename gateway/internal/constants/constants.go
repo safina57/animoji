@@ -43,15 +43,15 @@ const (
 
 // CORS configuration
 const (
-	CORSAllowOrigin      = "*"
-	CORSAllowMethods     = "GET, POST, PUT, DELETE, OPTIONS"
-	CORSAllowHeaders     = "Content-Type, Authorization, Cache-Control"
-	CORSExposeHeaders    = "Content-Type, Cache-Control, Connection"
+	CORSAllowMethods  = "GET, POST, PUT, DELETE, OPTIONS"
+	CORSAllowHeaders  = "Content-Type, Authorization, Cache-Control"
+	CORSExposeHeaders = "Content-Type, Cache-Control, Connection"
 	CORSAllowCredentials = "true"
 )
 
-// Pagination constants
+// Authentication constants
 const (
-	MaxPageLimit = 100
-	DefaultPageLimit = 20
+	DefaultJWTExpiryHours = 24
+	StateExpiryMinutes    = 5
+	CookieNameAuthToken   = "auth_token"
 )

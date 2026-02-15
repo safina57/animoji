@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/safina57/animoji/gateway/internal/dto"
 	"github.com/safina57/animoji/gateway/internal/models"
 )
 
@@ -103,9 +104,7 @@ func (r *Repository) DeleteUser(ctx context.Context, userID uuid.UUID) error {
 }
 
 // ListUsers retrieves all users with pagination
-func (r *Repository) ListUsers(ctx context.Context, params PaginationParams) ([]*models.User, error) {
-	// Normalize pagination parameters
-	params.Normalize()
+func (r *Repository) ListUsers(ctx context.Context, params dto.PaginationParams) ([]*models.User, error) {
 
 	var users []*models.User
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/safina57/animoji/gateway/internal/dto"
 	"github.com/safina57/animoji/gateway/internal/models"
 	"gorm.io/gorm"
 )
@@ -40,9 +41,7 @@ func (r *Repository) GetImageByJobID(ctx context.Context, jobID string) (*models
 }
 
 // GetUserImages retrieves all images for a user with optional visibility filter
-func (r *Repository) GetUserImages(ctx context.Context, userID uuid.UUID, visibility string, params PaginationParams) ([]*models.Image, error) {
-	// Normalize pagination parameters
-	params.Normalize()
+func (r *Repository) GetUserImages(ctx context.Context, userID uuid.UUID, visibility string, params dto.PaginationParams) ([]*models.Image, error) {
 
 	var images []*models.Image
 
@@ -60,9 +59,7 @@ func (r *Repository) GetUserImages(ctx context.Context, userID uuid.UUID, visibi
 }
 
 // GetPublicImages retrieves public images with pagination
-func (r *Repository) GetPublicImages(ctx context.Context, params PaginationParams) ([]*models.Image, error) {
-	// Normalize pagination parameters
-	params.Normalize()
+func (r *Repository) GetPublicImages(ctx context.Context, params dto.PaginationParams) ([]*models.Image, error) {
 
 	var images []*models.Image
 

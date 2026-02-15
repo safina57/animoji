@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -36,11 +37,13 @@ func HandleJobStatusStream(w http.ResponseWriter, r *http.Request, eventManager 
 	rc := http.NewResponseController(w)
 	_ = rc.SetWriteDeadline(time.Time{}) // zero value = no deadline
 
+
 	// Set SSE headers
+	origin := os.Getenv("FRONTEND_URL")
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
-	w.Header().Set("Access-Control-Allow-Origin", constants.CORSAllowOrigin)
+	w.Header().Set("Access-Control-Allow-Origin", origin)
 	w.Header().Set("X-Accel-Buffering", "no") // Disable proxy buffering
 
 	flusher, ok := w.(http.Flusher)
