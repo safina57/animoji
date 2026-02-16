@@ -39,6 +39,9 @@ func newRouter(
 		authConfig.JWTExpiry,
 	)
 
+	// Create publish handler
+	publishHandler := handlers.NewPublishImageHandler(repo)
+
 	// Public routes
 	r.Get("/health", handlers.HandleHealth)
 	r.Get("/auth/google/login", googleLogin)
@@ -54,6 +57,7 @@ func newRouter(
 		r.Get("/job-status/{job_id}/stream", func(w http.ResponseWriter, r *http.Request) {
 			handlers.HandleJobStatusStream(w, r, eventManager, storageService)
 		})
+		r.Post("/images/{job_id}/publish", publishHandler.HandlePublishImage)
 	})
 
 	return r

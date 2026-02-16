@@ -95,6 +95,17 @@ func (r *Repository) UpdateImageVisibility(ctx context.Context, imageID uuid.UUI
 	return nil
 }
 
+// UpdateImageThumbnailKey updates the thumbnail key for an image
+func (r *Repository) UpdateImageThumbnailKey(ctx context.Context, imageID uuid.UUID, thumbnailKey string) error {
+	if err := r.db.WithContext(ctx).
+		Model(&models.Image{}).
+		Where("id = ?", imageID).
+		Update("thumbnail_key", thumbnailKey).Error; err != nil {
+		return fmt.Errorf("failed to update image thumbnail key: %w", err)
+	}
+	return nil
+}
+
 // DeleteImage soft deletes an image
 func (r *Repository) DeleteImage(ctx context.Context, imageID uuid.UUID) error {
 	if err := r.db.WithContext(ctx).Delete(&models.Image{}, imageID).Error; err != nil {

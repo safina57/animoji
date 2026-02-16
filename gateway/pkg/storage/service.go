@@ -66,3 +66,13 @@ func (s *MinIOService) GetPresignedURLForResult(ctx context.Context, jobID strin
 	objectKey := fmt.Sprintf("%s%s/result.png", constants.PrefixGenerated, jobID)
 	return s.client.GetPresignedURL(ctx, constants.BucketName, objectKey, expiry)
 }
+
+// DownloadFile downloads a file from MinIO using the object key
+func (s *MinIOService) DownloadFile(ctx context.Context, objectKey string) ([]byte, error) {
+	return s.client.DownloadFile(ctx, constants.BucketName, objectKey)
+}
+
+// UploadFile uploads a file to MinIO using the object key
+func (s *MinIOService) UploadFile(ctx context.Context, objectKey string, data []byte, contentType string) error {
+	return s.client.UploadFile(ctx, constants.BucketName, objectKey, data, contentType)
+}

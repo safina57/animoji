@@ -6,7 +6,9 @@ import (
 	"strings"
 
 	"github.com/nats-io/nats.go"
+	"github.com/safina57/animoji/gateway/internal/constants"
 	"github.com/safina57/animoji/gateway/internal/models"
+	"github.com/safina57/animoji/gateway/pkg/cache"
 	"github.com/safina57/animoji/gateway/pkg/logger"
 )
 
@@ -40,6 +42,21 @@ func (s *NatsSubscriber) SubscribeToStatusEvents(ctx context.Context) error {
 			return
 		}
 		jobID := parts[2]
+
+		// Update Redis cache with generated key on completion
+		if event.Status == constants.StatusCompleted && event.ResultKey != "" {
+			redisClient := cache.MustGetClient()
+
+			if err := redisClient.UpdateJobGeneratedKey(ctx, jobID, event.ResultKey); err != nil {
+				logger.Error().Err(err).
+					Str("job_id", jobID).
+					Msg("Failed to update job metadata in Redis")
+			} else {
+				logger.Debug().
+					Str("job_id", jobID).
+					Msg("Updated job metadata in Redis with generated key")
+			}
+		}
 
 		// Route event to all connections waiting for this job_id
 		s.eventManager.NotifyJob(jobID, event)

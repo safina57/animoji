@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/safina57/animoji/gateway/internal/constants"
 )
 
 // ImageValidator handles image validation logic
@@ -108,4 +110,19 @@ func detectMIMETypeFromData(data []byte) string {
 	// http.DetectContentType reads at most first 512 bytes
 	size := min(len(data), 512)
 	return http.DetectContentType(data[:size])
+}
+
+// ValidateDimensions checks if image dimensions are within acceptable limits
+func (v *ImageValidator) ValidateDimensions(width, height int) error {
+	if width < constants.MinImageWidth || height < constants.MinImageHeight {
+		return fmt.Errorf("image too small: %dx%d (minimum: %dx%d)",
+			width, height, constants.MinImageWidth, constants.MinImageHeight)
+	}
+
+	if width > constants.MaxImageWidth || height > constants.MaxImageHeight {
+		return fmt.Errorf("image too large: %dx%d (maximum: %dx%d)",
+			width, height, constants.MaxImageWidth, constants.MaxImageHeight)
+	}
+
+	return nil
 }

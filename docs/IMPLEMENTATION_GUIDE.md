@@ -18,16 +18,42 @@
 
 ## Architecture Overview
 
-### Current State
+### Current State (Implemented)
 ```
-User (no auth) → Upload Image → Gateway → MinIO → NATS → AI Worker → Result
+User (Google OAuth) → Upload Image → Gateway → Validate Dimensions (256-2048px)
+                                              → MinIO (originals)
+                                              → Redis Cache (24h TTL, temporary metadata)
+                                              → NATS publish
+                                                    ↓
+                                              AI Worker → GPT-4o enhance prompt
+                                                       → FLUX.2-pro generate (dynamic dimensions)
+                                                       → MinIO (generated)
+                                                       → NATS status event
+                                                    ↓
+                                              Gateway updates Redis cache
+                                              [User previews result]
+                                                    ↓
+                                              POST /images/{job_id}/publish
+                                                    ↓
+                                              PostgreSQL (persist metadata)
+                                              Background: Generate thumbnails (200/400/800px)
+                                              MinIO (thumbnails)
+                                              Delete Redis cache
 ```
+
+**Key Workflow Principle**: Publish-on-Demand
+- Upload/generation phase: Temporary storage in Redis (no database writes)
+- User previews generated image and decides whether to publish
+- Only published images are persisted in PostgreSQL with thumbnails
+- Unpublished jobs auto-expire after 24 hours (Redis TTL)
 
 ### Target State
 ```
-User (Google OAuth) → Upload Image → Gateway → PostgreSQL + MinIO → NATS → AI Worker
+User (Google OAuth) → Upload Image → Gateway → Redis + MinIO → NATS → AI Worker
                                          ↓
-                              Store metadata (likes, visibility, creator)
+                              [Publish endpoint] → PostgreSQL
+                                         ↓
+                              Store metadata (likes, visibility, creator, dimensions, thumbnails)
                                          ↓
                          Community Feed (collaborative filtering recommendations)
                                          ↓
@@ -53,8 +79,9 @@ User (Google OAuth) → Upload Image → Gateway → PostgreSQL + MinIO → NATS
 
 **Infrastructure:**
 - Docker Compose (orchestration)
-- MinIO (object storage)
+- MinIO (object storage - originals, generated, thumbnails)
 - NATS (message broker)
+- Redis (temporary job metadata cache, 24h TTL)
 
 ---
 
@@ -75,14 +102,20 @@ CREATE TABLE users (
 );
 
 -- Images (generated results)
+-- NOTE: Images are only created when user explicitly publishes (publish-on-demand workflow)
 CREATE TABLE images (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     job_id VARCHAR(255) UNIQUE NOT NULL,
     prompts TEXT[] NOT NULL,
-    enhanced_prompt TEXT,
+    enhanced_prompt TEXT,                        -- GPT-4o enhanced prompt (internal only)
     original_key VARCHAR(500) NOT NULL,
     generated_key VARCHAR(500) NOT NULL,
+    thumbnail_small VARCHAR(500),                -- 200px thumbnail (grid view)
+    thumbnail_medium VARCHAR(500),               -- 400px thumbnail (preview)
+    thumbnail_large VARCHAR(500),                -- 800px thumbnail (detail view)
+    width INTEGER NOT NULL,                      -- Original image width in pixels
+    height INTEGER NOT NULL,                     -- Original image height in pixels
     visibility VARCHAR(20) NOT NULL DEFAULT 'private',
     likes_count INTEGER NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -1081,7 +1114,165 @@ Authorization: Bearer {jwt_token}
 }
 ```
 
-[API reference continues...]
+### Image Generation & Publishing
+
+#### `POST /submit-job`
+Upload and generate anime image (protected).
+
+**Headers:**
+```
+Authorization: Bearer {jwt_token}
+Content-Type: multipart/form-data
+```
+
+**Body:**
+```
+image: (file, max 10MB, JPEG/PNG/WebP)
+prompt: "user description"
+```
+
+**Response:**
+```json
+{
+  "job_id": "uuid",
+  "message": "Job submitted successfully"
+}
+```
+
+**Notes:**
+- Image dimensions validated (256-2048px)
+- Job metadata cached in Redis (24h TTL)
+- Original uploaded to MinIO
+- Job queued in NATS for AI processing
+- No database record created yet (temporary storage)
+
+#### `GET /job-status/{job_id}/stream`
+Stream job status via Server-Sent Events (protected).
+
+**Headers:**
+```
+Authorization: Bearer {jwt_token}
+```
+
+**Response Stream:**
+```
+event: status
+data: {"status": "completed", "result_key": "generated/{job_id}/result.png"}
+```
+
+#### `POST /images/{job_id}/publish?visibility=public|private`
+Publish generated image to database with thumbnails (protected).
+
+**Headers:**
+```
+Authorization: Bearer {jwt_token}
+```
+
+**Query Parameters:**
+- `visibility`: `public` or `private` (default: `private`)
+
+**Response:**
+```json
+{
+  "message": "Image published successfully",
+  "image_id": "uuid",
+  "visibility": "public"
+}
+```
+
+**Process:**
+1. Retrieve job metadata from Redis
+2. Verify user owns the job
+3. Verify generated image exists in MinIO
+4. Create `Image` record in PostgreSQL
+5. Launch background goroutine to generate thumbnails (200/400/800px)
+6. Delete job metadata from Redis
+7. Return 201 Created immediately (thumbnails generate async)
+
+**Notes:**
+- Only published images are persisted in database
+- Unpublished jobs auto-expire after 24h
+- Thumbnails generated asynchronously after response
+- Enhanced prompt stored internally (not exposed to users)
+
+### Redis Temporary Storage
+
+**Purpose:** Cache job metadata during upload/generation phase before publish.
+
+**Key Pattern:** `job:{job_id}`
+
+**TTL:** 24 hours
+
+**Data Structure:**
+```json
+{
+  "job_id": "uuid",
+  "user_id": "uuid",
+  "prompt": "user description",
+  "enhanced_prompt": "GPT-4o enhanced prompt",
+  "original_key": "originals/{job_id}/input.{ext}",
+  "generated_key": "generated/{job_id}/result.png",
+  "width": 1920,
+  "height": 1080,
+  "created_at": "2024-01-01T00:00:00Z"
+}
+```
+
+**Workflow:**
+1. **Upload** → Set metadata in Redis
+2. **Generation Complete** → Update Redis with `enhanced_prompt` and `generated_key`
+3. **Publish** → Move metadata to PostgreSQL, delete Redis cache
+4. **Expire** → Auto-cleanup after 24h if not published
+
+### Dynamic Image Dimensions
+
+**Dimension Limits:**
+- Minimum: 256x256 pixels
+- Maximum: 2048x2048 pixels
+
+**Processing:**
+1. Gateway validates dimensions on upload
+2. Original dimensions preserved throughout pipeline
+3. AI worker generates anime image with same dimensions
+4. Database stores width/height for reference
+
+**Benefits:**
+- Better composition preservation (no forced 1:1 aspect ratio)
+- Supports landscape, portrait, and square images
+- FLUX API compatible (dimensions rounded to nearest multiple of 8)
+
+### Storage Key Patterns
+
+**MinIO Bucket:** `animoji-images`
+
+**Originals** (user uploads):
+```
+originals/{job_id}/input.{ext}
+```
+Example: `originals/a1b2c3d4/input.jpg`
+
+**Generated** (AI-processed anime images):
+```
+generated/{job_id}/result.png
+```
+Example: `generated/a1b2c3d4/result.png`
+
+**Thumbnails** (created on publish, async):
+```
+thumbnails/{job_id}/small.png   (200x200 max, aspect preserved)
+thumbnails/{job_id}/medium.png  (400x400 max, aspect preserved)
+thumbnails/{job_id}/large.png   (800x800 max, aspect preserved)
+```
+Example:
+- `thumbnails/a1b2c3d4/small.png`
+- `thumbnails/a1b2c3d4/medium.png`
+- `thumbnails/a1b2c3d4/large.png`
+
+**Thumbnail Generation:**
+- Triggered asynchronously after publish endpoint returns
+- Uses `github.com/disintegration/imaging` (Lanczos filter)
+- Saved as PNG format
+- Updates `Image` record with thumbnail keys after upload
 
 ---
 

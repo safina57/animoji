@@ -52,6 +52,22 @@ services:
     depends_on:
       - postgres
 
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: animoji-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - animoji-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   # API Gateway
   gateway:
     build:
@@ -63,6 +79,8 @@ services:
       - .env
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
       minio-init:
         condition: service_completed_successfully
@@ -162,6 +180,7 @@ volumes:
   minio-data:
   postgres-data:
   pgadmin-data:
+  redis-data:
 
 networks:
   animoji-network:
