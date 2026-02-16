@@ -114,6 +114,7 @@ func HandleSubmitJob(w http.ResponseWriter, r *http.Request) {
 		Prompt:   prompt,
 		Width:    info.Width,
 		Height:   info.Height,
+		MIMEType: info.MIMEType,
 	}
 	payload, err := json.Marshal(message)
 	if err != nil {

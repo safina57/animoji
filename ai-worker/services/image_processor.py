@@ -15,7 +15,8 @@ from models.image_generation import (
 )
 from core.logger import get_logger
 from core.prompt_agent import get_prompt_agent
-from utils.image_utils import detect_image_mime_type
+
+
 class ImageProcessor:
     """
     Orchestrates the image-generation pipeline
@@ -40,6 +41,7 @@ class ImageProcessor:
         job_id: str,
         user_prompt: str,
         input_image_data: bytes,
+        input_mime_type: str,
         target_width: int | None = None,
         target_height: int | None = None,
     ) -> GenerationResult:
@@ -50,6 +52,7 @@ class ImageProcessor:
             job_id: Unique job identifier for tracing.
             user_prompt: Raw prompt supplied by the user.
             input_image_data: Original image bytes to transform.
+            input_mime_type: MIME type of the input image (validated by gateway).
             target_width: Target output image width (uses settings default if None).
             target_height: Target output image height (uses settings default if None).
 
@@ -57,19 +60,16 @@ class ImageProcessor:
             GenerationResult containing image bytes, content-type, and metadata.
         """
         # ── Stage 1: prompt enhancement ──────────────────────────────
-        self.logger.info("Enhancing prompt", extra={"job_id": job_id})
-        
-        # Detect image type from bytes
-        image_mime_type = detect_image_mime_type(input_image_data)
         self.logger.info(
-            "Detected image type",
-            extra={"job_id": job_id, "mime_type": image_mime_type}
-        )        
+            "Enhancing prompt",
+            extra={"job_id": job_id, "mime_type": input_mime_type}
+        )
+
         # Pass both text and image to the agent
         agent_result = await self.prompt_agent.run(
             [
                 user_prompt,
-                BinaryContent(data=input_image_data, media_type=image_mime_type),
+                BinaryContent(data=input_image_data, media_type=input_mime_type),
             ]
         )
         enhanced: EnhancedPrompt = agent_result.output

@@ -137,6 +137,7 @@ class JobConsumer:
                 job_id=job_id,
                 user_prompt=job_message.prompt,
                 input_image_data=image_data,
+                input_mime_type=job_message.mime_type,
                 target_width=job_message.width,
                 target_height=job_message.height,
             )

@@ -7,6 +7,7 @@ type NatsJobMessage struct {
 	Prompt   string `json:"prompt"`
 	Width    int    `json:"width"`
 	Height   int    `json:"height"`
+	MIMEType string `json:"mime_type"`
 }
 
 // StatusEvent represents a job status event received from NATS

@@ -1,6 +1,6 @@
 """Job message model matching the Go NatsJobMessage structure."""
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field
 
 
 class JobMessage(BaseModel):
@@ -18,3 +18,4 @@ class JobMessage(BaseModel):
     )
     width: int = Field(..., description="Target image width in pixels")
     height: int = Field(..., description="Target image height in pixels")
+    mime_type: str = Field(..., description="MIME type of the input image")
