@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/dustin/go-humanize"
 	"github.com/google/uuid"
@@ -13,6 +14,7 @@ import (
 	"github.com/safina57/animoji/gateway/internal/dto"
 	"github.com/safina57/animoji/gateway/internal/messaging"
 	"github.com/safina57/animoji/gateway/internal/models"
+	"github.com/safina57/animoji/gateway/pkg/cache"
 	"github.com/safina57/animoji/gateway/pkg/imageinfo"
 	"github.com/safina57/animoji/gateway/pkg/logger"
 	"github.com/safina57/animoji/gateway/pkg/storage"
@@ -87,12 +89,31 @@ func HandleSubmitJob(w http.ResponseWriter, r *http.Request) {
 	}
 	info.ClearData()
 
+	// Cache job metadata in Redis
+	redisClient := cache.MustGetClient()
+	metadata := &cache.JobMetadata{
+		JobID:       jobID,
+		UserID:      claims.UserID,
+		Prompt:      prompt,
+		OriginalKey: inputKey,
+		Width:       info.Width,
+		Height:      info.Height,
+		CreatedAt:   time.Now(),
+	}
+	if err := redisClient.SetJobMetadata(ctx, jobID, metadata); err != nil {
+		logger.Error().Err(err).
+			Str("job_id", jobID).
+			Msg("Failed to cache job metadata in Redis")
+	}
+
 	// Publish job to NATS queue for AI processing
 	natsClient := messaging.MustGetClient()
 	message := models.NatsJobMessage{
 		JobID:    jobID,
 		InputKey: inputKey,
 		Prompt:   prompt,
+		Width:    info.Width,
+		Height:   info.Height,
 	}
 	payload, err := json.Marshal(message)
 	if err != nil {

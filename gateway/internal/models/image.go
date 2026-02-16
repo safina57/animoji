@@ -9,13 +9,16 @@ import (
 
 // Image represents a generated anime-style image
 type Image struct {
-	ID           uuid.UUID      `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
-	UserID       uuid.UUID      `gorm:"type:uuid;not null;index" json:"user_id"`
-	JobID        string         `gorm:"uniqueIndex;not null" json:"job_id"`
-	Prompts      []string       `gorm:"type:text[];not null" json:"prompts"` // Array of prompts (user can refine iteratively)
-	OriginalKey  string         `gorm:"size:500;not null" json:"original_key"`  // MinIO key
-	GeneratedKey string         `gorm:"size:500;not null" json:"generated_key"` // MinIO key
-	Visibility   string         `gorm:"size:20;not null;default:'private';index" json:"visibility"` // 'public' or 'private'
+	ID              uuid.UUID      `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+	UserID          uuid.UUID      `gorm:"type:uuid;not null;index" json:"user_id"`
+	JobID           string         `gorm:"uniqueIndex;not null" json:"job_id"`
+	Prompts         []string       `gorm:"type:text[];not null" json:"prompts"` // Array of prompts (user can refine iteratively)
+	OriginalKey  string `gorm:"size:500;not null" json:"original_key"`  // MinIO key
+	GeneratedKey string `gorm:"size:500;not null" json:"generated_key"` // MinIO key
+	ThumbnailKey string `gorm:"size:500" json:"thumbnail_key,omitempty"` // MinIO key for scaled thumbnail (0.25x)
+	Width        int    `gorm:"not null" json:"width"`                   // Original image width in pixels
+	Height       int    `gorm:"not null" json:"height"`                  // Original image height in pixels
+	Visibility      string         `gorm:"size:20;not null;default:'private';index" json:"visibility"` // 'public' or 'private'
 	LikesCount   int            `gorm:"not null;default:0" json:"likes_count"`
 	CreatedAt    time.Time      `gorm:"not null;default:now();index:idx_images_created_at" json:"created_at"`
 	UpdatedAt    time.Time      `gorm:"not null;default:now()" json:"updated_at"`

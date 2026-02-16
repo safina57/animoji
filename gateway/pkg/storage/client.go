@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"fmt"
+	"io"
 	"strings"
 	"time"
 
@@ -37,6 +38,23 @@ func (c *MinIOClient) UploadFile(ctx context.Context, bucketName, objectKey stri
 		return fmt.Errorf("failed to upload object: %w", err)
 	}
 	return nil
+}
+
+// DownloadFile downloads a file from the specified bucket and object key
+func (c *MinIOClient) DownloadFile(ctx context.Context, bucketName, objectKey string) ([]byte, error) {
+	object, err := c.client.GetObject(ctx, bucketName, objectKey, minio.GetObjectOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get object: %w", err)
+	}
+	defer object.Close()
+
+	// Read all data into memory
+	data, err := io.ReadAll(object)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read object data: %w", err)
+	}
+
+	return data, nil
 }
 
 // ObjectExists checks if an object exists in MinIO
