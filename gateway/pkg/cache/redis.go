@@ -132,18 +132,16 @@ func (r *RedisClient) GetJobMetadata(ctx context.Context, jobID string) (*JobMet
 	return &metadata, nil
 }
 
-// UpdateJobMetadata updates specific fields in existing job metadata
-func (r *RedisClient) UpdateJobMetadata(ctx context.Context, jobID string, updates map[string]interface{}) error {
+// UpdateJobGeneratedKey updates only the generated_key field in job metadata
+func (r *RedisClient) UpdateJobGeneratedKey(ctx context.Context, jobID string, generatedKey string) error {
 	// Get existing metadata
 	metadata, err := r.GetJobMetadata(ctx, jobID)
 	if err != nil {
 		return err
 	}
 
-	// Apply updates
-	if generatedKey, ok := updates["generated_key"].(string); ok {
-		metadata.GeneratedKey = generatedKey
-	}
+	// Update generated key
+	metadata.GeneratedKey = generatedKey
 
 	// Save updated metadata
 	return r.SetJobMetadata(ctx, jobID, metadata)

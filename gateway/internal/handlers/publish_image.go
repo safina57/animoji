@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -118,11 +119,14 @@ func (h *PublishImageHandler) HandlePublishImage(w http.ResponseWriter, r *http.
 	}
 
 	// Launch background goroutine for thumbnail generation
-	go h.generateThumbnailAsync(jobID, metadata.GeneratedKey, image.ID.String())
+	go h.generateThumbnailAsync(jobID, metadata.GeneratedKey, image.ID)
 
-	// Launch background goroutine for Redis cleanup
+	// Launch background goroutine for Redis cleanup (with timeout to prevent leaks)
 	go func(jobID string) {
-		if err := redisClient.DeleteJobMetadata(context.Background(), jobID); err != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		if err := redisClient.DeleteJobMetadata(ctx, jobID); err != nil {
 			logger.Error().Err(err).
 				Str("job_id", jobID).
 				Msg("Failed to delete job metadata from Redis")
@@ -149,11 +153,13 @@ func (h *PublishImageHandler) HandlePublishImage(w http.ResponseWriter, r *http.
 }
 
 // generateThumbnailAsync generates a thumbnail in the background
-func (h *PublishImageHandler) generateThumbnailAsync(jobID, generatedKey string, imageID any) {
-	ctx := context.Background()
+func (h *PublishImageHandler) generateThumbnailAsync(jobID, generatedKey string, imageID uuid.UUID) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
 
 	logger.Info().
 		Str("job_id", jobID).
+		Str("image_id", imageID.String()).
 		Msg("Starting background thumbnail generation")
 
 	// Initialize services
@@ -169,26 +175,8 @@ func (h *PublishImageHandler) generateThumbnailAsync(jobID, generatedKey string,
 		return
 	}
 
-	// Parse image ID from string
-	imageIDStr, ok := imageID.(string)
-	if !ok {
-		logger.Error().
-			Str("job_id", jobID).
-			Msg("Invalid image ID type")
-		return
-	}
-
-	parsedID, err := uuid.Parse(imageIDStr)
-	if err != nil {
-		logger.Error().Err(err).
-			Str("job_id", jobID).
-			Str("image_id", imageIDStr).
-			Msg("Failed to parse image ID")
-		return
-	}
-
 	// Update image record with thumbnail key via repository
-	if err := h.repo.UpdateImageThumbnailKey(ctx, parsedID, thumbnailKey); err != nil {
+	if err := h.repo.UpdateImageThumbnailKey(ctx, imageID, thumbnailKey); err != nil {
 		logger.Error().Err(err).
 			Str("job_id", jobID).
 			Msg("Failed to update image record with thumbnail key")

@@ -162,17 +162,3 @@ func HandleHealth(w http.ResponseWriter, r *http.Request) {
 		"status": "healthy",
 	}, http.StatusOK)
 }
-
-// respondJSON sends a JSON response
-func respondJSON(w http.ResponseWriter, data interface{}, statusCode int) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(data)
-}
-
-// respondError sends a JSON error response
-func respondError(w http.ResponseWriter, message string, statusCode int) {
-	respondJSON(w, map[string]string{
-		"error": message,
-	}, statusCode)
-}
