@@ -1,5 +1,7 @@
 package constants
 
+import "time"
+
 // File upload and size limits
 const (
 	// MaxUploadSize is the maximum allowed file upload size (10 MB)
@@ -72,6 +74,6 @@ const (
 
 // Redis configuration
 const (
-	RedisDB = 0
-	RedisTTL = 15 * 60
+	RedisDB  = 0
+	RedisTTL = 15 * 60 * time.Second
 )
