@@ -40,6 +40,8 @@ class ImageProcessor:
         job_id: str,
         user_prompt: str,
         input_image_data: bytes,
+        target_width: int | None = None,
+        target_height: int | None = None,
     ) -> GenerationResult:
         """
         Run the full generation pipeline for a single job.
@@ -48,6 +50,8 @@ class ImageProcessor:
             job_id: Unique job identifier for tracing.
             user_prompt: Raw prompt supplied by the user.
             input_image_data: Original image bytes to transform.
+            target_width: Target output image width (uses settings default if None).
+            target_height: Target output image height (uses settings default if None).
 
         Returns:
             GenerationResult containing image bytes, content-type, and metadata.
@@ -82,13 +86,17 @@ class ImageProcessor:
         # ── Stage 2: FLUX image generation ───────────────────────────
         # Encode input image as base64 for FLUX API
         input_image_b64 = base64.b64encode(input_image_data).decode('utf-8')
-        
+
+        # Use provided dimensions or fall back to settings defaults
+        width = target_width if target_width is not None else self.settings.flux_width
+        height = target_height if target_height is not None else self.settings.flux_height
+
         flux_request = FluxRequest(
             prompt=enhanced.enhanced_text,
             input_image=input_image_b64,
             model=self.settings.flux_model,
-            width=self.settings.flux_width,
-            height=self.settings.flux_height,
+            width=width,
+            height=height,
         )
 
         self.logger.info("Generating image with FLUX", extra={"job_id": job_id})

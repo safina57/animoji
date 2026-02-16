@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 class JobMessage(BaseModel):
     """
     Job message received from NATS queue.
-    
+
     Matches the Go struct NatsJobMessage from gateway/internal/models/job.go
     """
 
@@ -16,3 +16,5 @@ class JobMessage(BaseModel):
         default="anime style portrait",
         description="User's text prompt for image generation",
     )
+    width: int = Field(..., description="Target image width in pixels")
+    height: int = Field(..., description="Target image height in pixels")
