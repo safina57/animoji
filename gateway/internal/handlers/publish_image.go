@@ -87,16 +87,20 @@ func (h *PublishImageHandler) HandlePublishImage(w http.ResponseWriter, r *http.
 		return
 	}
 
+	// Use latest generated key
+	latestGeneratedKey := metadata.GeneratedKeys[len(metadata.GeneratedKeys)-1]
+
 	minioService := storage.NewMinIOService()
-	exists, err := minioService.CheckResultExists(ctx, jobID)
+	// Check if latest iteration result exists
+	exists, err := minioService.CheckResultExists(ctx, jobID, metadata.IterationNum)
 	if err != nil || !exists {
 		logger.Error().Err(err).
 			Str("job_id", jobID).
+			Int("iteration_num", metadata.IterationNum).
 			Msg("Generated image does not exist in storage")
 		respondError(w, "Generated image not found", http.StatusNotFound)
 		return
 	}
-	latestGeneratedKey := metadata.GeneratedKeys[len(metadata.GeneratedKeys)-1]
 
 	// Create image record in database via repository
 	image := &models.Image{

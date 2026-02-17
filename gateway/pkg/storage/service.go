@@ -36,9 +36,9 @@ func (s *MinIOService) UploadOriginalImage(ctx context.Context, jobID string, da
 	return objectKey, nil
 }
 
-// CheckResultExists checks if a result image exists for a job
-func (s *MinIOService) CheckResultExists(ctx context.Context, jobID string) (bool, error) {
-	objectKey := fmt.Sprintf("%s%s/result.png", constants.PrefixGenerated, jobID)
+// CheckResultExists checks if a result image exists for a job (latest iteration)
+func (s *MinIOService) CheckResultExists(ctx context.Context, jobID string, iterationNum int) (bool, error) {
+	objectKey := fmt.Sprintf("%s%s/result_v%d.png", constants.PrefixGenerated, jobID, iterationNum)
 	return s.client.ObjectExists(ctx, constants.BucketName, objectKey)
 }
 
@@ -62,8 +62,8 @@ func (s *MinIOService) GetPresignedURLForOriginal(ctx context.Context, jobID str
 }
 
 // GetPresignedURLForResult generates a presigned URL for the result image
-func (s *MinIOService) GetPresignedURLForResult(ctx context.Context, jobID string, expiry time.Duration) (string, error) {
-	objectKey := fmt.Sprintf("%s%s/result.png", constants.PrefixGenerated, jobID)
+func (s *MinIOService) GetPresignedURLForResult(ctx context.Context, jobID string, iterationNum int, expiry time.Duration) (string, error) {
+	objectKey := fmt.Sprintf("%s%s/result_v%d.png", constants.PrefixGenerated, jobID, iterationNum)
 	return s.client.GetPresignedURL(ctx, constants.BucketName, objectKey, expiry)
 }
 
