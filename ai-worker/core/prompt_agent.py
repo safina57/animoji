@@ -1,7 +1,7 @@
 """Prompt enhancement agent."""
 
 from pydantic_ai import Agent
-from pydantic_ai.models.openai import OpenAIChatModel
+from pydantic_ai.models.openai import OpenAIResponsesModel
 from pydantic_ai.providers.azure import AzureProvider
 
 from core.settings import get_settings
@@ -19,7 +19,7 @@ def get_prompt_agent() -> Agent[None, EnhancedPrompt]:
 
     settings = get_settings()
 
-    model = OpenAIChatModel(
+    model = OpenAIResponsesModel(
         settings.azure_openai_deployment,
         provider=AzureProvider(
             azure_endpoint=settings.azure_openai_endpoint,

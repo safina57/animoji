@@ -37,5 +37,9 @@ class GenerationResult(BaseModel):
     image_data: bytes
     content_type: str
     metadata: dict[str, Any] = Field(default_factory=dict)
+    response_id: str | None = Field(
+        default=None,
+        description="OpenAI Responses API response ID for conversation continuity across iterations",
+    )
 
     model_config = {"arbitrary_types_allowed": True}

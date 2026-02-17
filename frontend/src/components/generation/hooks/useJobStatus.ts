@@ -35,13 +35,11 @@ export function useJobStatus(jobId: string | null, enabled: boolean) {
       if (data.status === 'completed') {
         dispatch(
           completeGeneration({
-            jobId: data.job_id!,
             originalImageUrl: data.original_url!,
             generatedImageUrl: data.result_url!,
+            iterationNum: data.iteration_num ?? 0,
           })
         );
-        handledJobRef.current = null;
-        disconnect();
       } else if (data.status === 'failed') {
         dispatch(failGeneration(data.error || 'Generation failed'));
         handledJobRef.current = null;

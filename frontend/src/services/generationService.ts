@@ -24,3 +24,25 @@ export async function submitJob(image: File, prompt: string): Promise<SubmitJobR
 
   return response.json();
 }
+
+export async function submitRefinement(
+  jobId: string,
+  refinementPrompt: string
+): Promise<SubmitJobResponse> {
+  const response = await fetch(`${API_URL}/jobs/${jobId}/refine`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ prompt: refinementPrompt }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Failed to submit refinement' }));
+    throw new Error(error.error || 'Failed to submit refinement');
+  }
+
+  // Response contains SAME job_id with updated iteration count
+  return response.json();
+}

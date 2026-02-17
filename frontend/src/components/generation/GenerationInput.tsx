@@ -8,19 +8,20 @@ import {
   setJobId,
   failGeneration,
 } from "@store/slices/generationSlice";
-import { submitJob } from "@services/generationService";
+import { submitJob, submitRefinement } from "@services/generationService";
 import { Button } from "@lib/ui/button";
 
 const SUGGESTIONS = ["Cyberpunk Tokyo", "Studio Ghibli Forest", "90s Retro Anime"];
 
 export default function GenerationInput() {
   const dispatch = useAppDispatch();
-  const { prompt, referenceImage, referencePreviewUrl, stage } = useAppSelector(
+  const { prompt, referenceImage, referencePreviewUrl, stage, jobId, results } = useAppSelector(
     (s) => s.generation
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isBottom = stage === "result";
+  const isRefinement = stage === "result" && results.length > 0;
 
   /* ── File selection ── */
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
@@ -38,22 +39,46 @@ export default function GenerationInput() {
   /* ── Generation ── */
   async function generate() {
     if (!prompt.trim()) return;
-    if (!referenceImage) {
-      dispatch(failGeneration("Please upload an image first"));
-      return;
-    }
 
-    dispatch(startGeneration());
+    // Check if this is a refinement or initial generation
+    if (isRefinement) {
+      // Refinement mode - use same job_id
+      if (!jobId) {
+        dispatch(failGeneration("No active job to refine"));
+        return;
+      }
 
-    try {
-      const result = await submitJob(referenceImage, prompt);
-      dispatch(setJobId(result.job_id)); // Store job_id to trigger SSE connection
-    } catch (error) {
-      dispatch(
-        failGeneration(
-          error instanceof Error ? error.message : "Something went wrong. Please try again."
-        )
-      );
+      dispatch(startGeneration());
+
+      try {
+        await submitRefinement(jobId, prompt);
+        // No need to setJobId - same job_id, SSE connection still active
+      } catch (error) {
+        dispatch(
+          failGeneration(
+            error instanceof Error ? error.message : "Failed to submit refinement"
+          )
+        );
+      }
+    } else {
+      // Initial generation - need reference image
+      if (!referenceImage) {
+        dispatch(failGeneration("Please upload an image first"));
+        return;
+      }
+
+      dispatch(startGeneration());
+
+      try {
+        const result = await submitJob(referenceImage, prompt);
+        dispatch(setJobId(result.job_id)); // Store job_id to trigger SSE connection
+      } catch (error) {
+        dispatch(
+          failGeneration(
+            error instanceof Error ? error.message : "Something went wrong. Please try again."
+          )
+        );
+      }
     }
   }
 
@@ -115,23 +140,31 @@ export default function GenerationInput() {
 
             {/* Input row */}
             <div className="flex items-center gap-2">
-              {/* Add image button */}
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="flex items-center justify-center w-12 h-12 rounded-2xl text-slate-400 hover:text-primary hover:bg-primary/5 transition-all shrink-0"
-              >
-                <span className="material-symbols-outlined text-3xl">
-                  add_photo_alternate
-                </span>
-              </button>
+              {/* Left slot: image upload in initial mode, wand icon in refinement mode */}
+              {isRefinement ? (
+                <div className="flex items-center justify-center w-12 h-12 rounded-2xl text-primary/30 shrink-0">
+                  <span className="material-symbols-outlined text-2xl">auto_fix_high</span>
+                </div>
+              ) : (
+                <>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center justify-center w-12 h-12 rounded-2xl text-slate-400 hover:text-primary hover:bg-primary/5 transition-all shrink-0"
+                  >
+                    <span className="material-symbols-outlined text-3xl">
+                      add_photo_alternate
+                    </span>
+                  </button>
 
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                className="hidden"
-                onChange={handleFileChange}
-              />
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,.jpg,.jpeg,.png"
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+                </>
+              )}
 
               <textarea
                 value={prompt}

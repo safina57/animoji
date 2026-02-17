@@ -18,6 +18,7 @@ type Image struct {
 	ThumbnailKey    string         `gorm:"size:500" json:"thumbnail_key,omitempty"`                    // MinIO key for scaled thumbnail (0.25x)
 	Width           int            `gorm:"not null;default:0" json:"width"`                            // Original image width in pixels
 	Height          int            `gorm:"not null;default:0" json:"height"`                           // Original image height in pixels
+	IterationNum    int            `gorm:"not null;default:0" json:"iteration_num"`                    // Which iteration was published (0, 1, 2...)
 	Visibility      string         `gorm:"size:20;not null;default:'private';index" json:"visibility"` // 'public' or 'private'
 	LikesCount   	int            `gorm:"not null;default:0" json:"likes_count"`
 	CreatedAt    	time.Time      `gorm:"not null;default:now();index:idx_images_created_at" json:"created_at"`
