@@ -140,8 +140,12 @@ export default function GenerationInput() {
 
             {/* Input row */}
             <div className="flex items-center gap-2">
-              {/* Add image button - only show in initial mode */}
-              {!isRefinement && (
+              {/* Left slot: image upload in initial mode, wand icon in refinement mode */}
+              {isRefinement ? (
+                <div className="flex items-center justify-center w-12 h-12 rounded-2xl text-primary/30 shrink-0">
+                  <span className="material-symbols-outlined text-2xl">auto_fix_high</span>
+                </div>
+              ) : (
                 <>
                   <button
                     onClick={() => fileInputRef.current?.click()}

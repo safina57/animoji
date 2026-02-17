@@ -75,13 +75,19 @@ function ResultItem({ result, index, isLatest }: ResultItemProps) {
         {/* Prompt header */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                Iteration {result.iterationNum}
+            <div className="flex items-center gap-2.5 mb-1">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center shrink-0 shadow-sm shadow-primary/30">
+                  {result.iterationNum}
+                </span>
+                <span className="text-xs font-semibold tracking-wide text-slate-500 dark:text-slate-400">
+                  Take {result.iterationNum}
+                </span>
               </span>
+              <span className="text-slate-300 dark:text-slate-600 text-xs">·</span>
               <span className="text-xs text-slate-400">{timeAgo}</span>
               {isLatest && (
-                <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase">
+                <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">
                   Latest
                 </span>
               )}
