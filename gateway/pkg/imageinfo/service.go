@@ -1,6 +1,13 @@
 package imageinfo
 
-import "io"
+import (
+	"bytes"
+	"fmt"
+	"io"
+
+	"github.com/disintegration/imaging"
+	"github.com/dustin/go-humanize"
+)
 
 // ImageProcessor orchestrates image validation and metadata extraction
 type ImageProcessor struct {
@@ -46,10 +53,38 @@ func (p *ImageProcessor) ProcessReader(r io.Reader, filename string, size int64)
 		return nil, err
 	}
 
-	// Step 5: Validate dimensions
+	// Step 5: If dimensions are outside the valid range, clamp and resize image bytes.
 	if err := p.validator.ValidateDimensions(info.Width, info.Height); err != nil {
-		return nil, err
+		targetW, targetH := p.validator.ClampDimensions(info.Width, info.Height)
+		resized, err := resizeImageData(info.Data, targetW, targetH)
+		if err != nil {
+			return nil, fmt.Errorf("failed to resize image to valid dimensions: %w", err)
+		}
+		info.Data = resized
+		info.Width = targetW
+		info.Height = targetH
+		info.MIMEType = "image/png"
+		info.Extension = "png"
+		info.SizeBytes = int64(len(resized))
+		info.ReadableSize = humanize.Bytes(uint64(len(resized)))
 	}
 
 	return info, nil
+}
+
+// resizeImageData decodes image bytes, resizes to the target dimensions, and re-encodes as PNG.
+func resizeImageData(data []byte, width, height int) ([]byte, error) {
+	img, err := imaging.Decode(bytes.NewReader(data), imaging.AutoOrientation(true))
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode image: %w", err)
+	}
+
+	resized := imaging.Resize(img, width, height, imaging.Lanczos)
+
+	var buf bytes.Buffer
+	if err := imaging.Encode(&buf, resized, imaging.PNG); err != nil {
+		return nil, fmt.Errorf("failed to encode resized image: %w", err)
+	}
+
+	return buf.Bytes(), nil
 }
