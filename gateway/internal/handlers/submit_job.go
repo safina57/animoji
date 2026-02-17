@@ -79,7 +79,7 @@ func HandleSubmitJob(w http.ResponseWriter, r *http.Request) {
 
 	// Upload original image to storage
 	ctx := r.Context()
-	inputKey, err := minioService.UploadOriginalImage(ctx, jobID, info.Data, header.Filename, info.MIMEType)
+	inputKey, err := minioService.UploadOriginalImage(ctx, jobID, info.Data, info.Extension, info.MIMEType)
 	if err != nil {
 		logger.Error().Err(err).
 			Str("job_id", jobID).

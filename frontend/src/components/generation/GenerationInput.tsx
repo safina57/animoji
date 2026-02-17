@@ -159,7 +159,7 @@ export default function GenerationInput() {
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/jpeg,image/png,image/webp"
+                    accept="image/jpeg,image/png,.jpg,.jpeg,.png"
                     className="hidden"
                     onChange={handleFileChange}
                   />
