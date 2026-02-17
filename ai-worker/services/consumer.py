@@ -75,6 +75,7 @@ class JobConsumer:
         status: str,
         result_key: str | None = None,
         iteration_num: int = 0,
+        response_id: str | None = None,
     ) -> None:
         """
         Publish job status to NATS for gateway SSE.
@@ -84,11 +85,14 @@ class JobConsumer:
             status: Job status ("completed", "failed")
             result_key: Optional MinIO key for result
             iteration_num: Iteration number of the result
+            response_id: OpenAI Responses API ID for conversation continuity
         """
         try:
             payload = {"status": status, "iteration_num": iteration_num}
             if result_key:
                 payload["result_key"] = result_key
+            if response_id:
+                payload["response_id"] = response_id
 
             subject = f"anime.status.{job_id}"
             await self.nats_client.publish(subject, json.dumps(payload).encode())
@@ -142,6 +146,7 @@ class JobConsumer:
                 input_mime_type=job_message.mime_type,
                 target_width=job_message.width,
                 target_height=job_message.height,
+                previous_response_id=job_message.previous_response_id,
             )
             processed_data, content_type = result.image_data, result.content_type
 
@@ -154,7 +159,7 @@ class JobConsumer:
             await self.minio_client.upload_file(output_key, processed_data, content_type)
 
             await self._publish_status(
-                job_id, "completed", output_key, job_message.iteration_num
+                job_id, "completed", output_key, job_message.iteration_num, result.response_id
             )
 
             self.logger.info(

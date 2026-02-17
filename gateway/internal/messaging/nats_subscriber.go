@@ -43,11 +43,11 @@ func (s *NatsSubscriber) SubscribeToStatusEvents(ctx context.Context) error {
 		}
 		jobID := parts[2]
 
-		// Append generated key to Redis cache on completion
+		// Append generated key and store response ID in Redis on completion
 		if event.Status == constants.StatusCompleted && event.ResultKey != "" {
 			redisClient := cache.MustGetClient()
 
-			if err := redisClient.AppendJobGeneratedKey(ctx, jobID, event.ResultKey); err != nil {
+			if err := redisClient.AppendJobGeneratedKey(ctx, jobID, event.ResultKey, event.ResponseID); err != nil {
 				logger.Error().Err(err).
 					Str("job_id", jobID).
 					Msg("Failed to append generated key to job metadata in Redis")
@@ -55,6 +55,7 @@ func (s *NatsSubscriber) SubscribeToStatusEvents(ctx context.Context) error {
 				logger.Debug().
 					Str("job_id", jobID).
 					Int("iteration_num", event.IterationNum).
+					Bool("has_response_id", event.ResponseID != "").
 					Msg("Appended generated key to job metadata in Redis")
 			}
 		}

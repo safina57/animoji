@@ -95,13 +95,14 @@ func HandleRefineJob(w http.ResponseWriter, r *http.Request) {
 	// Publish to NATS with SAME job_id and iteration number
 	natsClient := messaging.MustGetClient()
 	message := models.NatsJobMessage{
-		JobID:        jobID,
-		InputKey:     metadata.OriginalKey,
-		Prompt:       combinedPrompt,
-		Width:        metadata.Width,
-		Height:       metadata.Height,
-		MIMEType:     "image/png",
-		IterationNum: metadata.IterationNum,
+		JobID:              jobID,
+		InputKey:           metadata.OriginalKey,
+		Prompt:             combinedPrompt,
+		Width:              metadata.Width,
+		Height:             metadata.Height,
+		MIMEType:           "image/png",
+		IterationNum:       metadata.IterationNum,
+		PreviousResponseID: metadata.LastResponseID,
 	}
 
 	payload, err := json.Marshal(message)

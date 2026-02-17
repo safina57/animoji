@@ -16,15 +16,16 @@ import (
 
 // JobMetadata represents temporary job data cached in Redis
 type JobMetadata struct {
-	JobID         string    `json:"job_id"`
-	UserID        uuid.UUID `json:"user_id"`
-	Prompts       []string  `json:"prompts"`                   // Array of prompts (original + refinements)
-	OriginalKey   string    `json:"original_key"`
-	GeneratedKeys []string  `json:"generated_keys,omitempty"`  // Array of result keys (versioned)
-	Width         int       `json:"width"`
-	Height        int       `json:"height"`
-	IterationNum  int       `json:"iteration_num"`            
-	CreatedAt     time.Time `json:"created_at"`
+	JobID          string    `json:"job_id"`
+	UserID         uuid.UUID `json:"user_id"`
+	Prompts        []string  `json:"prompts"`                  // Array of prompts (original + refinements)
+	OriginalKey    string    `json:"original_key"`
+	GeneratedKeys  []string  `json:"generated_keys,omitempty"` // Array of result keys (versioned)
+	Width          int       `json:"width"`
+	Height         int       `json:"height"`
+	IterationNum   int       `json:"iteration_num"`
+	LastResponseID string    `json:"last_response_id,omitempty"` // OpenAI Responses API ID for next iteration
+	CreatedAt      time.Time `json:"created_at"`
 }
 
 // RedisClient wraps the Redis client with job metadata operations
@@ -133,16 +134,19 @@ func (r *RedisClient) GetJobMetadata(ctx context.Context, jobID string) (*JobMet
 	return &metadata, nil
 }
 
-// AppendJobGeneratedKey appends a new generated result key to the array
-func (r *RedisClient) AppendJobGeneratedKey(ctx context.Context, jobID string, generatedKey string) error {
+// AppendJobGeneratedKey appends a new generated result key and stores the latest response ID
+func (r *RedisClient) AppendJobGeneratedKey(ctx context.Context, jobID string, generatedKey string, responseID string) error {
 	// Get existing metadata
 	metadata, err := r.GetJobMetadata(ctx, jobID)
 	if err != nil {
 		return err
 	}
 
-	// Append generated key to array
+	// Append generated key and update response ID for next iteration
 	metadata.GeneratedKeys = append(metadata.GeneratedKeys, generatedKey)
+	if responseID != "" {
+		metadata.LastResponseID = responseID
+	}
 
 	// Save updated metadata
 	return r.SetJobMetadata(ctx, jobID, metadata)
