@@ -74,6 +74,7 @@ class JobConsumer:
         job_id: str,
         status: str,
         result_key: str | None = None,
+        iteration_num: int = 0,
     ) -> None:
         """
         Publish job status to NATS for gateway SSE.
@@ -82,9 +83,10 @@ class JobConsumer:
             job_id: Job identifier
             status: Job status ("completed", "failed")
             result_key: Optional MinIO key for result
+            iteration_num: Iteration number of the result
         """
         try:
-            payload = {"status": status}
+            payload = {"status": status, "iteration_num": iteration_num}
             if result_key:
                 payload["result_key"] = result_key
 
@@ -93,7 +95,7 @@ class JobConsumer:
 
             self.logger.info(
                 "Published status to NATS",
-                extra={"job_id": job_id, "status": status, "subject": subject},
+                extra={"job_id": job_id, "status": status, "iteration_num": iteration_num, "subject": subject},
             )
         except Exception as e:
             self.logger.error(
@@ -143,16 +145,16 @@ class JobConsumer:
             )
             processed_data, content_type = result.image_data, result.content_type
 
-            # Upload processed image to MinIO
-            output_key = f"generated/{job_id}/result.png"
+            # Generate versioned output key for iteration
+            output_key = f"generated/{job_id}/result_v{job_message.iteration_num}.png"
             self.logger.info(
                 "Uploading processed image",
-                extra={"job_id": job_id, "output_key": output_key},
+                extra={"job_id": job_id, "output_key": output_key, "iteration_num": job_message.iteration_num},
             )
             await self.minio_client.upload_file(output_key, processed_data, content_type)
 
             await self._publish_status(
-                job_id, "completed", output_key
+                job_id, "completed", output_key, job_message.iteration_num
             )
 
             self.logger.info(

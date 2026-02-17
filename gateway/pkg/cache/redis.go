@@ -16,14 +16,15 @@ import (
 
 // JobMetadata represents temporary job data cached in Redis
 type JobMetadata struct {
-	JobID        string    `json:"job_id"`
-	UserID       uuid.UUID `json:"user_id"`
-	Prompt       string    `json:"prompt"`
-	OriginalKey  string    `json:"original_key"`
-	GeneratedKey string    `json:"generated_key,omitempty"`
-	Width        int       `json:"width"`
-	Height       int       `json:"height"`
-	CreatedAt    time.Time `json:"created_at"`
+	JobID         string    `json:"job_id"`
+	UserID        uuid.UUID `json:"user_id"`
+	Prompts       []string  `json:"prompts"`                   // Array of prompts (original + refinements)
+	OriginalKey   string    `json:"original_key"`
+	GeneratedKeys []string  `json:"generated_keys,omitempty"`  // Array of result keys (versioned)
+	Width         int       `json:"width"`
+	Height        int       `json:"height"`
+	IterationNum  int       `json:"iteration_num"`            
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 // RedisClient wraps the Redis client with job metadata operations
@@ -132,16 +133,16 @@ func (r *RedisClient) GetJobMetadata(ctx context.Context, jobID string) (*JobMet
 	return &metadata, nil
 }
 
-// UpdateJobGeneratedKey updates only the generated_key field in job metadata
-func (r *RedisClient) UpdateJobGeneratedKey(ctx context.Context, jobID string, generatedKey string) error {
+// AppendJobGeneratedKey appends a new generated result key to the array
+func (r *RedisClient) AppendJobGeneratedKey(ctx context.Context, jobID string, generatedKey string) error {
 	// Get existing metadata
 	metadata, err := r.GetJobMetadata(ctx, jobID)
 	if err != nil {
 		return err
 	}
 
-	// Update generated key
-	metadata.GeneratedKey = generatedKey
+	// Append generated key to array
+	metadata.GeneratedKeys = append(metadata.GeneratedKeys, generatedKey)
 
 	// Save updated metadata
 	return r.SetJobMetadata(ctx, jobID, metadata)

@@ -57,6 +57,7 @@ func newRouter(
 		r.Get("/job-status/{job_id}/stream", func(w http.ResponseWriter, r *http.Request) {
 			handlers.HandleJobStatusStream(w, r, eventManager, storageService)
 		})
+		r.Post("/jobs/{job_id}/refine", handlers.HandleRefineJob)
 		r.Post("/images/{job_id}/publish", publishHandler.HandlePublishImage)
 	})
 

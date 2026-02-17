@@ -92,13 +92,15 @@ func HandleSubmitJob(w http.ResponseWriter, r *http.Request) {
 	// Cache job metadata in Redis
 	redisClient := cache.MustGetClient()
 	metadata := &cache.JobMetadata{
-		JobID:       jobID,
-		UserID:      claims.UserID,
-		Prompt:      prompt,
-		OriginalKey: inputKey,
-		Width:       info.Width,
-		Height:      info.Height,
-		CreatedAt:   time.Now(),
+		JobID:         jobID,
+		UserID:        claims.UserID,
+		Prompts:       []string{prompt},
+		OriginalKey:   inputKey,
+		GeneratedKeys: []string{},       
+		Width:         info.Width,
+		Height:        info.Height,
+		IterationNum:  0,                
+		CreatedAt:     time.Now(),
 	}
 	if err := redisClient.SetJobMetadata(ctx, jobID, metadata); err != nil {
 		logger.Error().Err(err).
@@ -109,12 +111,13 @@ func HandleSubmitJob(w http.ResponseWriter, r *http.Request) {
 	// Publish job to NATS queue for AI processing
 	natsClient := messaging.MustGetClient()
 	message := models.NatsJobMessage{
-		JobID:    jobID,
-		InputKey: inputKey,
-		Prompt:   prompt,
-		Width:    info.Width,
-		Height:   info.Height,
-		MIMEType: info.MIMEType,
+		JobID:        jobID,
+		InputKey:     inputKey,
+		Prompt:       prompt,
+		Width:        info.Width,
+		Height:       info.Height,
+		MIMEType:     info.MIMEType,
+		IterationNum: 0, 
 	}
 	payload, err := json.Marshal(message)
 	if err != nil {

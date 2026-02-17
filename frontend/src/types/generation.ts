@@ -19,14 +19,15 @@ export interface StatusEvent {
   job_id?: string;
   original_url?: string;
   result_url?: string;
+  iteration_num?: number;
   error?: string;
 }
 
 /** Result of a completed generation */
 export interface GenerationResult {
-  jobId: string;
   prompt: string;
   originalImageUrl: string;
   generatedImageUrl: string;
   timestamp: number;
+  iterationNum: number;
 }

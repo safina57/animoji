@@ -40,7 +40,7 @@ export default function ResultView() {
 
           {results.map((result, index) => (
             <ResultItem
-              key={result.jobId}
+              key={index}
               result={result}
               index={index}
               isLatest={index === results.length - 1}
@@ -77,7 +77,7 @@ function ResultItem({ result, index, isLatest }: ResultItemProps) {
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                Iteration {index + 1}
+                Iteration {result.iterationNum}
               </span>
               <span className="text-xs text-slate-400">{timeAgo}</span>
               {isLatest && (
