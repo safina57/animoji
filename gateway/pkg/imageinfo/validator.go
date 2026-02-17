@@ -1,11 +1,12 @@
 package imageinfo
 
 import (
-	"slices"
 	"fmt"
+	"math"
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/safina57/animoji/gateway/internal/constants"
@@ -112,17 +113,43 @@ func detectMIMETypeFromData(data []byte) string {
 	return http.DetectContentType(data[:size])
 }
 
-// ValidateDimensions checks if image dimensions are within acceptable limits
+// ValidateDimensions returns an error if the image dimensions are outside the acceptable range.
 func (v *ImageValidator) ValidateDimensions(width, height int) error {
 	if width < constants.MinImageWidth || height < constants.MinImageHeight {
 		return fmt.Errorf("image too small: %dx%d (minimum: %dx%d)",
 			width, height, constants.MinImageWidth, constants.MinImageHeight)
 	}
-
 	if width > constants.MaxImageWidth || height > constants.MaxImageHeight {
 		return fmt.Errorf("image too large: %dx%d (maximum: %dx%d)",
 			width, height, constants.MaxImageWidth, constants.MaxImageHeight)
 	}
-
 	return nil
+}
+
+// ClampDimensions proportionally scales image dimensions to fit within [MinImageWidth/Height, MaxImageWidth/Height].
+func (v *ImageValidator) ClampDimensions(width, height int) (int, int) {
+	w, h := float64(width), float64(height)
+
+	if width > constants.MaxImageWidth || height > constants.MaxImageHeight {
+		scale := math.Min(
+			float64(constants.MaxImageWidth)/w,
+			float64(constants.MaxImageHeight)/h,
+		)
+		w, h = w*scale, h*scale
+	}
+
+	if int(math.Round(w)) < constants.MinImageWidth || int(math.Round(h)) < constants.MinImageHeight {
+		scale := math.Max(
+			float64(constants.MinImageWidth)/w,
+			float64(constants.MinImageHeight)/h,
+		)
+		w, h = w*scale, h*scale
+	}
+
+	return roundToMultiple8(int(math.Round(w))), roundToMultiple8(int(math.Round(h)))
+}
+
+// roundToMultiple8 rounds n to the nearest multiple of 8.
+func roundToMultiple8(n int) int {
+	return ((n + 4) / 8) * 8
 }

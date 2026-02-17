@@ -5,6 +5,7 @@ import logging
 from datetime import datetime, timezone
 
 from pydantic_ai import Agent, BinaryContent
+from pydantic_ai.models.openai import OpenAIResponsesModelSettings
 
 from core.flux_client import FluxClient, get_flux_client
 from core.settings import Settings, get_settings
@@ -44,6 +45,7 @@ class ImageProcessor:
         input_mime_type: str,
         target_width: int | None = None,
         target_height: int | None = None,
+        previous_response_id: str | None = None,
     ) -> GenerationResult:
         """
         Run the full generation pipeline for a single job.
@@ -65,14 +67,26 @@ class ImageProcessor:
             extra={"job_id": job_id, "mime_type": input_mime_type}
         )
 
+        # Build model settings — pass previous response ID when refining an existing job
+        model_settings = None
+        if previous_response_id:
+            model_settings = OpenAIResponsesModelSettings(
+                openai_previous_response_id=previous_response_id
+            )
+
         # Pass both text and image to the agent
         agent_result = await self.prompt_agent.run(
             [
                 user_prompt,
                 BinaryContent(data=input_image_data, media_type=input_mime_type),
-            ]
+            ],
+            model_settings=model_settings,
         )
         enhanced: EnhancedPrompt = agent_result.output
+
+        # Extract response ID for conversation continuity in future iterations
+        last_message = agent_result.all_messages()[-1]
+        response_id: str | None = getattr(last_message, "provider_response_id", None)
 
         self.logger.info(
             "Prompt enhanced",
@@ -110,6 +124,7 @@ class ImageProcessor:
         return GenerationResult(
             image_data=image_bytes,
             content_type="image/png",
+            response_id=response_id,
             metadata={
                 "job_id": job_id,
                 "enhanced_prompt": enhanced.enhanced_text,

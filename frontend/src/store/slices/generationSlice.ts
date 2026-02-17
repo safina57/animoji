@@ -47,12 +47,15 @@ const generationSlice = createSlice({
     startGeneration(state) {
       state.stage = "loading";
       state.error = null;
-      state.jobId = null;
       state.currentPrompt = state.prompt; // Save current prompt
-      if (state.referencePreviewUrl) {
-        URL.revokeObjectURL(state.referencePreviewUrl);
-        state.referencePreviewUrl = null;
-        state.referenceImage = null;
+      // Only clear job_id and reference if this is the first generation
+      if (state.results.length === 0) {
+        state.jobId = null;
+        if (state.referencePreviewUrl) {
+          URL.revokeObjectURL(state.referencePreviewUrl);
+          state.referencePreviewUrl = null;
+          state.referenceImage = null;
+        }
       }
     },
 
@@ -63,21 +66,20 @@ const generationSlice = createSlice({
     completeGeneration(
       state,
       action: PayloadAction<{
-        jobId: string;
         originalImageUrl: string;
         generatedImageUrl: string;
+        iterationNum: number;
       }>
     ) {
       state.stage = "result";
-      state.jobId = action.payload.jobId;
 
       // Add new result to the array
       state.results.push({
-        jobId: action.payload.jobId,
         prompt: state.currentPrompt,
         originalImageUrl: action.payload.originalImageUrl,
         generatedImageUrl: action.payload.generatedImageUrl,
         timestamp: Date.now(),
+        iterationNum: action.payload.iterationNum,
       });
 
       // Clear prompt for next refinement

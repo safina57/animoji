@@ -73,7 +73,7 @@ func HandleJobStatusStream(w http.ResponseWriter, r *http.Request, eventManager 
 				return
 			}
 			if event.Status == constants.StatusCompleted {
-				sendCompletedEvent(w, flusher, jobID, storageService, r.Context())
+				sendCompletedEvent(w, flusher, jobID, event.IterationNum, storageService, r.Context())
 			}
 			if event.Status == constants.StatusFailed {
 				eventData := map[string]string{
@@ -82,9 +82,7 @@ func HandleJobStatusStream(w http.ResponseWriter, r *http.Request, eventManager 
 				sendSSEEvent(w, flusher, eventData)
 			}
 
-			// Don't return immediately — wait for the client to disconnect
-			// so Go doesn't kill the chunked response before the browser processes the data.
-			<-ctx.Done()
+			
 			return
 
 		case <-timeout:
@@ -100,7 +98,7 @@ func HandleJobStatusStream(w http.ResponseWriter, r *http.Request, eventManager 
 }
 
 // sendCompletedEvent sends a completed status event with presigned URLs
-func sendCompletedEvent(w http.ResponseWriter, flusher http.Flusher, jobID string, storageService *storage.MinIOService, ctx context.Context) {
+func sendCompletedEvent(w http.ResponseWriter, flusher http.Flusher, jobID string, iterationNum int, storageService *storage.MinIOService, ctx context.Context) {
 	// Generate presigned URLs
 	originalURL, err := storageService.GetPresignedURLForOriginal(ctx, jobID, presignedURLExpiry)
 	if err != nil {
@@ -109,19 +107,20 @@ func sendCompletedEvent(w http.ResponseWriter, flusher http.Flusher, jobID strin
 		return
 	}
 
-	resultURL, err := storageService.GetPresignedURLForResult(ctx, jobID, presignedURLExpiry)
+	resultURL, err := storageService.GetPresignedURLForResult(ctx, jobID, iterationNum, presignedURLExpiry)
 	if err != nil {
-		logger.Error().Err(err).Str("job_id", jobID).Msg("Failed to generate presigned URL for result")
+		logger.Error().Err(err).Str("job_id", jobID).Int("iteration_num", iterationNum).Msg("Failed to generate presigned URL for result")
 		sendSSEError(w, flusher, "Failed to retrieve result")
 		return
 	}
 
 	// Send completed event
-	eventData := map[string]string{
-		"status":       constants.StatusCompleted,
-		"job_id":       jobID,
-		"original_url": originalURL,
-		"result_url":   resultURL,
+	eventData := map[string]any{
+		"status":        constants.StatusCompleted,
+		"job_id":        jobID,
+		"original_url":  originalURL,
+		"result_url":    resultURL,
+		"iteration_num": iterationNum,
 	}
 	sendSSEEvent(w, flusher, eventData)
 }

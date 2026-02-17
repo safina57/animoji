@@ -23,10 +23,10 @@ const (
 // Allowed file types for image uploads
 var (
 	AllowedImageExtensions = []string{
-		"jpg", "jpeg", "png", "webp",
+		"jpg", "jpeg", "png",
 	}
 	AllowedImageMIMETypes = []string{
-		"image/jpeg", "image/png", "image/webp",
+		"image/jpeg", "image/png",
 	}
 )
 

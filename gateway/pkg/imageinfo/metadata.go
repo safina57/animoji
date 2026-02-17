@@ -12,7 +12,6 @@ import (
 
 	"github.com/dustin/go-humanize"
 	"github.com/safina57/animoji/gateway/pkg/storage"
-	_ "golang.org/x/image/webp"
 )
 
 // ImageMetadataExtractor extracts image metadata

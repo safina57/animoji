@@ -19,3 +19,8 @@ class JobMessage(BaseModel):
     width: int = Field(..., description="Target image width in pixels")
     height: int = Field(..., description="Target image height in pixels")
     mime_type: str = Field(..., description="MIME type of the input image")
+    iteration_num: int = Field(default=0, description="Iteration number for versioned storage")
+    previous_response_id: str | None = Field(
+        default=None,
+        description="OpenAI Responses API ID from prior iteration for conversation continuity",
+    )

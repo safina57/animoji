@@ -81,17 +81,22 @@ func (h *PublishImageHandler) HandlePublishImage(w http.ResponseWriter, r *http.
 		return
 	}
 
-	// Verify generated image exists
-	if metadata.GeneratedKey == "" {
+	// Verify generated images exist
+	if len(metadata.GeneratedKeys) == 0 {
 		respondError(w, "Image generation not completed yet", http.StatusBadRequest)
 		return
 	}
 
+	// Use latest generated key
+	latestGeneratedKey := metadata.GeneratedKeys[len(metadata.GeneratedKeys)-1]
+
 	minioService := storage.NewMinIOService()
-	exists, err := minioService.CheckResultExists(ctx, jobID)
+	// Check if latest iteration result exists
+	exists, err := minioService.CheckResultExists(ctx, jobID, metadata.IterationNum)
 	if err != nil || !exists {
 		logger.Error().Err(err).
 			Str("job_id", jobID).
+			Int("iteration_num", metadata.IterationNum).
 			Msg("Generated image does not exist in storage")
 		respondError(w, "Generated image not found", http.StatusNotFound)
 		return
@@ -101,12 +106,13 @@ func (h *PublishImageHandler) HandlePublishImage(w http.ResponseWriter, r *http.
 	image := &models.Image{
 		UserID:       metadata.UserID,
 		JobID:        metadata.JobID,
-		Prompts:      []string{metadata.Prompt},
+		Prompts:      metadata.Prompts,       // All prompts from iteration chain
 		OriginalKey:  metadata.OriginalKey,
-		GeneratedKey: metadata.GeneratedKey,
+		GeneratedKey: latestGeneratedKey,     // Latest iteration result
 		Width:        metadata.Width,
 		Height:       metadata.Height,
 		Visibility:   visibility,
+		IterationNum: metadata.IterationNum,
 		// Thumbnail key will be updated by background goroutine
 	}
 
@@ -118,8 +124,8 @@ func (h *PublishImageHandler) HandlePublishImage(w http.ResponseWriter, r *http.
 		return
 	}
 
-	// Launch background goroutine for thumbnail generation
-	go h.generateThumbnailAsync(jobID, metadata.GeneratedKey, image.ID)
+	// Launch background goroutine for thumbnail generation (use latest result)
+	go h.generateThumbnailAsync(jobID, latestGeneratedKey, image.ID)
 
 	// Launch background goroutine for Redis cleanup (with timeout to prevent leaks)
 	go func(jobID string) {
