@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
@@ -12,7 +13,7 @@ type Image struct {
 	ID              uuid.UUID      `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
 	UserID          uuid.UUID      `gorm:"type:uuid;not null;index" json:"user_id"`
 	JobID           string         `gorm:"uniqueIndex;not null" json:"job_id"`
-	Prompts         []string       `gorm:"type:text[];not null" json:"prompts"`                        // Array of prompts (user can refine iteratively)
+	Prompts         pq.StringArray `gorm:"type:text[];not null" json:"prompts"`                        // Array of prompts (user can refine iteratively)
 	OriginalKey     string         `gorm:"size:500;not null" json:"original_key"`                      // MinIO key
 	GeneratedKey    string         `gorm:"size:500;not null" json:"generated_key"`                     // MinIO key
 	ThumbnailKey    string         `gorm:"size:500" json:"thumbnail_key,omitempty"`                    // MinIO key for scaled thumbnail (0.25x)
