@@ -93,6 +93,18 @@ const generationSlice = createSlice({
       state.error = action.payload;
     },
 
+    markResultAsPublished(
+      state,
+      action: PayloadAction<{ iterationNum: number; imageId: string }>
+    ) {
+      const result = state.results.find(
+        (r) => r.iterationNum === action.payload.iterationNum
+      );
+      if (result) {
+        result.publishedImageId = action.payload.imageId;
+      }
+    },
+
     resetGeneration() {
       return initialState;
     },
@@ -106,6 +118,7 @@ export const {
   setJobId,
   completeGeneration,
   failGeneration,
+  markResultAsPublished,
   resetGeneration,
 } = generationSlice.actions;
 
