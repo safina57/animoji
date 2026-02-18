@@ -18,9 +18,10 @@ import (
 type JobMetadata struct {
 	JobID          string    `json:"job_id"`
 	UserID         uuid.UUID `json:"user_id"`
-	Prompts        []string  `json:"prompts"`                  // Array of prompts (original + refinements)
-	OriginalKey    string    `json:"original_key"`
-	GeneratedKeys  []string  `json:"generated_keys,omitempty"` // Array of result keys (versioned)
+	Prompts        []string  `json:"prompts"`                    // Array of prompts (original + refinements)
+	OriginalKey    string    `json:"original_key"`               // tmp/{job_id}/original.{ext}
+	OriginalExt    string    `json:"original_ext"`               // "jpg" or "png" — for publish path reconstruction
+	GeneratedKeys  []string  `json:"generated_keys,omitempty"`   // Array of result keys (versioned)
 	Width          int       `json:"width"`
 	Height         int       `json:"height"`
 	IterationNum   int       `json:"iteration_num"`

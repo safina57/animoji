@@ -21,31 +21,77 @@
 ### Current State (Implemented)
 ```
 User (Google OAuth) → Upload Image → Gateway → Validate Dimensions (256-2048px)
-                                              → MinIO (originals)
+                                              → MinIO (tmp/{job_id}/original.{ext})
                                               → Redis Cache (24h TTL, temporary metadata)
                                               → NATS publish
                                                     ↓
                                               AI Worker → GPT-4o enhance prompt
                                                        → FLUX.2-pro generate (dynamic dimensions)
-                                                       → MinIO (generated)
+                                                       → MinIO (tmp/{job_id}/result_v{N}.png)
                                                        → NATS status event
                                                     ↓
                                               Gateway updates Redis cache
-                                              [User previews result]
+                                              [User previews result via presigned URL]
                                                     ↓
-                                              POST /images/{job_id}/publish
+                                              POST /images/{job_id}/publish?visibility=public|private
                                                     ↓
-                                              PostgreSQL (persist metadata)
-                                              Background: Generate thumbnails (200/400/800px)
-                                              MinIO (thumbnails)
+                                              imageID = uuid.New()
+                                              Copy tmp/ → images/{visibility}/{image_id}/
+                                              PostgreSQL (persist metadata with image_id)
+                                              Background: Generate thumbnails (0.25x scale)
+                                              MinIO (thumbnails/{visibility}/{image_id}/thumbnail.png)
                                               Delete Redis cache
 ```
 
 **Key Workflow Principle**: Publish-on-Demand
-- Upload/generation phase: Temporary storage in Redis (no database writes)
-- User previews generated image and decides whether to publish
-- Only published images are persisted in PostgreSQL with thumbnails
-- Unpublished jobs auto-expire after 24 hours (Redis TTL)
+- Upload/generation phase: All files go to `tmp/` prefix in MinIO, metadata in Redis (24h TTL)
+- User previews generated image via presigned URL and decides whether to publish
+- On publish: files are copied from `tmp/` to `images/{visibility}/{image_id}/` using a pre-generated UUID
+- Only published images are persisted in PostgreSQL; thumbnails generated asynchronously
+- Unpublished `tmp/` files auto-expire after 24h via MinIO ILM lifecycle rule
+- Public images are served via direct URL (bucket policy); private images require presigned URL
+
+### Object Storage Layout
+
+```
+# Temporary (auto-expire 24h via MinIO ILM)
+tmp/{job_id}/original.{ext}
+tmp/{job_id}/result_v{N}.png
+
+# Published public (direct URL — anonymous GetObject via bucket policy)
+images/public/{image_id}/original.{ext}
+images/public/{image_id}/result.png
+
+# Published private (presigned URL only)
+images/private/{image_id}/original.{ext}
+images/private/{image_id}/result.png
+
+# Thumbnails (served in homepage and catalogs)
+thumbnails/public/{image_id}/thumbnail.png
+thumbnails/private/{image_id}/thumbnail.png
+```
+
+### Key Storage API (`gateway/pkg/storage/service.go`)
+
+| Method | Purpose |
+|--------|---------|
+| `UploadTmpOriginal(ctx, jobID, data, ext, mimeType)` | Upload original to `tmp/` |
+| `CheckTmpResultExists(ctx, jobID, iterationNum)` | Verify tmp result exists before publish |
+| `GetPresignedURLForTmpOriginal(ctx, jobID, ext, expiry)` | Presigned URL for tmp original |
+| `GetPresignedURLForTmpResult(ctx, jobID, iterationNum, expiry)` | Presigned URL for tmp result |
+| `GetPresignedURLForKey(ctx, objectKey, expiry)` | Presigned URL for any key |
+| `GetPublicURL(objectKey)` | Direct URL for public objects |
+| `PublishFiles(ctx, jobID, imageID, originalExt, iterationNum, visibility)` | Copy tmp → permanent |
+| `DeleteObject(ctx, objectKey)` | Delete a single object |
+
+### Visibility Change Flow (Future Feature)
+
+When a user toggles image visibility after publish:
+1. Load current image from DB (get `OriginalKey`, `GeneratedKey`, `ThumbnailKey`, `Visibility`)
+2. Determine source and destination prefixes (`images/public/` ↔ `images/private/`, `thumbnails/public/` ↔ `thumbnails/private/`)
+3. Copy all three objects to new paths using `MinIOClient.CopyObject`
+4. Update DB record with new keys and new visibility in a single transaction
+5. Delete old objects asynchronously (best-effort)
 
 ### Target State
 ```

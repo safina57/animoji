@@ -68,6 +68,11 @@ func initializeClient(ctx context.Context) (*MinIOClient, error) {
 		return nil, err
 	}
 
+	// Configure ILM to auto-expire tmp/ objects after 24h
+	if err := client.SetupBucketLifecycle(ctx, constants.BucketName); err != nil {
+		return nil, fmt.Errorf("failed to configure bucket lifecycle: %w", err)
+	}
+
 	logger.Info().
 		Str("bucket", constants.BucketName).
 		Msg("MinIO client initialized")

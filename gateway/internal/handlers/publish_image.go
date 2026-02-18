@@ -87,12 +87,10 @@ func (h *PublishImageHandler) HandlePublishImage(w http.ResponseWriter, r *http.
 		return
 	}
 
-	// Use latest generated key
-	latestGeneratedKey := metadata.GeneratedKeys[len(metadata.GeneratedKeys)-1]
-
 	minioService := storage.NewMinIOService()
-	// Check if latest iteration result exists
-	exists, err := minioService.CheckResultExists(ctx, jobID, metadata.IterationNum)
+
+	// Check if latest iteration result exists in tmp storage
+	exists, err := minioService.CheckTmpResultExists(ctx, jobID, metadata.IterationNum)
 	if err != nil || !exists {
 		logger.Error().Err(err).
 			Str("job_id", jobID).
@@ -102,32 +100,62 @@ func (h *PublishImageHandler) HandlePublishImage(w http.ResponseWriter, r *http.
 		return
 	}
 
-	// Create image record in database via repository
+	// Generate the image UUID upfront so it can be used for both storage paths and the DB record
+	imageID := uuid.New()
+
+	// Copy files from tmp/ to their permanent published location
+	permanentOriginalKey, permanentGeneratedKey, err := minioService.PublishFiles(
+		ctx,
+		jobID,
+		imageID,
+		metadata.OriginalExt,
+		metadata.IterationNum,
+		visibility,
+	)
+	if err != nil {
+		logger.Error().Err(err).
+			Str("job_id", jobID).
+			Str("image_id", imageID.String()).
+			Msg("Failed to copy files to permanent storage")
+		respondError(w, "Failed to publish image", http.StatusInternalServerError)
+		return
+	}
+
+	// Create image record in the database with the pre-set UUID and permanent storage keys
 	image := &models.Image{
+		ID:           imageID,
 		UserID:       metadata.UserID,
 		JobID:        metadata.JobID,
-		Prompts:      metadata.Prompts,       // All prompts from iteration chain
-		OriginalKey:  metadata.OriginalKey,
-		GeneratedKey: latestGeneratedKey,     // Latest iteration result
+		Prompts:      metadata.Prompts,
+		OriginalKey:  permanentOriginalKey,
+		GeneratedKey: permanentGeneratedKey,
 		Width:        metadata.Width,
 		Height:       metadata.Height,
 		Visibility:   visibility,
 		IterationNum: metadata.IterationNum,
-		// Thumbnail key will be updated by background goroutine
+		// ThumbnailKey will be updated by the background goroutine
 	}
 
 	if err := h.repo.CreateImage(ctx, image); err != nil {
 		logger.Error().Err(err).
 			Str("job_id", jobID).
+			Str("image_id", imageID.String()).
 			Msg("Failed to create image record in database")
+		// Best-effort cleanup of the copied permanent files
+		go func() {
+			cleanupCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+			_ = minioService.DeleteObject(cleanupCtx, permanentOriginalKey)
+			_ = minioService.DeleteObject(cleanupCtx, permanentGeneratedKey)
+		}()
 		respondError(w, "Failed to publish image", http.StatusInternalServerError)
 		return
 	}
 
-	// Launch background goroutine for thumbnail generation (use latest result)
-	go h.generateThumbnailAsync(jobID, latestGeneratedKey, image.ID)
+	// Launch background goroutine for thumbnail generation
+	go h.generateThumbnailAsync(imageID, visibility, permanentGeneratedKey)
 
-	// Launch background goroutine for Redis cleanup (with timeout to prevent leaks)
+	// Launch background goroutine for Redis cleanup
 	go func(jobID string) {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
@@ -146,51 +174,50 @@ func (h *PublishImageHandler) HandlePublishImage(w http.ResponseWriter, r *http.
 	logger.Info().
 		Str("job_id", jobID).
 		Str("user_id", claims.UserID.String()).
-		Str("image_id", image.ID.String()).
+		Str("image_id", imageID.String()).
 		Str("visibility", visibility).
 		Msg("Image published successfully")
 
-	// Return success response
+	// Return success response immediately; thumbnail generates in background
 	respondJSON(w, map[string]any{
 		"message":    "Image published successfully",
-		"image_id":   image.ID,
+		"image_id":   imageID,
 		"visibility": visibility,
 	}, http.StatusCreated)
 }
 
-// generateThumbnailAsync generates a thumbnail in the background
-func (h *PublishImageHandler) generateThumbnailAsync(jobID, generatedKey string, imageID uuid.UUID) {
+// generateThumbnailAsync generates a thumbnail in the background after publish
+func (h *PublishImageHandler) generateThumbnailAsync(imageID uuid.UUID, visibility string, generatedKey string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
 	logger.Info().
-		Str("job_id", jobID).
 		Str("image_id", imageID.String()).
+		Str("visibility", visibility).
 		Msg("Starting background thumbnail generation")
 
-	// Initialize services
 	minioService := storage.NewMinIOService()
 	thumbnailService := thumbnail.NewThumbnailService(minioService)
 
-	// Generate thumbnail
-	thumbnailKey, err := thumbnailService.GenerateThumbnail(ctx, jobID, generatedKey)
+	thumbnailKey, err := thumbnailService.GenerateThumbnail(ctx, imageID, visibility, generatedKey)
 	if err != nil {
 		logger.Error().Err(err).
-			Str("job_id", jobID).
+			Str("image_id", imageID.String()).
 			Msg("Failed to generate thumbnail")
 		return
 	}
 
-	// Update image record with thumbnail key via repository
 	if err := h.repo.UpdateImageThumbnailKey(ctx, imageID, thumbnailKey); err != nil {
 		logger.Error().Err(err).
-			Str("job_id", jobID).
+			Str("image_id", imageID.String()).
 			Msg("Failed to update image record with thumbnail key")
 		return
 	}
 
 	logger.Info().
-		Str("job_id", jobID).
+		Str("image_id", imageID.String()).
 		Str("thumbnail_key", thumbnailKey).
+		Str("visibility", visibility).
 		Msg("Thumbnail generated and database updated successfully")
 }
+

@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/lifecycle"
+	"github.com/safina57/animoji/gateway/internal/constants"
 )
 
 // MinIOClient wraps the MinIO client with low-level storage operations
@@ -91,3 +93,51 @@ func (c *MinIOClient) ListObjects(ctx context.Context, bucketName, prefix string
 		Recursive: true,
 	})
 }
+
+// CopyObject copies an object within the same bucket
+func (c *MinIOClient) CopyObject(ctx context.Context, bucketName, srcKey, dstKey string) error {
+	_, err := c.client.CopyObject(ctx,
+		minio.CopyDestOptions{
+			Bucket: bucketName,
+			Object: dstKey,
+		},
+		minio.CopySrcOptions{
+			Bucket: bucketName,
+			Object: srcKey,
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to copy object from %s to %s: %w", srcKey, dstKey, err)
+	}
+	return nil
+}
+
+// DeleteObject removes an object from MinIO
+func (c *MinIOClient) DeleteObject(ctx context.Context, bucketName, objectKey string) error {
+	if err := c.client.RemoveObject(ctx, bucketName, objectKey, minio.RemoveObjectOptions{}); err != nil {
+		return fmt.Errorf("failed to delete object %s: %w", objectKey, err)
+	}
+	return nil
+}
+
+// SetupBucketLifecycle configures ILM on the bucket to expire tmp/ objects after 24h
+func (c *MinIOClient) SetupBucketLifecycle(ctx context.Context, bucketName string) error {
+	cfg := lifecycle.NewConfiguration()
+	cfg.Rules = []lifecycle.Rule{
+		{
+			ID:     constants.TmpLifecycleRuleID,
+			Status: "Enabled",
+			RuleFilter: lifecycle.Filter{
+				Prefix: constants.PrefixTmp,
+			},
+			Expiration: lifecycle.Expiration{
+				Days: lifecycle.ExpirationDays(constants.TmpLifecycleDays),
+			},
+		},
+	}
+	if err := c.client.SetBucketLifecycle(ctx, bucketName, cfg); err != nil {
+		return fmt.Errorf("failed to set bucket lifecycle: %w", err)
+	}
+	return nil
+}
+

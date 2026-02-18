@@ -77,9 +77,9 @@ func HandleSubmitJob(w http.ResponseWriter, r *http.Request) {
 	// Generate job ID
 	jobID := uuid.New().String()
 
-	// Upload original image to storage
+	// Upload original image to temporary storage
 	ctx := r.Context()
-	inputKey, err := minioService.UploadOriginalImage(ctx, jobID, info.Data, info.Extension, info.MIMEType)
+	inputKey, err := minioService.UploadTmpOriginal(ctx, jobID, info.Data, info.Extension, info.MIMEType)
 	if err != nil {
 		logger.Error().Err(err).
 			Str("job_id", jobID).
@@ -96,10 +96,11 @@ func HandleSubmitJob(w http.ResponseWriter, r *http.Request) {
 		UserID:        claims.UserID,
 		Prompts:       []string{prompt},
 		OriginalKey:   inputKey,
-		GeneratedKeys: []string{},       
+		OriginalExt:   info.Extension,
+		GeneratedKeys: []string{},
 		Width:         info.Width,
 		Height:        info.Height,
-		IterationNum:  0,                
+		IterationNum:  0,
 		CreatedAt:     time.Now(),
 	}
 	if err := redisClient.SetJobMetadata(ctx, jobID, metadata); err != nil {

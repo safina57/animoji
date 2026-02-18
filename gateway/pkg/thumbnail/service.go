@@ -8,6 +8,7 @@ import (
 	"image/png"
 
 	"github.com/disintegration/imaging"
+	"github.com/google/uuid"
 	"github.com/safina57/animoji/gateway/internal/constants"
 	"github.com/safina57/animoji/gateway/pkg/logger"
 	"github.com/safina57/animoji/gateway/pkg/storage"
@@ -25,10 +26,12 @@ func NewThumbnailService(storage *storage.MinIOService) *ThumbnailService {
 	}
 }
 
-// GenerateThumbnail downloads an image, creates a scaled thumbnail, and uploads it to MinIO
+// GenerateThumbnail downloads a generated image, creates a scaled thumbnail, and uploads it.
+// The thumbnail is stored at thumbnails/{visibility}/{image_id}/thumbnail.png.
 func (s *ThumbnailService) GenerateThumbnail(
 	ctx context.Context,
-	jobID string,
+	imageID uuid.UUID,
+	visibility string,
 	generatedKey string,
 ) (string, error) {
 	// Download the generated image from MinIO
@@ -50,7 +53,6 @@ func (s *ThumbnailService) GenerateThumbnail(
 	newWidth := int(float64(originalWidth) * constants.ThumbnailScaleFactor)
 	newHeight := int(float64(originalHeight) * constants.ThumbnailScaleFactor)
 
-	// Ensure minimum dimensions of 1px
 	if newWidth < 1 {
 		newWidth = 1
 	}
@@ -67,14 +69,15 @@ func (s *ThumbnailService) GenerateThumbnail(
 		return "", fmt.Errorf("failed to encode thumbnail: %w", err)
 	}
 
-	// Upload to MinIO
-	key := fmt.Sprintf("%s%s/thumbnail.png", constants.PrefixThumbnails, jobID)
+	// Upload thumbnail keyed by image UUID under the correct visibility prefix
+	key := fmt.Sprintf("%s%s/thumbnail.png", constants.ThumbnailPrefix(visibility), imageID.String())
 	if err := s.storage.UploadFile(ctx, key, buf.Bytes(), "image/png"); err != nil {
 		return "", fmt.Errorf("failed to upload thumbnail: %w", err)
 	}
 
 	logger.Info().
-		Str("job_id", jobID).
+		Str("image_id", imageID.String()).
+		Str("visibility", visibility).
 		Str("key", key).
 		Int("original_width", originalWidth).
 		Int("original_height", originalHeight).

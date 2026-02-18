@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/safina57/animoji/gateway/internal/constants"
 	"github.com/safina57/animoji/gateway/internal/messaging"
+	"github.com/safina57/animoji/gateway/pkg/cache"
 	"github.com/safina57/animoji/gateway/pkg/logger"
 	"github.com/safina57/animoji/gateway/pkg/storage"
 )
@@ -97,17 +98,29 @@ func HandleJobStatusStream(w http.ResponseWriter, r *http.Request, eventManager 
 	}
 }
 
-// sendCompletedEvent sends a completed status event with presigned URLs
+// sendCompletedEvent sends a completed status event with presigned URLs for the tmp files
 func sendCompletedEvent(w http.ResponseWriter, flusher http.Flusher, jobID string, iterationNum int, storageService *storage.MinIOService, ctx context.Context) {
-	// Generate presigned URLs
-	originalURL, err := storageService.GetPresignedURLForOriginal(ctx, jobID, presignedURLExpiry)
+	// Fetch job metadata to get the original file extension
+	redisClient := cache.MustGetClient()
+	metadata, err := redisClient.GetJobMetadata(ctx, jobID)
+	if err != nil {
+		logger.Error().Err(err).Str("job_id", jobID).Msg("Failed to retrieve job metadata for SSE URLs")
+		sendSSEError(w, flusher, "Failed to retrieve result")
+		return
+	}
+
+	// Build the tmp object keys directly from known paths
+	originalKey := fmt.Sprintf("%s%s/original.%s", constants.PrefixTmp, jobID, metadata.OriginalExt)
+	resultKey := fmt.Sprintf("%s%s/result_v%d.png", constants.PrefixTmp, jobID, iterationNum)
+
+	originalURL, err := storageService.GetPresignedURLForKey(ctx, originalKey, presignedURLExpiry)
 	if err != nil {
 		logger.Error().Err(err).Str("job_id", jobID).Msg("Failed to generate presigned URL for original")
 		sendSSEError(w, flusher, "Failed to retrieve result")
 		return
 	}
 
-	resultURL, err := storageService.GetPresignedURLForResult(ctx, jobID, iterationNum, presignedURLExpiry)
+	resultURL, err := storageService.GetPresignedURLForKey(ctx, resultKey, presignedURLExpiry)
 	if err != nil {
 		logger.Error().Err(err).Str("job_id", jobID).Int("iteration_num", iterationNum).Msg("Failed to generate presigned URL for result")
 		sendSSEError(w, flusher, "Failed to retrieve result")
