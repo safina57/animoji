@@ -8,8 +8,6 @@ import (
 	"time"
 
 	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/lifecycle"
-	"github.com/safina57/animoji/gateway/internal/constants"
 )
 
 // MinIOClient wraps the MinIO client with low-level storage operations
@@ -120,24 +118,4 @@ func (c *MinIOClient) DeleteObject(ctx context.Context, bucketName, objectKey st
 	return nil
 }
 
-// SetupBucketLifecycle configures ILM on the bucket to expire tmp/ objects after 24h
-func (c *MinIOClient) SetupBucketLifecycle(ctx context.Context, bucketName string) error {
-	cfg := lifecycle.NewConfiguration()
-	cfg.Rules = []lifecycle.Rule{
-		{
-			ID:     constants.TmpLifecycleRuleID,
-			Status: "Enabled",
-			RuleFilter: lifecycle.Filter{
-				Prefix: constants.PrefixTmp,
-			},
-			Expiration: lifecycle.Expiration{
-				Days: lifecycle.ExpirationDays(constants.TmpLifecycleDays),
-			},
-		},
-	}
-	if err := c.client.SetBucketLifecycle(ctx, bucketName, cfg); err != nil {
-		return fmt.Errorf("failed to set bucket lifecycle: %w", err)
-	}
-	return nil
-}
 

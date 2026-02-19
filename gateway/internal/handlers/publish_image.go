@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/safina57/animoji/gateway/internal/auth"
+	"github.com/safina57/animoji/gateway/internal/constants"
 	"github.com/safina57/animoji/gateway/internal/models"
 	"github.com/safina57/animoji/gateway/internal/repository"
 	"github.com/safina57/animoji/gateway/pkg/cache"
@@ -48,11 +49,11 @@ func (h *PublishImageHandler) HandlePublishImage(w http.ResponseWriter, r *http.
 	// Extract visibility from query param (default: private)
 	visibility := r.URL.Query().Get("visibility")
 	if visibility == "" {
-		visibility = models.VisibilityPrivate
+		visibility = constants.VisibilityPrivate
 	}
 
 	// Validate visibility
-	if visibility != models.VisibilityPublic && visibility != models.VisibilityPrivate {
+	if visibility != constants.VisibilityPublic && visibility != constants.VisibilityPrivate {
 		respondError(w, "visibility must be 'public' or 'private'", http.StatusBadRequest)
 		return
 	}

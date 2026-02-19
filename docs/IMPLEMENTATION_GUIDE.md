@@ -77,10 +77,7 @@ thumbnails/private/{image_id}/thumbnail.png
 |--------|---------|
 | `UploadTmpOriginal(ctx, jobID, data, ext, mimeType)` | Upload original to `tmp/` |
 | `CheckTmpResultExists(ctx, jobID, iterationNum)` | Verify tmp result exists before publish |
-| `GetPresignedURLForTmpOriginal(ctx, jobID, ext, expiry)` | Presigned URL for tmp original |
-| `GetPresignedURLForTmpResult(ctx, jobID, iterationNum, expiry)` | Presigned URL for tmp result |
-| `GetPresignedURLForKey(ctx, objectKey, expiry)` | Presigned URL for any key |
-| `GetPublicURL(objectKey)` | Direct URL for public objects |
+| `GetPresignedURLForKey(ctx, objectKey, expiry)` | Presigned URL for any object key |
 | `PublishFiles(ctx, jobID, imageID, originalExt, iterationNum, visibility)` | Copy tmp → permanent |
 | `DeleteObject(ctx, objectKey)` | Delete a single object |
 

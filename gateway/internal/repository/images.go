@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/safina57/animoji/gateway/internal/constants"
 	"github.com/safina57/animoji/gateway/internal/dto"
 	"github.com/safina57/animoji/gateway/internal/models"
 	"gorm.io/gorm"
@@ -65,7 +66,7 @@ func (r *Repository) GetPublicImages(ctx context.Context, params dto.PaginationP
 
 	if err := r.db.WithContext(ctx).
 		Preload("User").
-		Where("visibility = ?", models.VisibilityPublic).
+		Where("visibility = ?", constants.VisibilityPublic).
 		Order("created_at DESC").
 		Limit(params.Limit).
 		Offset(params.Offset).

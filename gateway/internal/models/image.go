@@ -36,8 +36,3 @@ func (Image) TableName() string {
 	return "images"
 }
 
-// Visibility constants
-const (
-	VisibilityPublic  = "public"
-	VisibilityPrivate = "private"
-)

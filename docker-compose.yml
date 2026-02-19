@@ -134,7 +134,8 @@ services:
       mc mb myminio/animoji-images --ignore-existing;
       mc anonymous set download myminio/animoji-images/images/public;
       mc anonymous set download myminio/animoji-images/thumbnails/public;
-      echo 'MinIO initialized: bucket, public access policies configured';
+      printf '{\"Rules\":[{\"ID\":\"expire-tmp-24h\",\"Status\":\"Enabled\",\"Filter\":{\"Prefix\":\"tmp/\"},\"Expiration\":{\"Days\":1}}]}' | mc ilm import myminio/animoji-images;
+      echo 'MinIO initialized: bucket, public access policies, and ILM lifecycle configured';
       "
     networks:
       - animoji-network
