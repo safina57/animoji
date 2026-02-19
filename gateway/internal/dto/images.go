@@ -42,18 +42,16 @@ type ImageFeedItemDTO struct {
 	ID            uuid.UUID    `json:"id"`
 	ThumbnailURL  string       `json:"thumbnail_url"`
 	GeneratedURL  string       `json:"generated_url"`
-	Prompts       []string     `json:"prompts"`
-	Width         int          `json:"width"`
-	Height        int          `json:"height"`
-	CreatedAt     time.Time    `json:"created_at"`
 	User          ImageUserDTO `json:"user"`
 	IsLikedByUser *bool        `json:"is_liked_by_user,omitempty"` // nil when not authenticated
 }
 
-// ImageDetailDTO extends the feed item with likes count for the detail endpoint
+// ImageDetailDTO extends the feed item with full metadata for the detail endpoint
 type ImageDetailDTO struct {
 	ImageFeedItemDTO
-	LikesCount int `json:"likes_count"`
+	Prompts    []string  `json:"prompts"`
+	CreatedAt  time.Time `json:"created_at"`
+	LikesCount int       `json:"likes_count"`
 }
 
 // PublicImagesResponseDTO wraps a paginated list of public feed items
@@ -78,17 +76,10 @@ func NewImageFeedItemDTO(img *models.Image, storageService *storage.MinIOService
 		avatarURL = *img.User.AvatarURL
 	}
 
-	prompts := make([]string, len(img.Prompts))
-	copy(prompts, img.Prompts)
-
 	item := ImageFeedItemDTO{
 		ID:           img.ID,
 		ThumbnailURL: thumbnailURL,
 		GeneratedURL: storageService.GetPublicURL(img.GeneratedKey),
-		Prompts:      prompts,
-		Width:        img.Width,
-		Height:       img.Height,
-		CreatedAt:    img.CreatedAt,
 		User: ImageUserDTO{
 			ID:        img.User.ID,
 			Name:      img.User.Name,
@@ -104,10 +95,15 @@ func NewImageFeedItemDTO(img *models.Image, storageService *storage.MinIOService
 	return item
 }
 
-// NewImageDetailDTO builds an ImageDetailDTO (with likes count) for the detail endpoint
+// NewImageDetailDTO builds an ImageDetailDTO (with full metadata) for the detail endpoint
 func NewImageDetailDTO(img *models.Image, storageService *storage.MinIOService) ImageDetailDTO {
+	prompts := make([]string, len(img.Prompts))
+	copy(prompts, img.Prompts)
+
 	return ImageDetailDTO{
 		ImageFeedItemDTO: NewImageFeedItemDTO(img, storageService, nil),
+		Prompts:          prompts,
+		CreatedAt:        img.CreatedAt,
 		LikesCount:       img.LikesCount,
 	}
 }

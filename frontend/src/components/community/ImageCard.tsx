@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState, useCallback } from "react";
 import { Heart, Share2, Check } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@lib/ui/avatar";
 import { Button } from "@lib/ui/button";
@@ -10,10 +10,10 @@ import type { ImageFeedItem } from "@customTypes/image";
 
 interface ImageCardProps {
   item: ImageFeedItem;
-  onClick: () => void;
+  onClick: (item: ImageFeedItem) => void;
 }
 
-export function ImageCard({ item, onClick }: ImageCardProps) {
+export const ImageCard = memo(function ImageCard({ item, onClick }: ImageCardProps) {
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated);
 
@@ -22,9 +22,8 @@ export function ImageCard({ item, onClick }: ImageCardProps) {
   const [shareCopied, setShareCopied] = useState(false);
 
   const isLiked = item.is_liked_by_user === true;
-  const lastPrompt = item.prompts[item.prompts.length - 1] ?? "";
 
-  const handleLike = async (e: React.MouseEvent) => {
+  const handleLike = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!isAuthenticated) {
       window.location.href = "/auth";
@@ -44,9 +43,9 @@ export function ImageCard({ item, onClick }: ImageCardProps) {
     } finally {
       setLikeLoading(false);
     }
-  };
+  }, [dispatch, isAuthenticated, isLiked, item.id, likeLoading]);
 
-  const handleShare = async (e: React.MouseEvent) => {
+  const handleShare = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
       await navigator.clipboard.writeText(
@@ -57,7 +56,7 @@ export function ImageCard({ item, onClick }: ImageCardProps) {
     } catch {
       // clipboard unavailable — fail silently
     }
-  };
+  }, [item.id]);
 
   const actionBase =
     "rounded-full backdrop-blur-sm shadow-lg h-8 w-8 active:scale-95 border border-white/20 transition-all";
@@ -70,11 +69,11 @@ export function ImageCard({ item, onClick }: ImageCardProps) {
     <div
       role="button"
       tabIndex={0}
-      onClick={onClick}
+      onClick={() => onClick(item)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          onClick();
+          onClick(item);
         }
       }}
       className="group relative w-full text-left break-inside-avoid rounded-xl overflow-hidden bg-white dark:bg-slate-900 shadow-md hover:shadow-xl hover:border-primary/20 border border-transparent transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer"
@@ -83,7 +82,7 @@ export function ImageCard({ item, onClick }: ImageCardProps) {
       <div className="relative overflow-hidden">
         <img
           src={item.thumbnail_url}
-          alt={lastPrompt}
+          alt="Anime transformation"
           loading="lazy"
           onLoad={() => setLoaded(true)}
           className={cn(
@@ -142,4 +141,4 @@ export function ImageCard({ item, onClick }: ImageCardProps) {
       </div>
     </div>
   );
-}
+});

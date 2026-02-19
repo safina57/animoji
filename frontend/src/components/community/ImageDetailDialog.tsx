@@ -55,11 +55,14 @@ export function ImageDetailDialog({
   if (!item) return null;
 
   const displayItem = detail ?? item;
-  const lastPrompt = displayItem.prompts[displayItem.prompts.length - 1] ?? "";
-  const formattedDate = new Date(displayItem.created_at).toLocaleDateString(
-    "en-US",
-    { year: "numeric", month: "long", day: "numeric" }
-  );
+  const lastPrompt = detail ? (detail.prompts[detail.prompts.length - 1] ?? "") : "";
+  const formattedDate = detail
+    ? new Date(detail.created_at).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "";
 
   const handleToggleLike = async () => {
     if (!isAuthenticated) {
@@ -216,12 +219,12 @@ export function ImageDetailDialog({
                   <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
                     {lastPrompt}
                   </p>
-                  {displayItem.prompts.length > 1 && (
+                  {detail && detail.prompts.length > 1 ? (
                     <p className="text-xs text-slate-400 mt-1">
-                      +{displayItem.prompts.length - 1} refinement
-                      {displayItem.prompts.length > 2 ? "s" : ""}
+                      +{detail.prompts.length - 1} refinement
+                      {detail.prompts.length > 2 ? "s" : ""}
                     </p>
-                  )}
+                  ) : null}
                 </div>
               )}
 

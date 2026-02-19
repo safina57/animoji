@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@hooks/redux";
 import { loadFeed, loadMoreFeed } from "@store/slices/feedSlice";
 import { imageService } from "@services/imageService";
@@ -40,6 +40,41 @@ function SkeletonCard({ tall }: { tall?: boolean }) {
 const SKELETON_HEIGHTS: boolean[] = [
   false, true, false, true, true, false, true, false,
 ];
+
+// Hoisted static JSX — never recreated across renders
+const skeletonGrid = (
+  <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
+    {SKELETON_HEIGHTS.map((tall, i) => (
+      <SkeletonCard key={i} tall={tall} />
+    ))}
+  </div>
+);
+
+const emptyState = (
+  <div className="flex flex-col items-center justify-center py-24 text-center gap-6">
+    <ToriiGate className="w-32 h-32 text-primary opacity-10" />
+    <div className="space-y-2">
+      <p className="text-lg font-japanese text-slate-400 dark:text-slate-500">
+        まだ投稿がありません
+      </p>
+      <p className="text-slate-500 dark:text-slate-400">
+        No creations yet — be the first to publish!
+      </p>
+    </div>
+  </div>
+);
+
+const loadingMoreSpinner = (
+  <div className="flex justify-center mt-8">
+    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+
+const headerDecoration = (
+  <div className="absolute right-8 top-1/2 -translate-y-1/2 hidden lg:block opacity-10 pointer-events-none text-primary">
+    <ToriiGate className="w-24 h-24" />
+  </div>
+);
 
 export default function CommunityPage() {
   const dispatch = useAppDispatch();
@@ -90,16 +125,17 @@ export default function CommunityPage() {
     return () => observer.disconnect();
   }, [dispatch, hasMore, isLoading, isLoadingMore]);
 
-  const handleCardClick = (item: ImageFeedItem) => {
+  // Stable reference — memo on ImageCard only skips re-renders if onClick is stable
+  const handleCardClick = useCallback((item: ImageFeedItem) => {
     setSelectedImage(item);
     setDialogOpen(true);
     window.history.replaceState({}, "", `?image=${item.id}`);
-  };
+  }, []);
 
-  const handleDialogClose = () => {
+  const handleDialogClose = useCallback(() => {
     setDialogOpen(false);
     window.history.replaceState({}, "", window.location.pathname);
-  };
+  }, []);
 
   return (
     <div className="flex-1 bg-background-light dark:bg-background-dark overflow-y-auto">
@@ -117,57 +153,29 @@ export default function CommunityPage() {
           </p>
         </div>
 
-        {/* Decorative torii silhouette */}
-        <div className="absolute right-8 top-1/2 -translate-y-1/2 hidden lg:block opacity-10 pointer-events-none text-primary">
-          <ToriiGate className="w-24 h-24" />
-        </div>
+        {headerDecoration}
       </div>
 
       {/* Main content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        {/* Loading skeleton */}
-        {isLoading && (
-          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
-            {SKELETON_HEIGHTS.map((tall, i) => (
-              <SkeletonCard key={i} tall={tall} />
-            ))}
-          </div>
-        )}
+        {isLoading ? skeletonGrid : null}
 
-        {/* Empty state */}
-        {!isLoading && images.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-24 text-center gap-6">
-            <ToriiGate className="w-32 h-32 text-primary opacity-10" />
-            <div className="space-y-2">
-              <p className="text-lg font-japanese text-slate-400 dark:text-slate-500">
-                まだ投稿がありません
-              </p>
-              <p className="text-slate-500 dark:text-slate-400">
-                No creations yet — be the first to publish!
-              </p>
-            </div>
-          </div>
-        )}
+        {!isLoading && images.length === 0 ? emptyState : null}
 
         {/* Masonry grid */}
-        {!isLoading && images.length > 0 && (
+        {!isLoading && images.length > 0 ? (
           <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
             {images.map((item) => (
               <ImageCard
                 key={item.id}
                 item={item}
-                onClick={() => handleCardClick(item)}
+                onClick={handleCardClick}
               />
             ))}
           </div>
-        )}
+        ) : null}
 
-        {/* Loading more indicator */}
-        {isLoadingMore && (
-          <div className="flex justify-center mt-8">
-            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          </div>
-        )}
+        {isLoadingMore ? loadingMoreSpinner : null}
 
         {/* Infinite scroll sentinel */}
         <div ref={sentinelRef} className="h-1" />
