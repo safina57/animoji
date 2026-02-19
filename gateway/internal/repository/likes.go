@@ -110,6 +110,28 @@ func (r *Repository) GetUserLikes(ctx context.Context, userID uuid.UUID, params 
 	return images, nil
 }
 
+// GetLikedImageIDs returns a set of image IDs (from the provided list) that the given user has liked.
+// A single query is used — no N+1.
+func (r *Repository) GetLikedImageIDs(ctx context.Context, userID uuid.UUID, imageIDs []uuid.UUID) (map[uuid.UUID]bool, error) {
+	if len(imageIDs) == 0 {
+		return map[uuid.UUID]bool{}, nil
+	}
+
+	var likes []*models.Like
+	if err := r.db.WithContext(ctx).
+		Select("image_id").
+		Where("user_id = ? AND image_id IN ?", userID, imageIDs).
+		Find(&likes).Error; err != nil {
+		return nil, fmt.Errorf("failed to get liked image IDs: %w", err)
+	}
+
+	result := make(map[uuid.UUID]bool, len(likes))
+	for _, l := range likes {
+		result[l.ImageID] = true
+	}
+	return result, nil
+}
+
 // GetLikesCount returns the total number of likes for an image
 func (r *Repository) GetLikesCount(ctx context.Context, imageID uuid.UUID) (int64, error) {
 	var count int64

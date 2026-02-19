@@ -39,14 +39,23 @@ func newRouter(
 		authConfig.JWTExpiry,
 	)
 
-	// Create publish handler
+	// Create handlers
 	publishHandler := handlers.NewPublishImageHandler(repo)
+	publicImagesHandler := handlers.NewPublicImagesHandler(repo, storageService)
+	likeHandler := handlers.NewLikeImageHandler(repo)
 
 	// Public routes
 	r.Get("/health", handlers.HandleHealth)
 	r.Get("/auth/google/login", googleLogin)
 	r.Get("/auth/google/callback", googleCallback)
 	r.Post("/auth/logout", logout)
+
+	// Image routes — optionally authenticated so is_liked_by_user is populated for logged-in users
+	r.Group(func(r chi.Router) {
+		r.Use(appMiddleware.OptionalAuthenticate(authConfig.PublicKey))
+		r.Get("/images/public", publicImagesHandler.HandleGetPublicImages)
+		r.Get("/images/{image_id}", publicImagesHandler.HandleGetImageDetail)
+	})
 
 	// Protected routes
 	r.Group(func(r chi.Router) {
@@ -59,6 +68,10 @@ func newRouter(
 		})
 		r.Post("/jobs/{job_id}/refine", handlers.HandleRefineJob)
 		r.Post("/images/{job_id}/publish", publishHandler.HandlePublishImage)
+
+		r.Post("/images/{image_id}/like", likeHandler.HandleLikeImage)
+		r.Delete("/images/{image_id}/like", likeHandler.HandleUnlikeImage)
+		r.Get("/images/{image_id}/liked", likeHandler.HandleCheckLiked)
 	})
 
 	return r

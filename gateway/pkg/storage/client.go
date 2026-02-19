@@ -118,4 +118,9 @@ func (c *MinIOClient) DeleteObject(ctx context.Context, bucketName, objectKey st
 	return nil
 }
 
+// GetPublicURL returns the public URL for a given bucket and object key
+func (c *MinIOClient) GetPublicURL(bucketName, objectKey string) string {
+	return fmt.Sprintf("%s/%s/%s", c.publicBaseURL, bucketName, objectKey)
+}
+
 
