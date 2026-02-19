@@ -132,7 +132,10 @@ services:
       /bin/sh -c "
       mc alias set myminio http://minio:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
       mc mb myminio/animoji-images --ignore-existing;
-      echo 'Bucket animoji-images initialized successfully';
+      mc anonymous set download myminio/animoji-images/images/public;
+      mc anonymous set download myminio/animoji-images/thumbnails/public;
+      printf '{\"Rules\":[{\"ID\":\"expire-tmp-24h\",\"Status\":\"Enabled\",\"Filter\":{\"Prefix\":\"tmp/\"},\"Expiration\":{\"Days\":1}}]}' | mc ilm import myminio/animoji-images;
+      echo 'MinIO initialized: bucket, public access policies, and ILM lifecycle configured';
       "
     networks:
       - animoji-network

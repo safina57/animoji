@@ -30,4 +30,12 @@ export interface GenerationResult {
   generatedImageUrl: string;
   timestamp: number;
   iterationNum: number;
+  publishedImageId?: string; // Set after successful publish
+}
+
+/** Response from POST /images/{job_id}/publish */
+export interface PublishImageResponse {
+  message: string;
+  image_id: string;
+  visibility: string;
 }

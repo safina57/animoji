@@ -91,3 +91,31 @@ func (c *MinIOClient) ListObjects(ctx context.Context, bucketName, prefix string
 		Recursive: true,
 	})
 }
+
+// CopyObject copies an object within the same bucket
+func (c *MinIOClient) CopyObject(ctx context.Context, bucketName, srcKey, dstKey string) error {
+	_, err := c.client.CopyObject(ctx,
+		minio.CopyDestOptions{
+			Bucket: bucketName,
+			Object: dstKey,
+		},
+		minio.CopySrcOptions{
+			Bucket: bucketName,
+			Object: srcKey,
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to copy object from %s to %s: %w", srcKey, dstKey, err)
+	}
+	return nil
+}
+
+// DeleteObject removes an object from MinIO
+func (c *MinIOClient) DeleteObject(ctx context.Context, bucketName, objectKey string) error {
+	if err := c.client.RemoveObject(ctx, bucketName, objectKey, minio.RemoveObjectOptions{}); err != nil {
+		return fmt.Errorf("failed to delete object %s: %w", objectKey, err)
+	}
+	return nil
+}
+
+

@@ -32,10 +32,30 @@ var (
 
 // MinIO storage configuration
 const (
-	BucketName        = "animoji-images"
-	PrefixOriginals   = "originals/"
-	PrefixGenerated   = "generated/"
-	PrefixThumbnails  = "thumbnails/"
+	BucketName = "animoji-images"
+
+	// Temporary prefix
+	PrefixTmp = "tmp/"
+
+	// Published image prefixes
+	PrefixImagesPublic  = "images/public/"
+	PrefixImagesPrivate = "images/private/"
+
+	// Thumbnail prefixes
+	PrefixThumbnailsPublic  = "thumbnails/public/"
+	PrefixThumbnailsPrivate = "thumbnails/private/"
+)
+
+// Image visibility constants
+const (
+	VisibilityPublic  = "public"
+	VisibilityPrivate = "private"
+)
+
+// MinIO ILM configuration
+const (
+	TmpLifecycleRuleID = "expire-tmp-24h"
+	TmpLifecycleDays   = 1
 )
 
 // Image dimension limits
@@ -75,5 +95,5 @@ const (
 // Redis configuration
 const (
 	RedisDB  = 0
-	RedisTTL = 15 * 60 * time.Second
+	RedisTTL = 24 * time.Hour // 24h matches the MinIO ILM tmp/ expiry window
 )

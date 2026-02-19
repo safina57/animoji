@@ -3,9 +3,9 @@ package storage
 import (
 	"context"
 	"fmt"
-	"path/filepath"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/safina57/animoji/gateway/internal/constants"
 )
 
@@ -19,49 +19,59 @@ func NewMinIOService() *MinIOService {
 	}
 }
 
-// UploadOriginalImage uploads a validated original image to the originals/ prefix
-// Returns the object key (path) in MinIO
-func (s *MinIOService) UploadOriginalImage(ctx context.Context, jobID string, data []byte, ext string, mimeType string) (string, error) {
-	// Construct object key: originals/{job_id}/input.{ext}
-	objectKey := fmt.Sprintf("%s%s/input.%s", constants.PrefixOriginals, jobID, ext)
-
-	// Upload to MinIO
+// UploadTmpOriginal uploads a validated original image to the tmp/ prefix
+// Returns the object key stored in MinIO
+func (s *MinIOService) UploadTmpOriginal(ctx context.Context, jobID string, data []byte, ext string, mimeType string) (string, error) {
+	objectKey := fmt.Sprintf("%s%s/original.%s", constants.PrefixTmp, jobID, ext)
 	if err := s.client.UploadFile(ctx, constants.BucketName, objectKey, data, mimeType); err != nil {
-		return "", fmt.Errorf("failed to upload original image: %w", err)
+		return "", fmt.Errorf("failed to upload tmp original: %w", err)
 	}
-
 	return objectKey, nil
 }
 
-// CheckResultExists checks if a result image exists for a job (latest iteration)
-func (s *MinIOService) CheckResultExists(ctx context.Context, jobID string, iterationNum int) (bool, error) {
-	objectKey := fmt.Sprintf("%s%s/result_v%d.png", constants.PrefixGenerated, jobID, iterationNum)
+// CheckTmpResultExists checks if a tmp result image exists for a job at a given iteration
+func (s *MinIOService) CheckTmpResultExists(ctx context.Context, jobID string, iterationNum int) (bool, error) {
+	objectKey := fmt.Sprintf("%s%s/result_v%d.png", constants.PrefixTmp, jobID, iterationNum)
 	return s.client.ObjectExists(ctx, constants.BucketName, objectKey)
 }
 
-// GetPresignedURLForOriginal generates a presigned URL for the original image
-func (s *MinIOService) GetPresignedURLForOriginal(ctx context.Context, jobID string, expiry time.Duration) (string, error) {
-	// Find the extension by listing objects in the original's prefix
-	prefix := fmt.Sprintf("%s%s/", constants.PrefixOriginals, jobID)
-	objectCh := s.client.ListObjects(ctx, constants.BucketName, prefix)
-
-	object, ok := <-objectCh
-	if !ok {
-		return "", fmt.Errorf("original not found for job %s", jobID)
-	}
-	if object.Err != nil {
-		return "", fmt.Errorf("failed to list objects: %w", object.Err)
-	}
-
-	ext := filepath.Ext(object.Key)
-	objectKey := fmt.Sprintf("%s%s/input%s", constants.PrefixOriginals, jobID, ext)
+// GetPresignedURLForKey generates a presigned URL for any arbitrary object key
+func (s *MinIOService) GetPresignedURLForKey(ctx context.Context, objectKey string, expiry time.Duration) (string, error) {
 	return s.client.GetPresignedURL(ctx, constants.BucketName, objectKey, expiry)
 }
 
-// GetPresignedURLForResult generates a presigned URL for the result image
-func (s *MinIOService) GetPresignedURLForResult(ctx context.Context, jobID string, iterationNum int, expiry time.Duration) (string, error) {
-	objectKey := fmt.Sprintf("%s%s/result_v%d.png", constants.PrefixGenerated, jobID, iterationNum)
-	return s.client.GetPresignedURL(ctx, constants.BucketName, objectKey, expiry)
+// PublishFiles copies the tmp original and tmp result to their permanent published paths.
+func (s *MinIOService) PublishFiles(
+	ctx context.Context,
+	jobID string,
+	imageID uuid.UUID,
+	originalExt string,
+	iterationNum int,
+	visibility string,
+) (string, string, error) {
+	prefix := constants.ImagePrefix(visibility)
+
+	imageIDStr := imageID.String()
+
+	srcOriginalKey := fmt.Sprintf("%s%s/original.%s", constants.PrefixTmp, jobID, originalExt)
+	srcResultKey := fmt.Sprintf("%s%s/result_v%d.png", constants.PrefixTmp, jobID, iterationNum)
+
+	dstOriginalKey := fmt.Sprintf("%s%s/original.%s", prefix, imageIDStr, originalExt)
+	dstResultKey := fmt.Sprintf("%s%s/result.png", prefix, imageIDStr)
+
+	if err := s.client.CopyObject(ctx, constants.BucketName, srcOriginalKey, dstOriginalKey); err != nil {
+		return "", "", fmt.Errorf("failed to copy original to permanent storage: %w", err)
+	}
+
+	if err := s.client.CopyObject(ctx, constants.BucketName, srcResultKey, dstResultKey); err != nil {
+		// Best-effort rollback of the already-copied original — non-blocking
+		go func(key string) {
+			_ = s.client.DeleteObject(context.Background(), constants.BucketName, key)
+		}(dstOriginalKey)
+		return "", "", fmt.Errorf("failed to copy result to permanent storage: %w", err)
+	}
+
+	return dstOriginalKey, dstResultKey, nil
 }
 
 // DownloadFile downloads a file from MinIO using the object key
@@ -72,4 +82,9 @@ func (s *MinIOService) DownloadFile(ctx context.Context, objectKey string) ([]by
 // UploadFile uploads a file to MinIO using the object key
 func (s *MinIOService) UploadFile(ctx context.Context, objectKey string, data []byte, contentType string) error {
 	return s.client.UploadFile(ctx, constants.BucketName, objectKey, data, contentType)
+}
+
+// DeleteObject removes an object from the bucket by key
+func (s *MinIOService) DeleteObject(ctx context.Context, objectKey string) error {
+	return s.client.DeleteObject(ctx, constants.BucketName, objectKey)
 }

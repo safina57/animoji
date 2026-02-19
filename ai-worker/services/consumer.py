@@ -151,7 +151,7 @@ class JobConsumer:
             processed_data, content_type = result.image_data, result.content_type
 
             # Generate versioned output key for iteration
-            output_key = f"generated/{job_id}/result_v{job_message.iteration_num}.png"
+            output_key = f"tmp/{job_id}/result_v{job_message.iteration_num}.png"
             self.logger.info(
                 "Uploading processed image",
                 extra={"job_id": job_id, "output_key": output_key, "iteration_num": job_message.iteration_num},

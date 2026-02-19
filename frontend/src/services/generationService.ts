@@ -1,4 +1,4 @@
-import type { SubmitJobResponse } from "@customTypes/generation";
+import type { SubmitJobResponse, PublishImageResponse } from "@customTypes/generation";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -44,5 +44,25 @@ export async function submitRefinement(
   }
 
   // Response contains SAME job_id with updated iteration count
+  return response.json();
+}
+
+export async function publishImage(
+  jobId: string,
+  visibility: 'public' | 'private'
+): Promise<PublishImageResponse> {
+  const response = await fetch(
+    `${API_URL}/images/${jobId}/publish?visibility=${visibility}`,
+    {
+      method: 'POST',
+      credentials: 'include',
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Failed to publish image' }));
+    throw new Error(error.error || 'Failed to publish image');
+  }
+
   return response.json();
 }
