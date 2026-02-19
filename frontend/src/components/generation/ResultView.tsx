@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@hooks/redux";
 import { resetGeneration, markResultAsPublished } from "@store/slices/generationSlice";
 import { publishImage } from "@services/generationService";
@@ -75,6 +76,21 @@ interface ResultItemProps {
 function ResultItem({ result, index, isLatest, jobId }: ResultItemProps) {
   const timeAgo = formatTimeAgo(result.timestamp);
 
+  async function handleDownload(url: string, iterationNum: number) {
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download = `animoji-take-${iterationNum}.png`;
+      a.click();
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      window.open(url, "_blank");
+    }
+  }
+
   return (
     <div
       className="relative animate-slide-up"
@@ -121,9 +137,7 @@ function ResultItem({ result, index, isLatest, jobId }: ResultItemProps) {
 
           {/* Secondary action buttons — visible on hover */}
           <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <ActionButton icon="favorite_border" />
-            <ActionButton icon="download" />
-            <ActionButton icon="share" />
+            <ActionButton icon="download" onClick={() => handleDownload(result.generatedImageUrl, result.iterationNum)} />
           </div>
 
           {/* Publish button — always visible, bottom-right, latest only */}
@@ -147,6 +161,7 @@ interface PublishButtonProps {
 
 function PublishButton({ jobId, result }: PublishButtonProps) {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [visibility, setVisibility] = useState<"public" | "private">("public");
   const [isPublishing, setIsPublishing] = useState(false);
@@ -167,6 +182,7 @@ function PublishButton({ jobId, result }: PublishButtonProps) {
         })
       );
       setOpen(false);
+      navigate(`/?image=${response.image_id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to publish");
     } finally {
@@ -324,9 +340,9 @@ function VisibilityOption({ selected, onSelect, icon, label, description }: Visi
 
 /* ── Small sub-components ── */
 
-function ActionButton({ icon }: { icon: string }) {
+function ActionButton({ icon, onClick }: { icon: string; onClick?: () => void }) {
   return (
-    <button className="w-10 h-10 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm hover:bg-primary hover:text-white transition-all shadow-lg border border-primary/10 flex items-center justify-center">
+    <button onClick={onClick} className="w-10 h-10 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm hover:bg-primary hover:text-white transition-all shadow-lg border border-primary/10 flex items-center justify-center">
       <span className="material-symbols-outlined text-lg">{icon}</span>
     </button>
   );

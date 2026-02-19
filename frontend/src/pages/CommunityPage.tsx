@@ -79,7 +79,7 @@ export default function CommunityPage() {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore && !isLoading) {
           dispatch(loadMoreFeed());
         }
       },
@@ -88,7 +88,7 @@ export default function CommunityPage() {
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, [dispatch, hasMore, isLoadingMore]);
+  }, [dispatch, hasMore, isLoading, isLoadingMore]);
 
   const handleCardClick = (item: ImageFeedItem) => {
     setSelectedImage(item);
