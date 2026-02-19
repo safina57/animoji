@@ -88,3 +88,8 @@ func (s *MinIOService) UploadFile(ctx context.Context, objectKey string, data []
 func (s *MinIOService) DeleteObject(ctx context.Context, objectKey string) error {
 	return s.client.DeleteObject(ctx, constants.BucketName, objectKey)
 }
+
+// GetPublicURL returns the public URL for a given object key in the default bucket
+func (s *MinIOService) GetPublicURL(objectKey string) string {
+	return s.client.GetPublicURL(constants.BucketName, objectKey)
+}

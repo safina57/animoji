@@ -9,6 +9,33 @@ import (
 	"github.com/safina57/animoji/gateway/internal/constants"
 )
 
+// OptionalAuthenticate tries to extract and validate a JWT but never rejects the request.
+// If a valid token is found, user claims are injected into the context for downstream handlers.
+func OptionalAuthenticate(publicKey *rsa.PublicKey) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			var tokenString string
+
+			if cookie, err := r.Cookie(constants.CookieNameAuthToken); err == nil {
+				tokenString = cookie.Value
+			} else if header := r.Header.Get("Authorization"); header != "" {
+				parts := strings.SplitN(header, " ", 2)
+				if len(parts) == 2 && parts[0] == "Bearer" {
+					tokenString = parts[1]
+				}
+			}
+
+			if tokenString != "" {
+				if claims, err := auth.ValidateJWT(tokenString, publicKey); err == nil {
+					r = r.WithContext(auth.InjectUserIntoContext(r.Context(), claims))
+				}
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
 // Authenticate is a middleware that validates JWT tokens and injects user claims into context
 func Authenticate(publicKey *rsa.PublicKey) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {

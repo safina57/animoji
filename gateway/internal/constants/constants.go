@@ -68,7 +68,7 @@ const (
 
 // Thumbnail configuration
 const (
-	ThumbnailScaleFactor = 0.25
+	ThumbnailScaleFactor = 0.5
 )
 
 // NATS configuration
