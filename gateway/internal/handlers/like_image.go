@@ -1,11 +1,12 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"github.com/safina57/animoji/gateway/internal/auth"
 	"github.com/safina57/animoji/gateway/internal/repository"
 )
@@ -44,7 +45,8 @@ func (h *LikeImageHandler) HandleLikeImage(w http.ResponseWriter, r *http.Reques
 			respondError(w, "image not found", http.StatusNotFound)
 			return
 		}
-		if strings.Contains(err.Error(), "duplicate") || strings.Contains(err.Error(), "unique") {
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) && pqErr.Code == "23505" {
 			respondError(w, "already liked", http.StatusConflict)
 			return
 		}

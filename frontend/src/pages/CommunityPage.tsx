@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@hooks/redux";
 import { loadFeed, loadMoreFeed } from "@store/slices/feedSlice";
+import { imageService } from "@services/imageService";
 import { ImageCard } from "@components/community/ImageCard";
 import { ImageDetailDialog } from "@components/community/ImageDetailDialog";
 import type { ImageFeedItem } from "@customTypes/image";
@@ -53,9 +54,22 @@ export default function CommunityPage() {
 
   const sentinelRef = useRef<HTMLDivElement>(null);
 
-  // Initial load
+  // Initial load + deep-link: open the dialog for ?image={id} on page load
   useEffect(() => {
     dispatch(loadFeed());
+
+    const imageId = new URLSearchParams(window.location.search).get("image");
+    if (imageId) {
+      imageService
+        .fetchImageDetail(imageId)
+        .then((img) => {
+          setSelectedImage(img);
+          setDialogOpen(true);
+        })
+        .catch(() => {
+          // Unknown or private image — silently ignore
+        });
+    }
   }, [dispatch]);
 
   // Infinite scroll sentinel
@@ -69,7 +83,7 @@ export default function CommunityPage() {
           dispatch(loadMoreFeed());
         }
       },
-      { rootMargin: "200px" }
+      { rootMargin: "100px" }
     );
 
     observer.observe(el);
@@ -79,10 +93,12 @@ export default function CommunityPage() {
   const handleCardClick = (item: ImageFeedItem) => {
     setSelectedImage(item);
     setDialogOpen(true);
+    window.history.replaceState({}, "", `?image=${item.id}`);
   };
 
   const handleDialogClose = () => {
     setDialogOpen(false);
+    window.history.replaceState({}, "", window.location.pathname);
   };
 
   return (

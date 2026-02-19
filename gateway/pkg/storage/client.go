@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/url"
 	"strings"
 	"time"
 
@@ -120,7 +121,11 @@ func (c *MinIOClient) DeleteObject(ctx context.Context, bucketName, objectKey st
 
 // GetPublicURL returns the public URL for a given bucket and object key
 func (c *MinIOClient) GetPublicURL(bucketName, objectKey string) string {
-	return fmt.Sprintf("%s/%s/%s", c.publicBaseURL, bucketName, objectKey)
+	segments := strings.Split(objectKey, "/")
+	for i, seg := range segments {
+		segments[i] = url.PathEscape(seg)
+	}
+	return fmt.Sprintf("%s/%s/%s", c.publicBaseURL, bucketName, strings.Join(segments, "/"))
 }
 
 

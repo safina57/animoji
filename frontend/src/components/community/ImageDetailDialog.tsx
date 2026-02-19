@@ -29,7 +29,7 @@ export function ImageDetailDialog({
   const [copyFeedback, setCopyFeedback] = useState(false);
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // On open: fetch fresh detail (for accurate likes_count) + check liked state
+  // On open: fetch fresh detail (for accurate likes_count)
   useEffect(() => {
     if (!item || !open) return;
 
@@ -45,7 +45,9 @@ export function ImageDetailDialog({
       })
       .catch(() => {});
 
-    if (isAuthenticated) {
+    if (item.is_liked_by_user !== undefined) {
+      setLiked(item.is_liked_by_user);
+    } else if (isAuthenticated) {
       imageService.checkLiked(item.id).then(setLiked).catch(() => {});
     }
   }, [item?.id, open, isAuthenticated]);

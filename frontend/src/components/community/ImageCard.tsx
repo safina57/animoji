@@ -67,10 +67,17 @@ export function ImageCard({ item, onClick }: ImageCardProps) {
     "bg-primary text-white hover:bg-primary/90 border-transparent";
 
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
-      className="group relative w-full text-left break-inside-avoid rounded-xl overflow-hidden bg-white dark:bg-slate-900 shadow-md hover:shadow-xl hover:border-primary/20 border border-transparent transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      className="group relative w-full text-left break-inside-avoid rounded-xl overflow-hidden bg-white dark:bg-slate-900 shadow-md hover:shadow-xl hover:border-primary/20 border border-transparent transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer"
     >
       {/* Image with blur-up fade-in */}
       <div className="relative overflow-hidden">
@@ -133,6 +140,6 @@ export function ImageCard({ item, onClick }: ImageCardProps) {
           {item.user.name}
         </span>
       </div>
-    </button>
+    </div>
   );
 }
