@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -27,26 +26,9 @@ func NewPublicImagesHandler(repo *repository.Repository, storageService *storage
 // When the request carries a valid JWT, each item includes is_liked_by_user.
 // GET /images/public
 func (h *PublicImagesHandler) HandleGetPublicImages(w http.ResponseWriter, r *http.Request) {
-	limit := 20
-	offset := 0
+	params := dto.ParsePaginationParams(r, 20)
 
-	if v := r.URL.Query().Get("limit"); v != "" {
-		if n, err := strconv.Atoi(v); err == nil {
-			if n < 1 {
-				n = 1
-			} else if n > 50 {
-				n = 50
-			}
-			limit = n
-		}
-	}
-	if v := r.URL.Query().Get("offset"); v != "" {
-		if n, err := strconv.Atoi(v); err == nil && n >= 0 {
-			offset = n
-		}
-	}
-
-	images, err := h.repo.GetPublicImages(r.Context(), dto.PaginationParams{Limit: limit, Offset: offset})
+	images, err := h.repo.GetPublicImages(r.Context(), params)
 	if err != nil {
 		respondError(w, "Failed to fetch images", http.StatusInternalServerError)
 		return
@@ -71,9 +53,9 @@ func (h *PublicImagesHandler) HandleGetPublicImages(w http.ResponseWriter, r *ht
 
 	respondJSON(w, dto.PublicImagesResponseDTO{
 		Images:  items,
-		HasMore: len(images) == limit,
-		Offset:  offset,
-		Limit:   limit,
+		HasMore: len(images) == params.Limit,
+		Offset:  params.Offset,
+		Limit:   params.Limit,
 	}, http.StatusOK)
 }
 

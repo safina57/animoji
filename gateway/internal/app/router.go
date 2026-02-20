@@ -42,6 +42,7 @@ func newRouter(
 	// Create handlers
 	publishHandler := handlers.NewPublishImageHandler(repo)
 	publicImagesHandler := handlers.NewPublicImagesHandler(repo, storageService)
+	userImagesHandler := handlers.NewUserImagesHandler(repo, storageService)
 	likeHandler := handlers.NewLikeImageHandler(repo)
 
 	// Public routes
@@ -62,6 +63,7 @@ func newRouter(
 		r.Use(appMiddleware.Authenticate(authConfig.PublicKey))
 
 		r.Get("/auth/me", getMe)
+		r.Get("/images/me", userImagesHandler.HandleGetMyImages)
 		r.Post("/submit-job", handlers.HandleSubmitJob)
 		r.Get("/job-status/{job_id}/stream", func(w http.ResponseWriter, r *http.Request) {
 			handlers.HandleJobStatusStream(w, r, eventManager, storageService)

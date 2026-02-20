@@ -3,8 +3,24 @@ import type { ImageDetailItem, PublicImagesResponse } from "@customTypes/image";
 const API_URL = import.meta.env.VITE_API_URL;
 
 export const FEED_PAGE_SIZE = 20;
+export const GALLERY_PAGE_SIZE = 20;
 
 export const imageService = {
+  async fetchMyImages(
+    visibility: "public" | "private",
+    limit: number,
+    offset: number
+  ): Promise<PublicImagesResponse> {
+    const response = await fetch(
+      `${API_URL}/images/me?visibility=${visibility}&limit=${limit}&offset=${offset}`,
+      { credentials: "include" }
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch your images");
+    }
+    return response.json();
+  },
+
   async fetchPublicImages(
     limit: number,
     offset: number

@@ -76,9 +76,16 @@ export default function Navbar() {
             >
               Create
             </NavLink>
-            <span className="hover:text-primary transition-colors text-slate-600 dark:text-slate-400 opacity-50 cursor-not-allowed">
+            <NavLink
+              to="/gallery"
+              className={({ isActive }) =>
+                isActive
+                  ? "text-primary"
+                  : "hover:text-primary transition-colors text-slate-600 dark:text-slate-400"
+              }
+            >
               Gallery
-            </span>
+            </NavLink>
           </div>
         </div>
 
