@@ -8,8 +8,6 @@ const MESSAGES = [
   "Almost there...",
 ];
 
-const PATH_LENGTH = 5618.03;
-
 export default function LoadingDialog() {
   const overlayRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -21,6 +19,11 @@ export default function LoadingDialog() {
   const [msgIndex, setMsgIndex] = useState(0);
 
   useEffect(() => {
+    const pathEl = pathRef.current;
+    if (!pathEl) return;
+
+    const pathLength = pathEl.getTotalLength();
+
     const ctx = gsap.context(() => {
       // Backdrop + card entrance
       const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
@@ -32,19 +35,19 @@ export default function LoadingDialog() {
       );
 
       // SVG stroke draw → sweep → loop
-      gsap.set(pathRef.current, {
-        strokeDasharray: PATH_LENGTH,
-        strokeDashoffset: PATH_LENGTH,
+      gsap.set(pathEl, {
+        strokeDasharray: pathLength,
+        strokeDashoffset: pathLength,
       });
 
       gsap.timeline({ repeat: -1, repeatDelay: 0.9, delay: 0.4 })
-        .to(pathRef.current, {
+        .to(pathEl, {
           strokeDashoffset: 0,
           duration: 2.6,
           ease: "power2.inOut",
         })
-        .to(pathRef.current, {
-          strokeDashoffset: -PATH_LENGTH,
+        .to(pathEl, {
+          strokeDashoffset: -pathLength,
           duration: 1.8,
           ease: "power2.in",
           delay: 1.2,

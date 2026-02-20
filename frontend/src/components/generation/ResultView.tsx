@@ -46,9 +46,7 @@ export default function ResultView() {
         </div>
 
         {/* Results Timeline */}
-        <div className="space-y-12 relative">
-          <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/30 via-primary/10 to-transparent hidden md:block" />
-
+        <div className="space-y-12">
           {results.map((result, index) => (
             <ResultItem
               key={index}
@@ -93,24 +91,25 @@ function ResultItem({ result, index, isLatest, jobId }: ResultItemProps) {
 
   return (
     <div
-      className="relative animate-slide-up"
+      className="flex gap-4 animate-slide-up"
       style={{ animationDelay: `${index * 100}ms` }}
     >
-      {/* Timeline dot */}
-      <div className="absolute -left-1 md:left-[30px] top-8 w-3 h-3 rounded-full bg-primary border-2 border-background-light dark:border-background-dark shadow-lg hidden md:block" />
+      {/* Timeline column: dot + line, always centered via flex */}
+      <div className="hidden md:flex flex-col items-center w-8 shrink-0">
+        <div className="mt-8 w-3 h-3 rounded-full bg-primary border-2 border-background-light dark:border-background-dark shadow-lg shrink-0" />
+        <div className="flex-1 w-0.5 mt-2 bg-gradient-to-b from-primary/30 via-primary/10 to-transparent" />
+      </div>
 
-      <div className="md:ml-20 space-y-4">
+      <div className="flex-1 min-w-0 space-y-4">
         {/* Prompt header */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
             <div className="flex items-center gap-2.5 mb-1">
-              <span className="inline-flex items-center gap-1.5">
-                <span className="w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center shrink-0 shadow-sm shadow-primary/30">
-                  {result.iterationNum}
-                </span>
-                <span className="text-xs font-semibold tracking-wide text-slate-500 dark:text-slate-400">
-                  Take {result.iterationNum}
-                </span>
+              <span className="w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center shrink-0 shadow-sm shadow-primary/30">
+                {result.iterationNum}
+              </span>
+              <span className="text-xs font-semibold tracking-wide text-slate-500 dark:text-slate-400">
+                Take {result.iterationNum}
               </span>
               <span className="text-slate-300 dark:text-slate-600 text-xs">·</span>
               <span className="text-xs text-slate-400">{timeAgo}</span>
