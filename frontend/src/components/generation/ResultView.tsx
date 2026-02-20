@@ -87,7 +87,7 @@ function ResultItem({ result, index, isLatest, jobId }: ResultItemProps) {
       a.click();
       URL.revokeObjectURL(objectUrl);
     } catch {
-      window.open(url, "_blank");
+      window.open(url, "_blank", "noopener,noreferrer");
     }
   }
 
@@ -204,18 +204,20 @@ function PublishButton({ jobId, result }: PublishButtonProps) {
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setError(null); }}>
       {/* Trigger — always-visible button on image */}
-      <button
+      <Button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/90 backdrop-blur-sm text-white shadow-lg hover:bg-primary transition-all"
+        variant="outline"
+        size="sm"
+        className="flex items-center gap-1.5 bg-white/90 dark:bg-paper-dark/90 border border-primary/10 rounded-2xl text-primary hover:border-primary/30 hover:bg-primary hover:text-white backdrop-blur-sm shadow-lg transition-all"
       >
         <span className="material-symbols-outlined text-sm">cloud_upload</span>
         <span className="text-xs font-semibold">Publish</span>
-      </button>
+      </Button>
 
       {/* Custom portal — blur overlay, no X button, controlled size */}
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/25 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <DialogPrimitive.Content className="fixed left-[50%] top-[50%] z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-primary/10 bg-white dark:bg-slate-900 p-0 overflow-hidden shadow-2xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
+        <DialogPrimitive.Content className="fixed left-[50%] top-[50%] z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-3xl border border-primary/10 bg-paper-light dark:bg-paper-dark paper-texture p-0 overflow-hidden shadow-xl shadow-primary/10 duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
           {/* Top accent bar */}
           <div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
 

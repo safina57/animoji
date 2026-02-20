@@ -59,9 +59,9 @@ export const ImageCard = memo(function ImageCard({ item, onClick }: ImageCardPro
   }, [item.id]);
 
   const actionBase =
-    "rounded-full backdrop-blur-sm shadow-lg h-8 w-8 active:scale-95 border border-white/20 transition-all";
+    "rounded-full backdrop-blur-sm shadow-lg h-8 w-8 active:scale-95 border transition-all";
   const actionIdle =
-    "bg-white/90 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 hover:bg-primary hover:text-white hover:border-transparent";
+    "bg-white/90 dark:bg-paper-dark/90 text-primary border-primary/10 hover:bg-primary hover:text-white hover:border-transparent";
   const actionActive =
     "bg-primary text-white hover:bg-primary/90 border-transparent";
 

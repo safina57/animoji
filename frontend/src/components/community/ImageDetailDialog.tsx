@@ -136,10 +136,10 @@ export function ImageDetailDialog({
                   onClick={handleToggleLike}
                   disabled={likeLoading}
                   className={[
-                    "flex items-center gap-1.5 px-3 py-2 rounded-full backdrop-blur-sm shadow-lg text-sm font-medium transition-all",
+                    "flex items-center gap-1.5 px-3 py-2 rounded-full backdrop-blur-sm shadow-lg text-sm font-medium border transition-all",
                     liked
-                      ? "bg-rose-500/90 text-white"
-                      : "bg-white/90 dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 hover:bg-rose-500/90 hover:text-white",
+                      ? "bg-primary/90 text-white border-transparent"
+                      : "bg-white/90 dark:bg-paper-dark/90 text-primary border-primary/10 hover:bg-primary hover:text-white hover:border-transparent",
                   ].join(" ")}
                 >
                   <Heart
@@ -156,7 +156,12 @@ export function ImageDetailDialog({
                   <button
                     type="button"
                     onClick={handleShare}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm shadow-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-primary hover:text-white transition-all"
+                    className={[
+                      "flex items-center gap-1.5 px-3 py-2 rounded-full backdrop-blur-sm shadow-lg text-sm font-medium border transition-all",
+                      copyFeedback
+                        ? "bg-primary/90 text-white border-transparent"
+                        : "bg-white/90 dark:bg-paper-dark/90 text-primary border-primary/10 hover:bg-primary hover:text-white hover:border-transparent",
+                    ].join(" ")}
                   >
                     <Share2 className="w-4 h-4" />
                     <span>{copyFeedback ? "Copied!" : "Share"}</span>
@@ -164,7 +169,7 @@ export function ImageDetailDialog({
                   <button
                     type="button"
                     onClick={handleDownload}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm shadow-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-primary hover:text-white transition-all"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/90 dark:bg-paper-dark/90 backdrop-blur-sm shadow-lg text-sm font-medium text-primary border border-primary/10 hover:bg-primary hover:text-white hover:border-transparent transition-all"
                   >
                     <Download className="w-4 h-4" />
                     <span>Save</span>
