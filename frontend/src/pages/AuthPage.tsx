@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { authService } from "@services/authService";
 import { useAppSelector } from "@hooks/redux";
 import { Button } from "@lib/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@lib/ui/card";
+import SakuraPetal, { type PetalProps } from "@lib/decorations/SakuraPetal/SakuraPetal";
 
 export default function AuthPage() {
   const { isAuthenticated, error } = useAppSelector((state) => state.auth);
@@ -15,6 +16,16 @@ export default function AuthPage() {
     }
   }, [isAuthenticated, navigate]);
 
+  const petals = useMemo<PetalProps[]>(() => {
+    const sizes: PetalProps["size"][] = ["small", "medium", "large"];
+    return Array.from({ length: 14 }, () => ({
+      left: `${Math.random() * 100}%`,
+      delay: `${Math.random() * 6}s`,
+      duration: `${8 + Math.random() * 5}s`,
+      size: sizes[Math.floor(Math.random() * sizes.length)],
+    }));
+  }, []);
+
   const handleGoogleLogin = () => {
     authService.loginWithGoogle();
   };
@@ -24,22 +35,10 @@ export default function AuthPage() {
       {/* Decorative background patterns */}
       <div className="absolute inset-0 opacity-5 dark:opacity-10 pattern-seigaiha" />
 
-      {/* Floating cherry blossom petals */}
+      {/* Falling sakura petals */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {[...Array(8)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute text-sakura-pink dark:text-sakura-pink/30 animate-fall opacity-60"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `-${Math.random() * 20}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${8 + Math.random() * 4}s`,
-              fontSize: `${1 + Math.random() * 1.5}rem`,
-            }}
-          >
-            🌸
-          </div>
+        {petals.map((p, i) => (
+          <SakuraPetal key={i} {...p} />
         ))}
       </div>
 
