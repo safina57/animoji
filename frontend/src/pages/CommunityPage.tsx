@@ -70,6 +70,24 @@ const loadingMoreSpinner = (
   </div>
 );
 
+const endOfFeed = (
+  <div className="flex flex-col items-center justify-center py-16 text-center gap-5">
+    <div className="flex items-center gap-4 w-full max-w-sm">
+      <div className="flex-1 border-t border-slate-200 dark:border-slate-700" />
+      <ToriiGate className="w-10 h-10 text-primary opacity-20" />
+      <div className="flex-1 border-t border-slate-200 dark:border-slate-700" />
+    </div>
+    <div className="space-y-1.5">
+      <p className="text-sm font-japanese text-slate-400 dark:text-slate-500">
+        以上です
+      </p>
+      <p className="text-sm text-slate-400 dark:text-slate-500">
+        That's everything — now go make your own art!
+      </p>
+    </div>
+  </div>
+);
+
 const headerDecoration = (
   <div className="absolute right-8 top-1/2 -translate-y-1/2 hidden lg:block opacity-10 pointer-events-none text-primary">
     <ToriiGate className="w-24 h-24" />
@@ -178,6 +196,10 @@ export default function CommunityPage() {
         ) : null}
 
         {isLoadingMore ? loadingMoreSpinner : null}
+
+        {!isLoading && !isLoadingMore && !hasMore && images.length > 0
+          ? endOfFeed
+          : null}
 
         {/* Infinite scroll sentinel */}
         <div ref={sentinelRef} className="h-1" />
