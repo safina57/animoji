@@ -1,6 +1,9 @@
 package constants
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 // File upload and size limits
 const (
@@ -60,6 +63,12 @@ const (
 
 // Presigned URL expiry for private objects
 const PrivateURLExpiry = 1 * time.Hour
+
+// IsPrivateKey reports whether objectKey belongs to a private-visibility prefix.
+func IsPrivateKey(objectKey string) bool {
+	return strings.HasPrefix(objectKey, PrefixImagesPrivate) ||
+		strings.HasPrefix(objectKey, PrefixThumbnailsPrivate)
+}
 
 // Image dimension limits
 const (

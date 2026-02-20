@@ -50,7 +50,11 @@ func (h *UserImagesHandler) HandleGetMyImages(w http.ResponseWriter, r *http.Req
 	for i, img := range images {
 		ids[i] = img.ID
 	}
-	likedMap, _ := h.repo.GetLikedImageIDs(r.Context(), claims.UserID, ids)
+	likedMap, err := h.repo.GetLikedImageIDs(r.Context(), claims.UserID, ids)
+	if err != nil {
+		respondError(w, "Failed to fetch like state", http.StatusInternalServerError)
+		return
+	}
 
 	items := make([]dto.ImageFeedItemDTO, 0, len(images))
 	for _, img := range images {

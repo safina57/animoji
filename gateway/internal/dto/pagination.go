@@ -7,12 +7,11 @@ import (
 
 // PaginationParams represents validated pagination parameters
 type PaginationParams struct {
-	Limit  int `validate:"required,min=1,max=100"`
+	Limit  int `validate:"required,min=1,max=50"`
 	Offset int `validate:"omitempty,min=0"`
 }
 
 // ParsePaginationParams parses limit and offset from query params with safe defaults.
-// limit defaults to defaultLimit (clamped 1–50); offset defaults to 0.
 func ParsePaginationParams(r *http.Request, defaultLimit int) PaginationParams {
 	limit := defaultLimit
 	offset := 0

@@ -3,7 +3,6 @@ package storage
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -96,10 +95,10 @@ func (s *MinIOService) GetPublicURL(objectKey string) string {
 }
 
 // GetURLForKey returns the appropriate URL for an object key.
-// Private keys (containing "/private/") get a time-limited presigned URL;
+// Keys under a private prefix get a time-limited presigned URL;
 // all other keys get a plain public URL.
 func (s *MinIOService) GetURLForKey(ctx context.Context, objectKey string) (string, error) {
-	if strings.Contains(objectKey, "/private/") {
+	if constants.IsPrivateKey(objectKey) {
 		return s.client.GetPresignedURL(ctx, constants.BucketName, objectKey, constants.PrivateURLExpiry)
 	}
 	return s.client.GetPublicURL(constants.BucketName, objectKey), nil
