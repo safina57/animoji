@@ -334,6 +334,15 @@ body {
   animation: float 6s ease-in-out infinite;
 }
 
+/* ─── Loading Dialog ─── */
+.torii-path {
+  stroke: var(--color-primary);
+}
+
+.dark .torii-path {
+  stroke: var(--color-sakura-pink);
+}
+
 /* Accessibility - Reduce motion */
 @media (prefers-reduced-motion: reduce) {
   .animate-fall,

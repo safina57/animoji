@@ -1,7 +1,7 @@
 import { useAppSelector, useAppDispatch } from "@hooks/redux";
 import { useJobStatus } from "@components/generation/hooks/useJobStatus";
 import GenerationInput from "@components/generation/GenerationInput";
-import LoadingScreen from "@components/generation/LoadingScreen";
+import LoadingDialog from "@components/generation/LoadingDialog";
 import ResultView from "@components/generation/ResultView";
 import SakuraDecorationIcon from "@assets/icons/sakura-decoration.svg?react";
 import { Alert, AlertTitle, AlertDescription } from "@lib/ui/alert";
@@ -49,11 +49,11 @@ export default function CreatePage() {
         </div>
       )}
 
-      {/* ── Stage: Input (centered) ── */}
-      {stage === "input" && <GenerationInput />}
+      {/* ── Stage: Input (always visible when not in result) ── */}
+      {(stage === "input" || stage === "loading") && <GenerationInput />}
 
-      {/* ── Stage: Loading ── */}
-      {stage === "loading" && <LoadingScreen />}
+      {/* ── Stage: Loading dialog (overlays the input) ── */}
+      {stage === "loading" && <LoadingDialog />}
 
       {/* ── Stage: Result ── */}
       {stage === "result" && (
