@@ -83,27 +83,27 @@ interface GallerySidebarProps {
 function GallerySidebar({ value, onChange }: GallerySidebarProps) {
   return (
     <aside className="w-full md:w-52 shrink-0">
-      {/* Section label */}
-      <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+      {/* Section label — hidden on mobile */}
+      <p className="hidden md:block mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
         My Images
       </p>
 
       <NavigationMenu orientation="vertical" className="max-w-none w-full">
-        <NavigationMenuList className="flex-col items-stretch gap-0.5 space-x-0 w-full">
+        <NavigationMenuList className="flex-row md:flex-col items-stretch gap-1.5 space-x-0 w-full">
           {NAV_ITEMS.map(({ value: v, icon, label, labelJa }) => (
-            <NavigationMenuItem key={v} className="w-full">
+            <NavigationMenuItem key={v} className="flex-1 md:flex-none md:w-full">
               <NavigationMenuLink
                 onClick={() => onChange(v)}
                 className={cn(
                   navigationMenuTriggerStyle(),
-                  "w-full justify-start gap-3 px-3 h-10 rounded-lg cursor-pointer transition-all",
+                  "w-full justify-center md:justify-start gap-2 px-3 h-10 rounded-lg cursor-pointer transition-all",
                   value === v
                     ? "bg-primary/8 dark:bg-primary/12 text-primary border border-primary/15"
                     : "bg-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-primary border border-transparent"
                 )}
               >
                 <span className="material-symbols-outlined text-[18px] shrink-0">{icon}</span>
-                <span className="flex-1 text-xs font-semibold tracking-wide">{label}</span>
+                <span className="text-xs font-semibold tracking-wide">{label}</span>
                 <span className="text-[10px] font-japanese text-muted-foreground/60 hidden md:block">{labelJa}</span>
               </NavigationMenuLink>
             </NavigationMenuItem>
