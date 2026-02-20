@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { setLoading, loginSuccess, loginFailure } from "@store/slices/authSlice";
+import { setLoading, loginSuccess, logout } from "@store/slices/authSlice";
 import { authService } from "@services/authService";
 import { useAppSelector } from "@hooks/redux";
 
@@ -20,7 +20,7 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
         dispatch(loginSuccess({ user }));
       })
       .catch(() => {
-        dispatch(loginFailure("Not authenticated"));
+        dispatch(logout());
       });
   }, [dispatch]);
 
