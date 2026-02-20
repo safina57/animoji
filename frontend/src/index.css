@@ -41,9 +41,9 @@
   --color-destructive-foreground: #FFFFFF;
 
   /* Typography - Japanese Aesthetic */
-  --font-display: "Playfair Display", serif;
+  --font-display: "Cormorant Garamond", serif;
   --font-japanese: "Noto Serif JP", serif;
-  --font-sans: "Inter", sans-serif;
+  --font-sans: "DM Sans", sans-serif;
 }
 
 @variant dark (&:where(.dark, .dark *));
@@ -332,6 +332,15 @@ body {
 
 .animate-float {
   animation: float 6s ease-in-out infinite;
+}
+
+/* ─── Loading Dialog ─── */
+.torii-path {
+  stroke: var(--color-primary);
+}
+
+.dark .torii-path {
+  stroke: var(--color-sakura-pink);
 }
 
 /* Accessibility - Reduce motion */

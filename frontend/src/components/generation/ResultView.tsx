@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@hooks/redux";
 import { resetGeneration, markResultAsPublished } from "@store/slices/generationSlice";
 import { publishImage } from "@services/generationService";
@@ -45,9 +46,7 @@ export default function ResultView() {
         </div>
 
         {/* Results Timeline */}
-        <div className="space-y-12 relative">
-          <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/30 via-primary/10 to-transparent hidden md:block" />
-
+        <div className="space-y-12">
           {results.map((result, index) => (
             <ResultItem
               key={index}
@@ -75,26 +74,42 @@ interface ResultItemProps {
 function ResultItem({ result, index, isLatest, jobId }: ResultItemProps) {
   const timeAgo = formatTimeAgo(result.timestamp);
 
+  async function handleDownload(url: string, iterationNum: number) {
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download = `animoji-take-${iterationNum}.png`;
+      a.click();
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+  }
+
   return (
     <div
-      className="relative animate-slide-up"
+      className="flex gap-4 animate-slide-up"
       style={{ animationDelay: `${index * 100}ms` }}
     >
-      {/* Timeline dot */}
-      <div className="absolute -left-1 md:left-[30px] top-8 w-3 h-3 rounded-full bg-primary border-2 border-background-light dark:border-background-dark shadow-lg hidden md:block" />
+      {/* Timeline column: dot + line, always centered via flex */}
+      <div className="hidden md:flex flex-col items-center w-8 shrink-0">
+        <div className="mt-8 w-3 h-3 rounded-full bg-primary border-2 border-background-light dark:border-background-dark shadow-lg shrink-0" />
+        <div className="flex-1 w-0.5 mt-2 bg-gradient-to-b from-primary/30 via-primary/10 to-transparent" />
+      </div>
 
-      <div className="md:ml-20 space-y-4">
+      <div className="flex-1 min-w-0 space-y-4">
         {/* Prompt header */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
             <div className="flex items-center gap-2.5 mb-1">
-              <span className="inline-flex items-center gap-1.5">
-                <span className="w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center shrink-0 shadow-sm shadow-primary/30">
-                  {result.iterationNum}
-                </span>
-                <span className="text-xs font-semibold tracking-wide text-slate-500 dark:text-slate-400">
-                  Take {result.iterationNum}
-                </span>
+              <span className="w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center shrink-0 shadow-sm shadow-primary/30">
+                {result.iterationNum}
+              </span>
+              <span className="text-xs font-semibold tracking-wide text-slate-500 dark:text-slate-400">
+                Take {result.iterationNum}
               </span>
               <span className="text-slate-300 dark:text-slate-600 text-xs">·</span>
               <span className="text-xs text-slate-400">{timeAgo}</span>
@@ -121,9 +136,7 @@ function ResultItem({ result, index, isLatest, jobId }: ResultItemProps) {
 
           {/* Secondary action buttons — visible on hover */}
           <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <ActionButton icon="favorite_border" />
-            <ActionButton icon="download" />
-            <ActionButton icon="share" />
+            <ActionButton icon="download" onClick={() => handleDownload(result.generatedImageUrl, result.iterationNum)} />
           </div>
 
           {/* Publish button — always visible, bottom-right, latest only */}
@@ -147,6 +160,7 @@ interface PublishButtonProps {
 
 function PublishButton({ jobId, result }: PublishButtonProps) {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [visibility, setVisibility] = useState<"public" | "private">("public");
   const [isPublishing, setIsPublishing] = useState(false);
@@ -167,6 +181,8 @@ function PublishButton({ jobId, result }: PublishButtonProps) {
         })
       );
       setOpen(false);
+      dispatch(resetGeneration());
+      navigate(`/?image=${response.image_id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to publish");
     } finally {
@@ -187,18 +203,20 @@ function PublishButton({ jobId, result }: PublishButtonProps) {
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setError(null); }}>
       {/* Trigger — always-visible button on image */}
-      <button
+      <Button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/90 backdrop-blur-sm text-white shadow-lg hover:bg-primary transition-all"
+        variant="outline"
+        size="sm"
+        className="flex items-center gap-1.5 bg-white/90 dark:bg-paper-dark/90 border border-primary/10 rounded-2xl text-primary hover:border-primary/30 hover:bg-primary hover:text-white backdrop-blur-sm shadow-lg transition-all"
       >
         <span className="material-symbols-outlined text-sm">cloud_upload</span>
         <span className="text-xs font-semibold">Publish</span>
-      </button>
+      </Button>
 
       {/* Custom portal — blur overlay, no X button, controlled size */}
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/25 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <DialogPrimitive.Content className="fixed left-[50%] top-[50%] z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-primary/10 bg-white dark:bg-slate-900 p-0 overflow-hidden shadow-2xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
+        <DialogPrimitive.Content className="fixed left-[50%] top-[50%] z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-3xl border border-primary/10 bg-paper-light dark:bg-paper-dark paper-texture p-0 overflow-hidden shadow-xl shadow-primary/10 duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
           {/* Top accent bar */}
           <div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
 
@@ -324,9 +342,9 @@ function VisibilityOption({ selected, onSelect, icon, label, description }: Visi
 
 /* ── Small sub-components ── */
 
-function ActionButton({ icon }: { icon: string }) {
+function ActionButton({ icon, onClick }: { icon: string; onClick?: () => void }) {
   return (
-    <button className="w-10 h-10 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm hover:bg-primary hover:text-white transition-all shadow-lg border border-primary/10 flex items-center justify-center">
+    <button onClick={onClick} className="w-10 h-10 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm hover:bg-primary hover:text-white transition-all shadow-lg border border-primary/10 flex items-center justify-center">
       <span className="material-symbols-outlined text-lg">{icon}</span>
     </button>
   );

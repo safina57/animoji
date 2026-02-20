@@ -53,6 +53,8 @@ const feedSlice = createSlice({
       .addCase(loadFeed.pending, (state) => {
         state.isLoading = true;
         state.error = null;
+        state.images = [];
+        state.offset = 0;
       })
       .addCase(loadFeed.fulfilled, (state, action) => {
         state.isLoading = false;

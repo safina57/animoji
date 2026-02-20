@@ -85,17 +85,17 @@ export default function Navbar() {
         {/* Right: dark toggle + user menu */}
         <div className="flex items-center gap-4">
           <button
-            onClick={() => setDark((d) => !d)}
-            className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-colors"
-            aria-label="Toggle dark mode"
+          onClick={() => setDark((d) => !d)}
+          className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-colors flex items-center justify-center"
+          aria-label="Toggle dark mode"
           >
-            {dark ? (
-              <span className="material-symbols-outlined text-yellow-400">
-                light_mode
-              </span>
-            ) : (
-              <span className="material-symbols-outlined">dark_mode</span>
-            )}
+          {dark ? (
+            <span className="material-symbols-outlined text-yellow-400">
+            light_mode
+            </span>
+          ) : (
+            <span className="material-symbols-outlined">dark_mode</span>
+          )}
           </button>
 
           {isAuthenticated && user ? (

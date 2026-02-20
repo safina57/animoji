@@ -8,15 +8,13 @@ export interface ImageFeedItem {
   id: string;
   thumbnail_url: string;
   generated_url: string;
-  prompts: string[];
-  width: number;
-  height: number;
-  created_at: string;
   user: ImageUser;
   is_liked_by_user?: boolean; // populated by API when authenticated, updated locally via Redux
 }
 
 export interface ImageDetailItem extends ImageFeedItem {
+  prompts: string[];
+  created_at: string;
   likes_count: number;
 }
 
