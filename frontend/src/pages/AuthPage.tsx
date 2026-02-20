@@ -32,8 +32,33 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-background-light dark:bg-background-dark transition-colors duration-500">
-      {/* Decorative background patterns */}
-      <div className="absolute inset-0 opacity-5 dark:opacity-10 pattern-seigaiha" />
+      {/* Seigaiha pattern overlay */}
+      <div className="absolute inset-0 opacity-[0.04] dark:opacity-[0.08] pattern-seigaiha pointer-events-none" />
+
+      {/* Sakura tree — top-right, flush with edge */}
+      <div className="fixed right-0 top-0 pointer-events-none select-none w-[560px] md:w-[720px] opacity-55 dark:opacity-30">
+        <img
+          src="/sakura_tree.png"
+          alt=""
+          aria-hidden
+          className="w-full h-auto object-contain"
+          // style={{
+          //   filter: "sepia(0.5) hue-rotate(298deg) saturate(2.2) brightness(1.15)",
+          // }}
+        />
+      </div>
+
+      {/* Vertical welcome text — left side */}
+      <div className="fixed left-6 md:left-10 top-1/2 -translate-y-1/2 select-none pointer-events-none hidden md:block z-0">
+        <p
+          className="font-japanese font-bold text-7xl leading-none tracking-[0.25em]"
+          style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
+        >
+          <span className="bg-gradient-to-b from-primary via-primary/45 to-transparent bg-clip-text text-transparent">
+            ようこそ
+          </span>
+        </p>
+      </div>
 
       {/* Falling sakura petals */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -45,21 +70,21 @@ export default function AuthPage() {
       {/* Main content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center p-4">
         {/* Logo and title */}
-        <div className="mb-12 text-center animate-fade-in">
-          <h1 className="font-display text-6xl md:text-7xl font-bold text-primary mb-4 tracking-tight">
-            絵文字
-          </h1>
-          <p className="font-display text-2xl md:text-3xl text-stone-gray dark:text-slate-300 italic">
+        <div className="mb-10 text-center animate-fade-in">
+          <h1 className="font-display text-6xl md:text-7xl font-bold text-primary mb-3 tracking-tight">
             Animoji
-          </p>
-          <p className="mt-4 text-stone-gray/80 dark:text-slate-300/70 font-japanese">
+          </h1>
+          <p className="mt-3 text-sm text-slate-400 dark:text-slate-500 font-japanese tracking-widest">
             あなたの写真をアニメに変換
           </p>
         </div>
 
         {/* Auth card */}
-        <Card className="w-full max-w-md japanese-frame shadow-2xl backdrop-blur-sm bg-white/90 dark:bg-paper-dark/90 animate-slide-up">
-          <CardHeader className="space-y-3 text-center">
+        <Card className="w-full max-w-md border border-slate-200/60 dark:border-slate-700/40 shadow-2xl shadow-black/10 dark:shadow-black/50 backdrop-blur-md bg-white/95 dark:bg-paper-dark/95 animate-slide-up rounded-2xl overflow-hidden p-0">
+          {/* Vermillion accent bar */}
+          <div className="h-0.5 w-full bg-gradient-to-r from-primary/40 via-primary to-primary/40" />
+
+          <CardHeader className="space-y-2 text-center pt-8 pb-4">
             <CardTitle className="font-display text-3xl text-primary">
               Welcome
             </CardTitle>
@@ -68,23 +93,21 @@ export default function AuthPage() {
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-5 px-8 pb-8">
             {/* Error message */}
             {error && (
-              <div className="p-4 rounded-lg bg-primary/10 border border-primary/20 animate-fade-in">
-                <p className="text-sm text-primary dark:text-primary font-medium">
-                  {error}
-                </p>
+              <div className="p-4 rounded-xl bg-primary/8 border border-primary/20 animate-fade-in">
+                <p className="text-sm text-primary font-medium">{error}</p>
               </div>
             )}
 
-            {/* Google OAuth button */}
+            {/* Google OAuth button — light + dark mode */}
             <Button
               onClick={handleGoogleLogin}
-              className="w-full h-12 font-medium text-base bg-white hover:bg-gray-50 text-gray-900 border-2 border-stone-gray/20 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full h-12 font-medium text-base bg-white hover:bg-slate-50 text-slate-800 hover:text-slate-800 border border-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700 dark:text-white dark:hover:text-white dark:border-slate-600/60 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] rounded-xl"
               variant="outline"
             >
-              <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 mr-3 shrink-0" viewBox="0 0 24 24">
                 <path
                   fill="#4285F4"
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -108,21 +131,21 @@ export default function AuthPage() {
             {/* Decorative divider */}
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-stone-gray/20 dark:border-stone-light/20"></div>
+                <div className="w-full border-t border-slate-200 dark:border-slate-700/60" />
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white dark:bg-paper-dark px-2 text-stone-gray/60 dark:text-slate-400">
+              <div className="relative flex justify-center text-[10px] uppercase tracking-widest">
+                <span className="bg-white dark:bg-paper-dark px-3 text-muted-foreground">
                   Secure Authentication
                 </span>
               </div>
             </div>
 
             {/* Info text */}
-            <div className="text-center text-sm text-stone-gray/70 dark:text-slate-300/60 space-y-1">
-              <p className="font-japanese">
+            <div className="text-center space-y-1">
+              <p className="text-sm font-japanese text-muted-foreground">
                 Googleアカウントで安全にログイン
               </p>
-              <p className="text-xs">
+              <p className="text-xs text-muted-foreground/70">
                 Transform your photos into anime-style art
               </p>
             </div>
@@ -130,25 +153,11 @@ export default function AuthPage() {
         </Card>
 
         {/* Footer */}
-        <div className="mt-12 text-center text-sm text-stone-gray/60 dark:text-slate-300/50 animate-fade-in">
-          <p className="font-japanese">
+        <div className="mt-10 text-center animate-fade-in">
+          <p className="text-[11px] text-muted-foreground/60 font-japanese max-w-sm leading-relaxed">
             アカウントを作成すると、利用規約とプライバシーポリシーに同意したことになります
           </p>
         </div>
-      </div>
-
-      {/* Decorative corner elements */}
-      <div className="fixed top-0 left-0 w-32 h-32 opacity-20 dark:opacity-10">
-        <svg viewBox="0 0 100 100" className="text-primary fill-current">
-          <path d="M0,0 L100,0 L100,20 C80,20 60,10 40,10 C20,10 10,20 0,20 Z" />
-          <path d="M0,0 L20,0 C20,20 10,40 10,60 C10,80 20,90 20,100 L0,100 Z" />
-        </svg>
-      </div>
-      <div className="fixed bottom-0 right-0 w-32 h-32 opacity-20 dark:opacity-10 rotate-180">
-        <svg viewBox="0 0 100 100" className="text-primary fill-current">
-          <path d="M0,0 L100,0 L100,20 C80,20 60,10 40,10 C20,10 10,20 0,20 Z" />
-          <path d="M0,0 L20,0 C20,20 10,40 10,60 C10,80 20,90 20,100 L0,100 Z" />
-        </svg>
       </div>
     </div>
   );
