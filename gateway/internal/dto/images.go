@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -62,13 +63,21 @@ type PublicImagesResponseDTO struct {
 	Limit   int                `json:"limit"`
 }
 
-// NewImageFeedItemDTO builds an ImageFeedItemDTO for the public feed.
-// likedMap should be non-nil only for authenticated requests; when non-nil,
-// IsLikedByUser is populated for every image.
-func NewImageFeedItemDTO(img *models.Image, storageService *storage.MinIOService, likedMap map[uuid.UUID]bool) ImageFeedItemDTO {
-	thumbnailURL := storageService.GetPublicURL(img.GeneratedKey)
+// NewImageFeedItemDTO builds an ImageFeedItemDTO.
+// Private object keys get presigned URLs; public keys get plain public URLs.
+// likedMap should be non-nil only for authenticated requests.
+func NewImageFeedItemDTO(ctx context.Context, img *models.Image, storageService *storage.MinIOService, likedMap map[uuid.UUID]bool) (ImageFeedItemDTO, error) {
+	generatedURL, err := storageService.GetURLForKey(ctx, img.GeneratedKey)
+	if err != nil {
+		return ImageFeedItemDTO{}, err
+	}
+
+	thumbnailURL := generatedURL
 	if img.ThumbnailKey != "" {
-		thumbnailURL = storageService.GetPublicURL(img.ThumbnailKey)
+		thumbnailURL, err = storageService.GetURLForKey(ctx, img.ThumbnailKey)
+		if err != nil {
+			return ImageFeedItemDTO{}, err
+		}
 	}
 
 	avatarURL := ""
@@ -79,7 +88,7 @@ func NewImageFeedItemDTO(img *models.Image, storageService *storage.MinIOService
 	item := ImageFeedItemDTO{
 		ID:           img.ID,
 		ThumbnailURL: thumbnailURL,
-		GeneratedURL: storageService.GetPublicURL(img.GeneratedKey),
+		GeneratedURL: generatedURL,
 		User: ImageUserDTO{
 			ID:        img.User.ID,
 			Name:      img.User.Name,
@@ -92,18 +101,23 @@ func NewImageFeedItemDTO(img *models.Image, storageService *storage.MinIOService
 		item.IsLikedByUser = &liked
 	}
 
-	return item
+	return item, nil
 }
 
 // NewImageDetailDTO builds an ImageDetailDTO (with full metadata) for the detail endpoint
-func NewImageDetailDTO(img *models.Image, storageService *storage.MinIOService) ImageDetailDTO {
+func NewImageDetailDTO(ctx context.Context, img *models.Image, storageService *storage.MinIOService) (ImageDetailDTO, error) {
+	feedItem, err := NewImageFeedItemDTO(ctx, img, storageService, nil)
+	if err != nil {
+		return ImageDetailDTO{}, err
+	}
+
 	prompts := make([]string, len(img.Prompts))
 	copy(prompts, img.Prompts)
 
 	return ImageDetailDTO{
-		ImageFeedItemDTO: NewImageFeedItemDTO(img, storageService, nil),
+		ImageFeedItemDTO: feedItem,
 		Prompts:          prompts,
 		CreatedAt:        img.CreatedAt,
 		LikesCount:       img.LikesCount,
-	}
+	}, nil
 }

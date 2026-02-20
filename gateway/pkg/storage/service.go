@@ -93,3 +93,13 @@ func (s *MinIOService) DeleteObject(ctx context.Context, objectKey string) error
 func (s *MinIOService) GetPublicURL(objectKey string) string {
 	return s.client.GetPublicURL(constants.BucketName, objectKey)
 }
+
+// GetURLForKey returns the appropriate URL for an object key.
+// Keys under a private prefix get a time-limited presigned URL;
+// all other keys get a plain public URL.
+func (s *MinIOService) GetURLForKey(ctx context.Context, objectKey string) (string, error) {
+	if constants.IsPrivateKey(objectKey) {
+		return s.client.GetPresignedURL(ctx, constants.BucketName, objectKey, constants.PrivateURLExpiry)
+	}
+	return s.client.GetPublicURL(constants.BucketName, objectKey), nil
+}

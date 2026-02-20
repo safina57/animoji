@@ -123,18 +123,21 @@ export default function GenerationInput() {
           <div className="relative bg-paper-light dark:bg-paper-dark paper-texture rounded-3xl border border-primary/10 shadow-xl shadow-primary/5 p-2 flex flex-col gap-2 transition-all duration-300 focus-within:border-primary/30 focus-within:shadow-primary/10">
             {/* Reference image preview */}
             {referencePreviewUrl && (
-              <div className="relative mx-4 mt-2">
+              <div className="relative mx-4 mt-2 w-fit group/img">
                 <img
                   src={referencePreviewUrl}
                   alt="Reference"
                   className="h-20 w-20 object-cover rounded-xl border border-primary/10"
                 />
-                <button
+                <Button
                   onClick={removeImage}
-                  className="absolute -top-2 -right-2 w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+                  size="icon"
+                  variant="outline"
+                  aria-label="Remove image"
+                  className="absolute top-1 right-1 w-6 h-6 bg-white dark:bg-paper-dark border border-primary/10 rounded-md text-primary hover:border-primary/30 hover:bg-primary hover:text-white opacity-0 group-hover/img:opacity-100 transition-all shadow-sm"
                 >
-                  ×
-                </button>
+                  <span className="material-symbols-outlined text-xs">close</span>
+                </Button>
               </div>
             )}
 

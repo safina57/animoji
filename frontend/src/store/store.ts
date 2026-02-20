@@ -2,12 +2,14 @@ import { configureStore } from "@reduxjs/toolkit";
 import generationReducer from "./slices/generationSlice";
 import authReducer from "./slices/authSlice";
 import feedReducer from "./slices/feedSlice";
+import galleryReducer from "./slices/gallerySlice";
 
 export const store = configureStore({
   reducer: {
     generation: generationReducer,
     auth: authReducer,
     feed: feedReducer,
+    gallery: galleryReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -11,9 +11,10 @@ import type { ImageFeedItem } from "@customTypes/image";
 interface ImageCardProps {
   item: ImageFeedItem;
   onClick: (item: ImageFeedItem) => void;
+  onLikeToggle?: (imageId: string, liked: boolean) => void;
 }
 
-export const ImageCard = memo(function ImageCard({ item, onClick }: ImageCardProps) {
+export const ImageCard = memo(function ImageCard({ item, onClick, onLikeToggle }: ImageCardProps) {
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated);
 
@@ -31,7 +32,12 @@ export const ImageCard = memo(function ImageCard({ item, onClick }: ImageCardPro
     }
     if (likeLoading) return;
     setLikeLoading(true);
-    dispatch(updateLikedStatus({ imageId: item.id, liked: !isLiked }));
+    const newLiked = !isLiked;
+    if (onLikeToggle) {
+      onLikeToggle(item.id, newLiked);
+    } else {
+      dispatch(updateLikedStatus({ imageId: item.id, liked: newLiked }));
+    }
     try {
       if (isLiked) {
         await imageService.unlikeImage(item.id);
@@ -39,11 +45,15 @@ export const ImageCard = memo(function ImageCard({ item, onClick }: ImageCardPro
         await imageService.likeImage(item.id);
       }
     } catch {
-      dispatch(updateLikedStatus({ imageId: item.id, liked: isLiked }));
+      if (onLikeToggle) {
+        onLikeToggle(item.id, isLiked);
+      } else {
+        dispatch(updateLikedStatus({ imageId: item.id, liked: isLiked }));
+      }
     } finally {
       setLikeLoading(false);
     }
-  }, [dispatch, isAuthenticated, isLiked, item.id, likeLoading]);
+  }, [dispatch, isAuthenticated, isLiked, item.id, likeLoading, onLikeToggle]);
 
   const handleShare = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();

@@ -8,6 +8,7 @@ import { AuthInitializer } from "@components/auth/AuthInitializer";
 
 const CommunityPage = lazy(() => import("@pages/CommunityPage"));
 const CreatePage = lazy(() => import("@pages/CreatePage"));
+const GalleryPage = lazy(() => import("@pages/GalleryPage"));
 const AuthPage = lazy(() => import("@pages/AuthPage"));
 const AuthCallbackPage = lazy(() => import("@pages/AuthCallbackPage"));
 const NotFoundPage = lazy(() => import("@pages/NotFoundPage"));
@@ -37,6 +38,14 @@ export default function App() {
                   element={
                     <ProtectedRoute>
                       <CreatePage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/gallery"
+                  element={
+                    <ProtectedRoute>
+                      <GalleryPage />
                     </ProtectedRoute>
                   }
                 />

@@ -46,7 +46,7 @@ func (r *Repository) GetUserImages(ctx context.Context, userID uuid.UUID, visibi
 
 	var images []*models.Image
 
-	query := r.db.WithContext(ctx).Where("user_id = ?", userID)
+	query := r.db.WithContext(ctx).Preload("User").Where("user_id = ?", userID)
 
 	if visibility != "" && visibility != "all" {
 		query = query.Where("visibility = ?", visibility)
