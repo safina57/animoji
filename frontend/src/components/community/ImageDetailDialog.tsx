@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Heart, Download, Share2, X } from "lucide-react";
-import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { Dialog, DialogTitle } from "@lib/ui/dialog";
+import { Heart, Download, Share2 } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@lib/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@lib/ui/avatar";
 import { imageService } from "@services/imageService";
 import { useAppDispatch, useAppSelector } from "@hooks/redux";
@@ -114,27 +113,14 @@ export function ImageDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogPrimitive.Portal>
-        {/* Backdrop — blur overlay matching publish modal pattern */}
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-
-        <DialogPrimitive.Content className="fixed left-[50%] top-[50%] z-50 w-[95vw] max-w-5xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 focus:outline-none">
+      <DialogContent className="w-[95vw] max-w-5xl p-0 gap-0 overflow-hidden rounded-2xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
           <DialogTitle className="sr-only">
             {lastPrompt || "Image detail"}
           </DialogTitle>
 
-          {/* Close button */}
-          <DialogPrimitive.Close
-            onClick={onClose}
-            className="absolute right-3 top-3 z-10 rounded-full bg-black/40 p-1.5 text-white hover:bg-black/60 transition-colors focus:outline-none"
-            aria-label="Close"
-          >
-            <X className="w-4 h-4" />
-          </DialogPrimitive.Close>
-
           <div className="flex flex-col md:flex-row md:max-h-[88vh]">
             {/* Left: image panel with hover action buttons */}
-            <div className="group relative flex-1 min-h-[280px] bg-[#0F111A] flex items-center justify-center overflow-hidden">
+            <div className="group relative flex-1 min-h-[280px] bg-background-light dark:bg-background-dark flex items-center justify-center overflow-hidden">
               <img
                 src={displayItem.generated_url}
                 alt={lastPrompt}
@@ -235,8 +221,7 @@ export function ImageDetailDialog({
               </div>
             </div>
           </div>
-        </DialogPrimitive.Content>
-      </DialogPrimitive.Portal>
+      </DialogContent>
     </Dialog>
   );
 }

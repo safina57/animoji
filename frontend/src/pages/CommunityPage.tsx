@@ -138,7 +138,9 @@ export default function CommunityPage() {
   }, []);
 
   return (
-    <div className="flex-1 bg-background-light dark:bg-background-dark overflow-y-auto">
+    <div className="flex-1 bg-background-light dark:bg-background-dark overflow-y-auto relative">
+      {/* Seigaiha pattern overlay — matches CreatePage background */}
+      <div className="fixed inset-0 pattern-seigaiha pointer-events-none opacity-30 dark:opacity-20" />
       {/* Header */}
       <div className="relative bg-gradient-to-r from-primary/10 via-fuji-blue/10 to-sakura-pink/10 border-b border-primary/10 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 py-12 md:py-16 text-center space-y-4">
