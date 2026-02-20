@@ -54,7 +54,12 @@ func (h *UserImagesHandler) HandleGetMyImages(w http.ResponseWriter, r *http.Req
 
 	items := make([]dto.ImageFeedItemDTO, 0, len(images))
 	for _, img := range images {
-		items = append(items, dto.NewImageFeedItemDTO(img, h.storageService, likedMap))
+		item, err := dto.NewImageFeedItemDTO(r.Context(), img, h.storageService, likedMap)
+		if err != nil {
+			respondError(w, "Failed to build image response", http.StatusInternalServerError)
+			return
+		}
+		items = append(items, item)
 	}
 
 	respondJSON(w, dto.PublicImagesResponseDTO{

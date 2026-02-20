@@ -58,6 +58,9 @@ const (
 	TmpLifecycleDays   = 1
 )
 
+// Presigned URL expiry for private objects
+const PrivateURLExpiry = 1 * time.Hour
+
 // Image dimension limits
 const (
 	MaxImageWidth  = 2048

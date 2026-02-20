@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -92,4 +93,14 @@ func (s *MinIOService) DeleteObject(ctx context.Context, objectKey string) error
 // GetPublicURL returns the public URL for a given object key in the default bucket
 func (s *MinIOService) GetPublicURL(objectKey string) string {
 	return s.client.GetPublicURL(constants.BucketName, objectKey)
+}
+
+// GetURLForKey returns the appropriate URL for an object key.
+// Private keys (containing "/private/") get a time-limited presigned URL;
+// all other keys get a plain public URL.
+func (s *MinIOService) GetURLForKey(ctx context.Context, objectKey string) (string, error) {
+	if strings.Contains(objectKey, "/private/") {
+		return s.client.GetPresignedURL(ctx, constants.BucketName, objectKey, constants.PrivateURLExpiry)
+	}
+	return s.client.GetPublicURL(constants.BucketName, objectKey), nil
 }
