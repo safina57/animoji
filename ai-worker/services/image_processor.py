@@ -74,14 +74,12 @@ class ImageProcessor:
                 openai_previous_response_id=previous_response_id
             )
 
-        # Pass both text and image to the agent
-        agent_result = await self.prompt_agent.run(
-            [
-                user_prompt,
-                BinaryContent(data=input_image_data, media_type=input_mime_type),
-            ],
-            model_settings=model_settings,
+        agent_input = (
+            user_prompt
+            if previous_response_id
+            else [user_prompt, BinaryContent(data=input_image_data, media_type=input_mime_type)]
         )
+        agent_result = await self.prompt_agent.run(agent_input, model_settings=model_settings)
         enhanced: EnhancedPrompt = agent_result.output
 
         # Extract response ID for conversation continuity in future iterations
