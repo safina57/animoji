@@ -19,3 +19,32 @@ type StatusEvent struct {
 	IterationNum int    `json:"iteration_num"`
 	ResponseID   string `json:"response_id"` // OpenAI Responses API ID for next iteration
 }
+
+// EmojiNatsJobMessage is published once per emoji job.
+// The worker generates all emotion variants from this single message.
+type EmojiNatsJobMessage struct {
+	JobID    string `json:"job_id"`
+	InputKey string `json:"input_key"`
+	Prompt   string `json:"prompt"`
+	MIMEType string `json:"mime_type"`
+}
+
+// EmojiStatusEvent represents an emoji variant status event received from NATS.
+// When Status == "started", TotalVariants is set and Emotion/ResultKey are empty.
+type EmojiStatusEvent struct {
+	Status        string `json:"status"`
+	Emotion       string `json:"emotion"`
+	VariantIndex  int    `json:"variant_index"`
+	ResultKey     string `json:"result_key"`
+	TotalVariants int    `json:"total_variants,omitempty"`
+}
+
+// EmojiPartialEvent carries a single emoji status event from worker → SSE handler.
+// When Status == "started", TotalVariants is set and Emotion/ResultKey are empty.
+type EmojiPartialEvent struct {
+	Emotion       string `json:"emotion"`
+	VariantIndex  int    `json:"variant_index"`
+	ResultKey     string `json:"result_key"`
+	Status        string `json:"status"` // "started", "completed", or "failed"
+	TotalVariants int    `json:"total_variants,omitempty"`
+}

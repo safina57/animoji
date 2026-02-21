@@ -173,7 +173,7 @@ class EmojiConsumer:
                 extra={"job_id": job_id, "size": len(image_data)},
             )
 
-            # Step 2: Single GPT-4o call → shared character style anchor
+            # Step 2: Single LLM call → shared character style anchor
             agent_result = await self.prompt_agent.run(
                 [job.prompt, BinaryContent(data=image_data, media_type=job.mime_type)]
             )
@@ -198,6 +198,9 @@ class EmojiConsumer:
                     "character": base_style.character_description[:80],
                 },
             )
+
+            # Notify the gateway of the actual variant count before any FLUX calls start.
+            await self._publish_status(job_id, "started", total_variants=len(active_emotions))
 
             # Step 3: Generate all emotion variants in parallel
             input_image_b64 = base64.b64encode(image_data).decode("utf-8")
@@ -311,18 +314,20 @@ class EmojiConsumer:
         self,
         job_id: str,
         status: str,
-        emotion: str,
-        variant_index: int,
+        emotion: str = "",
+        variant_index: int = 0,
         result_key: str | None = None,
+        total_variants: int | None = None,
     ) -> None:
-        """Publish a single variant's completion or failure status to NATS."""
-        payload: dict = {
-            "status": status,
-            "emotion": emotion,
-            "variant_index": variant_index,
-        }
+        """Publish a variant status or the job-level 'started' event to NATS."""
+        payload: dict = {"status": status}
+        if emotion:
+            payload["emotion"] = emotion
+            payload["variant_index"] = variant_index
         if result_key:
             payload["result_key"] = result_key
+        if total_variants is not None:
+            payload["total_variants"] = total_variants
 
         subject = f"emoji.status.{job_id}"
         await self.nats_client.publish(subject, json.dumps(payload).encode())

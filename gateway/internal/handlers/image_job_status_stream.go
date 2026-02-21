@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/safina57/animoji/gateway/internal/constants"
 	"github.com/safina57/animoji/gateway/internal/messaging"
+	"github.com/safina57/animoji/gateway/internal/models"
 	"github.com/safina57/animoji/gateway/pkg/cache"
 	"github.com/safina57/animoji/gateway/pkg/logger"
 	"github.com/safina57/animoji/gateway/pkg/storage"
@@ -23,7 +24,7 @@ const (
 )
 
 // HandleJobStatusStream handles SSE connections for real-time job status updates
-func HandleJobStatusStream(w http.ResponseWriter, r *http.Request, eventManager *messaging.EventManager, storageService *storage.MinIOService) {
+func HandleJobStatusStream(w http.ResponseWriter, r *http.Request, eventManager *messaging.EventManager[models.StatusEvent], storageService *storage.MinIOService) {
 	jobID := chi.URLParam(r, "job_id")
 
 	// Validate UUID format
@@ -62,7 +63,7 @@ func HandleJobStatusStream(w http.ResponseWriter, r *http.Request, eventManager 
 
 	// Register for events
 	eventChan := eventManager.Register(jobID)
-	defer eventManager.Unregister(jobID, eventChan)
+	defer eventManager.Unregister(jobID)
 
 	// Wait for event or timeout
 	timeout := time.After(sseTimeout)

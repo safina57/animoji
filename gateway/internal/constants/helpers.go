@@ -15,3 +15,11 @@ func ThumbnailPrefix(visibility string) string {
 	}
 	return PrefixThumbnailsPrivate
 }
+
+// EmojiPrefix returns the published emojis MinIO prefix for the given visibility
+func EmojiPrefix(visibility string) string {
+	if visibility == VisibilityPublic {
+		return PrefixEmojisPublic
+	}
+	return PrefixEmojisPrivate
+}

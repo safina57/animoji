@@ -19,6 +19,7 @@ const (
 
 // Job status constants
 const (
+	StatusStarted   = "started"
 	StatusCompleted = "completed"
 	StatusFailed    = "failed"
 )
@@ -85,8 +86,15 @@ const (
 
 // NATS configuration
 const (
-	DefaultNatsURL      = "nats://nats:4222"
-	NatsSubjectGenerate = "anime.generate"
+	DefaultNatsURL             = "nats://nats:4222"
+	NatsSubjectGenerate        = "anime.generate"
+	NatsSubjectEmojiGenerate   = "emoji.generate"
+)
+
+// Emoji storage prefixes
+const (
+	PrefixEmojisPublic  = "emojis/public/"
+	PrefixEmojisPrivate = "emojis/private/"
 )
 
 // CORS configuration
