@@ -9,6 +9,11 @@ class Settings(BaseSettings):
     # NATS Configuration
     nats_url: str = "nats://nats:4222"
     nats_subject: str = "anime.generate"
+    emoji_nats_subject: str = "emoji.generate"
+
+    # Emoji Generation Configuration
+    emoji_width: int = 512
+    emoji_height: int = 512
 
     # MinIO Configuration
     minio_endpoint: str = "minio:9000"

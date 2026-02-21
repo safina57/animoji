@@ -9,7 +9,8 @@ from core.logger import get_logger
 from core.settings import get_settings
 from core.flux_client import get_flux_client
 from routers import health
-from services.consumer import get_job_consumer
+from services.image_consumer import get_image_job_consumer
+from services.emoji_consumer import get_emoji_consumer
 
 logger = get_logger()
 settings = get_settings()
@@ -41,12 +42,17 @@ async def lifespan(app: FastAPI):
                 """)
     
     try:
-        # Start the NATS consumer
-        job_consumer = get_job_consumer()
+        # Start the anime NATS consumer
+        job_consumer = get_image_job_consumer()
         await job_consumer.start()
         logger.info("Job consumer started successfully")
+
+        # Start the emoji NATS consumer
+        emoji_consumer = get_emoji_consumer()
+        await emoji_consumer.start()
+        logger.info("Emoji consumer started successfully")
     except Exception as e:
-        logger.error(f"Failed to start job consumer: {e}")
+        logger.error(f"Failed to start consumers: {e}")
         raise
 
     yield

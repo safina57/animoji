@@ -7,12 +7,12 @@ from nats.aio.msg import Msg
 from core.minio_client import MinioClient, get_minio_client
 from core.nats_client import NatsClient, get_nats_client
 from core.settings import Settings, get_settings
-from models.job import JobMessage
+from models.job import ImageJobMessage
 from core.logger import get_logger
 from services.image_processor import ImageProcessor, get_image_processor
 
 
-class JobConsumer:
+class ImageJobConsumer:
     """
     Consumes job messages from NATS queue and processes them.
     
@@ -118,7 +118,7 @@ class JobConsumer:
         try:
             # Parse the message payload
             data = json.loads(msg.data.decode())
-            job_message = JobMessage(**data)
+            job_message = ImageJobMessage(**data)
             job_id = job_message.job_id
 
             self.logger.info(
@@ -186,16 +186,16 @@ class JobConsumer:
             if job_id:
                 await self._publish_status(job_id, "failed")
 
-_job_consumer: JobConsumer | None = None
+_job_consumer: ImageJobConsumer | None = None
 
 
-def get_job_consumer() -> JobConsumer:
-    """Get the singleton JobConsumer instance."""
+def get_image_job_consumer() -> ImageJobConsumer:
+    """Get the singleton ImageJobConsumer instance."""
     global _job_consumer
     if _job_consumer is not None:
         return _job_consumer
 
-    _job_consumer = JobConsumer(
+    _job_consumer = ImageJobConsumer(
         nats_client=get_nats_client(),
         minio_client=get_minio_client(),
         image_processor=get_image_processor(),
