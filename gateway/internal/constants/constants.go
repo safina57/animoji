@@ -62,8 +62,8 @@ const (
 	TmpLifecycleDays   = 1
 )
 
-// Presigned URL expiry for private objects
-const PrivateURLExpiry = 1 * time.Hour
+// PresignedURLExpiry is the lifetime of presigned URLs returned to clients.
+const PresignedURLExpiry = 1 * time.Hour
 
 // IsPrivateKey reports whether objectKey belongs to a private-visibility prefix.
 func IsPrivateKey(objectKey string) bool {

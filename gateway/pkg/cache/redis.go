@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"sync"
@@ -230,33 +231,89 @@ func (r *RedisClient) GetEmojiJobMetadata(ctx context.Context, jobID string) (*E
 	return &metadata, nil
 }
 
-// UpdateEmojiJobTotalVariants sets the TotalVariants field once the worker has
-// determined the actual number of emotion variants it will generate.
+// UpdateEmojiJobTotalVariants atomically sets the TotalVariants field once the
+// worker has resolved the actual number of emotion variants it will generate.
 func (r *RedisClient) UpdateEmojiJobTotalVariants(ctx context.Context, jobID string, total int) error {
-	metadata, err := r.GetEmojiJobMetadata(ctx, jobID)
-	if err != nil {
-		return err
+	key := r.emojiJobKey(jobID)
+
+	for {
+		err := r.client.Watch(ctx, func(tx *redis.Tx) error {
+			data, err := tx.Get(ctx, key).Bytes()
+			if err != nil {
+				return fmt.Errorf("failed to get emoji job metadata: %w", err)
+			}
+
+			var metadata EmojiJobMetadata
+			if err := json.Unmarshal(data, &metadata); err != nil {
+				return fmt.Errorf("failed to unmarshal emoji job metadata: %w", err)
+			}
+
+			metadata.TotalVariants = total
+
+			newData, err := json.Marshal(metadata)
+			if err != nil {
+				return fmt.Errorf("failed to marshal emoji job metadata: %w", err)
+			}
+
+			_, err = tx.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
+				pipe.Set(ctx, key, newData, r.ttl)
+				return nil
+			})
+			return err
+		}, key)
+
+		if err == nil {
+			return nil
+		}
+		if errors.Is(err, redis.TxFailedErr) {
+			continue
+		}
+		return fmt.Errorf("failed to atomically update emoji job total variants: %w", err)
 	}
-	metadata.TotalVariants = total
-	return r.SetEmojiJobMetadata(ctx, jobID, metadata)
 }
 
-// AppendEmojiVariantResult appends a completed variant result to the emoji job metadata.
+// AppendEmojiVariantResult atomically appends a completed variant result to the
+// emoji job metadata using optimistic locking (WATCH/MULTI/EXEC).
 // Returns true when all variants are complete.
 func (r *RedisClient) AppendEmojiVariantResult(ctx context.Context, jobID string, variant EmojiVariantResult) (bool, error) {
-	metadata, err := r.GetEmojiJobMetadata(ctx, jobID)
-	if err != nil {
-		return false, err
+	key := r.emojiJobKey(jobID)
+	var allComplete bool
+
+	for {
+		err := r.client.Watch(ctx, func(tx *redis.Tx) error {
+			data, err := tx.Get(ctx, key).Bytes()
+			if err != nil {
+				return fmt.Errorf("failed to get emoji job metadata: %w", err)
+			}
+
+			var metadata EmojiJobMetadata
+			if err := json.Unmarshal(data, &metadata); err != nil {
+				return fmt.Errorf("failed to unmarshal emoji job metadata: %w", err)
+			}
+
+			metadata.CompletedVariants = append(metadata.CompletedVariants, variant)
+			allComplete = metadata.TotalVariants > 0 && len(metadata.CompletedVariants) >= metadata.TotalVariants
+
+			newData, err := json.Marshal(metadata)
+			if err != nil {
+				return fmt.Errorf("failed to marshal emoji job metadata: %w", err)
+			}
+
+			_, err = tx.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
+				pipe.Set(ctx, key, newData, r.ttl)
+				return nil
+			})
+			return err
+		}, key)
+
+		if err == nil {
+			return allComplete, nil
+		}
+		if errors.Is(err, redis.TxFailedErr) {
+			continue // key modified by another writer, retry
+		}
+		return false, fmt.Errorf("failed to atomically append emoji variant result: %w", err)
 	}
-
-	metadata.CompletedVariants = append(metadata.CompletedVariants, variant)
-
-	if err := r.SetEmojiJobMetadata(ctx, jobID, metadata); err != nil {
-		return false, err
-	}
-
-	allComplete := len(metadata.CompletedVariants) >= metadata.TotalVariants
-	return allComplete, nil
 }
 
 // DeleteEmojiJobMetadata removes emoji job metadata from Redis

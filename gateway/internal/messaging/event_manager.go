@@ -2,17 +2,6 @@ package messaging
 
 import "sync"
 
-// EventManager is a generic, job-scoped SSE event router.
-//
-// It maps job IDs to buffered channels of type T and handles the race between
-// the worker completing a job and the client opening an SSE connection:
-//   - If events arrive before the SSE connection: they are buffered in a slice.
-//   - When Register is called: buffered events are drained into the channel immediately.
-//
-// Instantiate with the appropriate event type and channel capacity:
-//
-//	messaging.NewEventManager[models.StatusEvent](1)          // anime: one terminal event
-//	messaging.NewEventManager[messaging.EmojiPartialEvent](3) // emoji: up to 3 partial events
 type EventManager[T any] struct {
 	mu       sync.RWMutex
 	channels map[string]chan T
@@ -48,7 +37,8 @@ func (m *EventManager[T]) Register(jobID string) <-chan T {
 	return ch
 }
 
-// Unregister closes and removes the channel for the job.
+// Unregister closes and removes the channel for the job and discards any
+// remaining buffered events, preventing unbounded memory growth.
 func (m *EventManager[T]) Unregister(jobID string) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -57,6 +47,7 @@ func (m *EventManager[T]) Unregister(jobID string) {
 		close(m.channels[jobID])
 		delete(m.channels, jobID)
 	}
+	delete(m.buffer, jobID)
 }
 
 // NotifyJob delivers an event to the SSE connection for the job.

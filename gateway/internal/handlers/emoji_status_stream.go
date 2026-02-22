@@ -11,6 +11,7 @@ import (
 	"github.com/safina57/animoji/gateway/internal/constants"
 	"github.com/safina57/animoji/gateway/internal/messaging"
 	"github.com/safina57/animoji/gateway/internal/models"
+	"github.com/safina57/animoji/gateway/pkg/cache"
 	"github.com/safina57/animoji/gateway/pkg/logger"
 	"github.com/safina57/animoji/gateway/pkg/storage"
 )
@@ -18,8 +19,11 @@ import (
 const emojiSSETimeout = 3 * time.Minute
 
 // HandleEmojiStatusStream handles progressive SSE for emoji jobs.
-// Each of the 3 emoji variants is streamed to the client as it completes,
-// followed by a final "all_complete" event when all 3 are ready.
+//
+// On connect it replays any already-completed variants from Redis so that a
+// reconnecting client receives the full picture without re-running generation.
+// The "started" event from the worker sets totalVariants dynamically; Redis
+// serves as a fallback in case that event was already processed.
 func HandleEmojiStatusStream(w http.ResponseWriter, r *http.Request, eventManager *messaging.EventManager[models.EmojiPartialEvent], storageService *storage.MinIOService) {
 	jobID := chi.URLParam(r, "job_id")
 
@@ -28,7 +32,6 @@ func HandleEmojiStatusStream(w http.ResponseWriter, r *http.Request, eventManage
 		return
 	}
 
-	// Disable write timeout so the long-lived SSE connection is not killed by the server
 	rc := http.NewResponseController(w)
 	_ = rc.SetWriteDeadline(time.Time{})
 
@@ -50,15 +53,45 @@ func HandleEmojiStatusStream(w http.ResponseWriter, r *http.Request, eventManage
 	fmt.Fprintf(w, ": connected\n\n")
 	flusher.Flush()
 
+	// Register FIRST so no future events are missed while we seed from Redis.
 	eventChan := eventManager.Register(jobID)
 	defer eventManager.Unregister(jobID)
 
 	timeout := time.After(emojiSSETimeout)
 
-	// totalVariants is set dynamically when the worker publishes its "started" event.
 	totalVariants := 0
-	// variantURLs accumulates presigned URLs as each variant completes
 	variantURLs := make(map[string]string, 3)
+
+	redisClient := cache.MustGetClient()
+	if meta, err := redisClient.GetEmojiJobMetadata(ctx, jobID); err == nil {
+		totalVariants = meta.TotalVariants
+		for _, v := range meta.CompletedVariants {
+			url, err := storageService.GetPresignedURLForKey(ctx, v.ResultKey, constants.PresignedURLExpiry)
+			if err != nil {
+				logger.Error().Err(err).
+					Str("job_id", jobID).
+					Str("emotion", v.Emotion).
+					Msg("Failed to generate presigned URL for cached emoji variant")
+				continue
+			}
+			variantURLs[v.Emotion] = url
+			sendSSEEvent(w, flusher, map[string]any{
+				"type":        "variant_ready",
+				"emotion":     v.Emotion,
+				"variant_url": url,
+				"completed":   len(variantURLs),
+				"total":       totalVariants,
+			})
+		}
+		// If all variants were already completed before this connection, finish early.
+		if totalVariants > 0 && len(variantURLs) >= totalVariants {
+			sendSSEEvent(w, flusher, map[string]any{
+				"type":     "all_complete",
+				"variants": variantURLs,
+			})
+			return
+		}
+	}
 
 	for {
 		select {
@@ -68,7 +101,10 @@ func HandleEmojiStatusStream(w http.ResponseWriter, r *http.Request, eventManage
 			}
 
 			if event.Status == constants.StatusStarted {
-				totalVariants = event.TotalVariants
+				// Only update if not already seeded from Redis.
+				if totalVariants == 0 {
+					totalVariants = event.TotalVariants
+				}
 				continue
 			}
 
@@ -81,7 +117,12 @@ func HandleEmojiStatusStream(w http.ResponseWriter, r *http.Request, eventManage
 			}
 
 			if event.Status == constants.StatusCompleted {
-				variantURL, err := storageService.GetPresignedURLForKey(ctx, event.ResultKey, presignedURLExpiry)
+				// Skip variants already replayed from Redis on connect.
+				if _, alreadySent := variantURLs[event.Emotion]; alreadySent {
+					continue
+				}
+
+				variantURL, err := storageService.GetPresignedURLForKey(ctx, event.ResultKey, constants.PresignedURLExpiry)
 				if err != nil {
 					logger.Error().Err(err).
 						Str("job_id", jobID).
