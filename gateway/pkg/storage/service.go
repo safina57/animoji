@@ -29,6 +29,16 @@ func (s *MinIOService) UploadTmpOriginal(ctx context.Context, jobID string, data
 	return objectKey, nil
 }
 
+// UploadTmpEmojiOriginal uploads the reference image for an emoji job to the tmp/ prefix.
+// Returns the object key stored in MinIO.
+func (s *MinIOService) UploadTmpEmojiOriginal(ctx context.Context, jobID string, data []byte, ext string, mimeType string) (string, error) {
+	objectKey := fmt.Sprintf("%s%s/emoji_original.%s", constants.PrefixTmp, jobID, ext)
+	if err := s.client.UploadFile(ctx, constants.BucketName, objectKey, data, mimeType); err != nil {
+		return "", fmt.Errorf("failed to upload tmp emoji original: %w", err)
+	}
+	return objectKey, nil
+}
+
 // CheckTmpResultExists checks if a tmp result image exists for a job at a given iteration
 func (s *MinIOService) CheckTmpResultExists(ctx context.Context, jobID string, iterationNum int) (bool, error) {
 	objectKey := fmt.Sprintf("%s%s/result_v%d.png", constants.PrefixTmp, jobID, iterationNum)
@@ -99,7 +109,7 @@ func (s *MinIOService) GetPublicURL(objectKey string) string {
 // all other keys get a plain public URL.
 func (s *MinIOService) GetURLForKey(ctx context.Context, objectKey string) (string, error) {
 	if constants.IsPrivateKey(objectKey) {
-		return s.client.GetPresignedURL(ctx, constants.BucketName, objectKey, constants.PrivateURLExpiry)
+		return s.client.GetPresignedURL(ctx, constants.BucketName, objectKey, constants.PresignedURLExpiry)
 	}
 	return s.client.GetPublicURL(constants.BucketName, objectKey), nil
 }

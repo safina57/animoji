@@ -352,3 +352,27 @@ body {
     animation: none;
   }
 }
+
+/* ─── 404 Night Shrine Scene ─── */
+
+/* Star blink */
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.1;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.2);
+  }
+}
+
+/* Torii gate glow pulse */
+@keyframes torii-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px rgba(230, 57, 70, 0.15));
+  }
+  50% {
+    filter: drop-shadow(0 0 24px rgba(230, 57, 70, 0.45));
+  }
+}

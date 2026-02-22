@@ -12,18 +12,16 @@ import (
 	"github.com/google/uuid"
 	"github.com/safina57/animoji/gateway/internal/constants"
 	"github.com/safina57/animoji/gateway/internal/messaging"
+	"github.com/safina57/animoji/gateway/internal/models"
 	"github.com/safina57/animoji/gateway/pkg/cache"
 	"github.com/safina57/animoji/gateway/pkg/logger"
 	"github.com/safina57/animoji/gateway/pkg/storage"
 )
 
-const (
-	sseTimeout         = 2 * time.Minute
-	presignedURLExpiry = time.Hour
-)
+const sseTimeout = 2 * time.Minute
 
 // HandleJobStatusStream handles SSE connections for real-time job status updates
-func HandleJobStatusStream(w http.ResponseWriter, r *http.Request, eventManager *messaging.EventManager, storageService *storage.MinIOService) {
+func HandleJobStatusStream(w http.ResponseWriter, r *http.Request, eventManager *messaging.EventManager[models.StatusEvent], storageService *storage.MinIOService) {
 	jobID := chi.URLParam(r, "job_id")
 
 	// Validate UUID format
@@ -62,7 +60,7 @@ func HandleJobStatusStream(w http.ResponseWriter, r *http.Request, eventManager 
 
 	// Register for events
 	eventChan := eventManager.Register(jobID)
-	defer eventManager.Unregister(jobID, eventChan)
+	defer eventManager.Unregister(jobID)
 
 	// Wait for event or timeout
 	timeout := time.After(sseTimeout)
@@ -113,14 +111,14 @@ func sendCompletedEvent(w http.ResponseWriter, flusher http.Flusher, jobID strin
 	originalKey := fmt.Sprintf("%s%s/original.%s", constants.PrefixTmp, jobID, metadata.OriginalExt)
 	resultKey := fmt.Sprintf("%s%s/result_v%d.png", constants.PrefixTmp, jobID, iterationNum)
 
-	originalURL, err := storageService.GetPresignedURLForKey(ctx, originalKey, presignedURLExpiry)
+	originalURL, err := storageService.GetPresignedURLForKey(ctx, originalKey, constants.PresignedURLExpiry)
 	if err != nil {
 		logger.Error().Err(err).Str("job_id", jobID).Msg("Failed to generate presigned URL for original")
 		sendSSEError(w, flusher, "Failed to retrieve result")
 		return
 	}
 
-	resultURL, err := storageService.GetPresignedURLForKey(ctx, resultKey, presignedURLExpiry)
+	resultURL, err := storageService.GetPresignedURLForKey(ctx, resultKey, constants.PresignedURLExpiry)
 	if err != nil {
 		logger.Error().Err(err).Str("job_id", jobID).Int("iteration_num", iterationNum).Msg("Failed to generate presigned URL for result")
 		sendSSEError(w, flusher, "Failed to retrieve result")

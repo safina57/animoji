@@ -17,14 +17,15 @@ import (
 
 // App holds all dependencies and configuration for the application
 type App struct {
-	router         *chi.Mux
-	db             *gorm.DB
-	repo           *repository.Repository
-	natsClient     *messaging.NatsClient
-	eventManager   *messaging.EventManager
-	storageService *storage.MinIOService
-	natsSubscriber *messaging.NatsSubscriber
-	authConfig     *auth.AuthConfig
+	router            *chi.Mux
+	db                *gorm.DB
+	repo              *repository.Repository
+	natsClient        *messaging.NatsClient
+	imageEventManager *messaging.EventManager[models.StatusEvent]
+	emojiEventManager *messaging.EventManager[models.EmojiPartialEvent]
+	storageService    *storage.MinIOService
+	natsSubscriber    *messaging.NatsSubscriber
+	authConfig        *auth.AuthConfig
 }
 
 // New initializes and returns a configured App instance
@@ -56,12 +57,13 @@ func New(ctx context.Context) (*App, error) {
 		return nil, err
 	}
 
-	// Create event manager and storage service
-	eventManager := messaging.NewEventManager()
+	// Create event managers and storage service
+	imageEventManager := messaging.NewEventManager[models.StatusEvent](1)
+	emojiEventManager := messaging.NewEventManager[models.EmojiPartialEvent](4)
 	storageService := storage.NewMinIOService()
 
 	// Create NATS subscriber and pass dependencies
-	natsSubscriber := messaging.NewNatsSubscriber(natsClient, eventManager)
+	natsSubscriber := messaging.NewNatsSubscriber(natsClient, imageEventManager, emojiEventManager)
 
 	// Initialize authentication system
 	authConfig, err := auth.Init()
@@ -70,28 +72,37 @@ func New(ctx context.Context) (*App, error) {
 	}
 
 	return &App{
-		db:             db,
-		repo:           repo,
-		natsClient:     natsClient,
-		eventManager:   eventManager,
-		storageService: storageService,
-		natsSubscriber: natsSubscriber,
-		authConfig:     authConfig,
+		db:                db,
+		repo:              repo,
+		natsClient:        natsClient,
+		imageEventManager: imageEventManager,
+		emojiEventManager: emojiEventManager,
+		storageService:    storageService,
+		natsSubscriber:    natsSubscriber,
+		authConfig:        authConfig,
 	}, nil
 }
 
 // Start begins all background services and returns the HTTP handler
 func (a *App) Start(ctx context.Context) http.Handler {
-	// Start NATS subscriber in background
+	// Start anime NATS subscriber in background
 	go func() {
 		if err := a.natsSubscriber.SubscribeToStatusEvents(ctx); err != nil {
-			logger.Error().Err(err).Msg("NATS subscriber stopped")
+			logger.Error().Err(err).Msg("NATS anime subscriber stopped")
+		}
+	}()
+
+	// Start emoji NATS subscriber in background
+	go func() {
+		if err := a.natsSubscriber.SubscribeToEmojiStatusEvents(ctx); err != nil {
+			logger.Error().Err(err).Msg("NATS emoji subscriber stopped")
 		}
 	}()
 
 	// Setup and return router
 	a.router = newRouter(
-		a.eventManager,
+		a.imageEventManager,
+		a.emojiEventManager,
 		a.storageService,
 		a.repo,
 		a.authConfig,

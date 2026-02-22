@@ -8,6 +8,7 @@ import (
 	"github.com/safina57/animoji/gateway/internal/auth"
 	"github.com/safina57/animoji/gateway/internal/handlers"
 	"github.com/safina57/animoji/gateway/internal/messaging"
+	"github.com/safina57/animoji/gateway/internal/models"
 	appMiddleware "github.com/safina57/animoji/gateway/internal/middleware"
 	"github.com/safina57/animoji/gateway/internal/repository"
 	"github.com/safina57/animoji/gateway/pkg/storage"
@@ -15,7 +16,8 @@ import (
 
 // newRouter creates and configures the HTTP router
 func newRouter(
-	eventManager *messaging.EventManager,
+	imageEventManager *messaging.EventManager[models.StatusEvent],
+	emojiEventManager *messaging.EventManager[models.EmojiPartialEvent],
 	storageService *storage.MinIOService,
 	repo *repository.Repository,
 	authConfig *auth.AuthConfig,
@@ -66,10 +68,16 @@ func newRouter(
 		r.Get("/images/me", userImagesHandler.HandleGetMyImages)
 		r.Post("/submit-job", handlers.HandleSubmitJob)
 		r.Get("/job-status/{job_id}/stream", func(w http.ResponseWriter, r *http.Request) {
-			handlers.HandleJobStatusStream(w, r, eventManager, storageService)
+			handlers.HandleJobStatusStream(w, r, imageEventManager, storageService)
 		})
 		r.Post("/jobs/{job_id}/refine", handlers.HandleRefineJob)
 		r.Post("/images/{job_id}/publish", publishHandler.HandlePublishImage)
+
+		// Emoji generation routes
+		r.Post("/submit-emoji-job", handlers.HandleSubmitEmojiJob)
+		r.Get("/emoji-job-status/{job_id}/stream", func(w http.ResponseWriter, r *http.Request) {
+			handlers.HandleEmojiStatusStream(w, r, emojiEventManager, storageService)
+		})
 
 		r.Post("/images/{image_id}/like", likeHandler.HandleLikeImage)
 		r.Delete("/images/{image_id}/like", likeHandler.HandleUnlikeImage)

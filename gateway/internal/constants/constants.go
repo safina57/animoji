@@ -19,6 +19,7 @@ const (
 
 // Job status constants
 const (
+	StatusStarted   = "started"
 	StatusCompleted = "completed"
 	StatusFailed    = "failed"
 )
@@ -61,8 +62,8 @@ const (
 	TmpLifecycleDays   = 1
 )
 
-// Presigned URL expiry for private objects
-const PrivateURLExpiry = 1 * time.Hour
+// PresignedURLExpiry is the lifetime of presigned URLs returned to clients.
+const PresignedURLExpiry = 1 * time.Hour
 
 // IsPrivateKey reports whether objectKey belongs to a private-visibility prefix.
 func IsPrivateKey(objectKey string) bool {
@@ -85,8 +86,15 @@ const (
 
 // NATS configuration
 const (
-	DefaultNatsURL      = "nats://nats:4222"
-	NatsSubjectGenerate = "anime.generate"
+	DefaultNatsURL             = "nats://nats:4222"
+	NatsSubjectGenerate        = "anime.generate"
+	NatsSubjectEmojiGenerate   = "emoji.generate"
+)
+
+// Emoji storage prefixes
+const (
+	PrefixEmojisPublic  = "emojis/public/"
+	PrefixEmojisPrivate = "emojis/private/"
 )
 
 // CORS configuration

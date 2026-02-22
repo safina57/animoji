@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"sync"
@@ -165,6 +166,165 @@ func (r *RedisClient) DeleteJobMetadata(ctx context.Context, jobID string) error
 		Str("job_id", jobID).
 		Msg("Job metadata deleted from Redis")
 
+	return nil
+}
+
+// EmojiVariantResult holds the result for a single completed emoji variant
+type EmojiVariantResult struct {
+	Emotion      string `json:"emotion"`
+	VariantIndex int    `json:"variant_index"`
+	ResultKey    string `json:"result_key"`
+}
+
+// EmojiJobMetadata represents temporary emoji job data cached in Redis
+type EmojiJobMetadata struct {
+	JobID             string               `json:"job_id"`
+	UserID            uuid.UUID            `json:"user_id"`
+	Prompt            string               `json:"prompt"`
+	OriginalKey       string               `json:"original_key"`
+	OriginalExt       string               `json:"original_ext"`
+	TotalVariants     int                  `json:"total_variants"`
+	CompletedVariants []EmojiVariantResult `json:"completed_variants"`
+	CreatedAt         time.Time            `json:"created_at"`
+}
+
+// emojiJobKey returns the Redis key for an emoji job ID
+func (r *RedisClient) emojiJobKey(jobID string) string {
+	return fmt.Sprintf("emoji_job:%s", jobID)
+}
+
+// SetEmojiJobMetadata stores emoji job metadata in Redis with TTL
+func (r *RedisClient) SetEmojiJobMetadata(ctx context.Context, jobID string, metadata *EmojiJobMetadata) error {
+	key := r.emojiJobKey(jobID)
+
+	data, err := json.Marshal(metadata)
+	if err != nil {
+		return fmt.Errorf("failed to marshal emoji job metadata: %w", err)
+	}
+
+	if err := r.client.Set(ctx, key, data, r.ttl).Err(); err != nil {
+		return fmt.Errorf("failed to set emoji job metadata in Redis: %w", err)
+	}
+
+	logger.Debug().Str("job_id", jobID).Dur("ttl", r.ttl).Msg("Emoji job metadata cached in Redis")
+	return nil
+}
+
+// GetEmojiJobMetadata retrieves emoji job metadata from Redis
+func (r *RedisClient) GetEmojiJobMetadata(ctx context.Context, jobID string) (*EmojiJobMetadata, error) {
+	key := r.emojiJobKey(jobID)
+
+	data, err := r.client.Get(ctx, key).Bytes()
+	if err != nil {
+		if err == redis.Nil {
+			return nil, fmt.Errorf("emoji job metadata not found: %s", jobID)
+		}
+		return nil, fmt.Errorf("failed to get emoji job metadata from Redis: %w", err)
+	}
+
+	var metadata EmojiJobMetadata
+	if err := json.Unmarshal(data, &metadata); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal emoji job metadata: %w", err)
+	}
+
+	logger.Debug().Str("job_id", jobID).Msg("Emoji job metadata retrieved from Redis")
+	return &metadata, nil
+}
+
+// UpdateEmojiJobTotalVariants atomically sets the TotalVariants field once the
+// worker has resolved the actual number of emotion variants it will generate.
+func (r *RedisClient) UpdateEmojiJobTotalVariants(ctx context.Context, jobID string, total int) error {
+	key := r.emojiJobKey(jobID)
+
+	for {
+		err := r.client.Watch(ctx, func(tx *redis.Tx) error {
+			data, err := tx.Get(ctx, key).Bytes()
+			if err != nil {
+				return fmt.Errorf("failed to get emoji job metadata: %w", err)
+			}
+
+			var metadata EmojiJobMetadata
+			if err := json.Unmarshal(data, &metadata); err != nil {
+				return fmt.Errorf("failed to unmarshal emoji job metadata: %w", err)
+			}
+
+			metadata.TotalVariants = total
+
+			newData, err := json.Marshal(metadata)
+			if err != nil {
+				return fmt.Errorf("failed to marshal emoji job metadata: %w", err)
+			}
+
+			_, err = tx.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
+				pipe.Set(ctx, key, newData, r.ttl)
+				return nil
+			})
+			return err
+		}, key)
+
+		if err == nil {
+			return nil
+		}
+		if errors.Is(err, redis.TxFailedErr) {
+			continue
+		}
+		return fmt.Errorf("failed to atomically update emoji job total variants: %w", err)
+	}
+}
+
+// AppendEmojiVariantResult atomically appends a completed variant result to the
+// emoji job metadata using optimistic locking (WATCH/MULTI/EXEC).
+// Returns true when all variants are complete.
+func (r *RedisClient) AppendEmojiVariantResult(ctx context.Context, jobID string, variant EmojiVariantResult) (bool, error) {
+	key := r.emojiJobKey(jobID)
+	var allComplete bool
+
+	for {
+		err := r.client.Watch(ctx, func(tx *redis.Tx) error {
+			data, err := tx.Get(ctx, key).Bytes()
+			if err != nil {
+				return fmt.Errorf("failed to get emoji job metadata: %w", err)
+			}
+
+			var metadata EmojiJobMetadata
+			if err := json.Unmarshal(data, &metadata); err != nil {
+				return fmt.Errorf("failed to unmarshal emoji job metadata: %w", err)
+			}
+
+			metadata.CompletedVariants = append(metadata.CompletedVariants, variant)
+			allComplete = metadata.TotalVariants > 0 && len(metadata.CompletedVariants) >= metadata.TotalVariants
+
+			newData, err := json.Marshal(metadata)
+			if err != nil {
+				return fmt.Errorf("failed to marshal emoji job metadata: %w", err)
+			}
+
+			_, err = tx.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
+				pipe.Set(ctx, key, newData, r.ttl)
+				return nil
+			})
+			return err
+		}, key)
+
+		if err == nil {
+			return allComplete, nil
+		}
+		if errors.Is(err, redis.TxFailedErr) {
+			continue // key modified by another writer, retry
+		}
+		return false, fmt.Errorf("failed to atomically append emoji variant result: %w", err)
+	}
+}
+
+// DeleteEmojiJobMetadata removes emoji job metadata from Redis
+func (r *RedisClient) DeleteEmojiJobMetadata(ctx context.Context, jobID string) error {
+	key := r.emojiJobKey(jobID)
+
+	if err := r.client.Del(ctx, key).Err(); err != nil {
+		return fmt.Errorf("failed to delete emoji job metadata from Redis: %w", err)
+	}
+
+	logger.Debug().Str("job_id", jobID).Msg("Emoji job metadata deleted from Redis")
 	return nil
 }
 

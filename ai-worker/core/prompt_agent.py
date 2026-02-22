@@ -1,25 +1,18 @@
-"""Prompt enhancement agent."""
+"""LLM prompt agents (pydantic-ai) for the AI worker."""
 
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIResponsesModel
 from pydantic_ai.providers.azure import AzureProvider
 
 from core.settings import get_settings
-from models.image_generation import EnhancedPrompt
-from prompts import AnimeGenerationPrompt
+from models.image_generation import EmojiBaseStyle, EnhancedPrompt
+from prompts import AnimeGenerationPrompt, EmojiGenerationPrompt
 
-_prompt_agent: Agent[None, EnhancedPrompt] | None = None
+# ── Shared model factory ───────────────────────────────────────────────────────
 
-
-def get_prompt_agent() -> Agent[None, EnhancedPrompt]:
-    """Get the singleton prompt enhancement agent."""
-    global _prompt_agent
-    if _prompt_agent is not None:
-        return _prompt_agent
-
+def _build_azure_model() -> OpenAIResponsesModel:
     settings = get_settings()
-
-    model = OpenAIResponsesModel(
+    return OpenAIResponsesModel(
         settings.azure_openai_deployment,
         provider=AzureProvider(
             azure_endpoint=settings.azure_openai_endpoint,
@@ -27,13 +20,43 @@ def get_prompt_agent() -> Agent[None, EnhancedPrompt]:
             api_version=settings.azure_openai_api_version,
         ),
     )
-    anime_prompt = AnimeGenerationPrompt()
+
+
+# ── Anime prompt agent ─────────────────────────────────────────────────────────
+
+_prompt_agent: Agent[None, EnhancedPrompt] | None = None
+
+
+def get_prompt_agent() -> Agent[None, EnhancedPrompt]:
+    """Get the singleton anime prompt enhancement agent."""
+    global _prompt_agent
+    if _prompt_agent is not None:
+        return _prompt_agent
 
     _prompt_agent = Agent(
-        model,
+        _build_azure_model(),
         output_type=EnhancedPrompt,
-        system_prompt=anime_prompt.get_system_prompt(),
+        system_prompt=AnimeGenerationPrompt().get_system_prompt(),
         retries=3,
     )
-
     return _prompt_agent
+
+
+# ── Emoji prompt agent ─────────────────────────────────────────────────────────
+
+_emoji_prompt_agent: Agent[None, EmojiBaseStyle] | None = None
+
+
+def get_emoji_prompt_agent() -> Agent[None, EmojiBaseStyle]:
+    """Get the singleton emoji style extraction agent."""
+    global _emoji_prompt_agent
+    if _emoji_prompt_agent is not None:
+        return _emoji_prompt_agent
+
+    _emoji_prompt_agent = Agent(
+        _build_azure_model(),
+        output_type=EmojiBaseStyle,
+        system_prompt=EmojiGenerationPrompt().get_system_prompt(),
+        retries=3,
+    )
+    return _emoji_prompt_agent

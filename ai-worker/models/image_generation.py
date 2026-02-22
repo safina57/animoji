@@ -4,6 +4,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from prompts.emotion_cues import EmotionName
+
 
 class EnhancedPrompt(BaseModel):
     """Structured output from the prompt enhancement agent."""
@@ -29,6 +31,48 @@ class FluxRequest(BaseModel):
     width: int = 1024
     height: int = 1024
     n: int = 1
+
+
+class EmojiBaseStyle(BaseModel):
+    """
+    Structured output from the emoji style extraction agent.
+    """
+
+    character_description: str = Field(
+        ...,
+        description=(
+            "Visual description of the subject in anime chibi form: species or type, "
+            "key physical features, hair/fur colour and style, eye colour, "
+            "distinctive traits. 2-3 sentences max."
+        ),
+    )
+    art_style: str = Field(
+        ...,
+        description=(
+            "Detected anime style reference from the user prompt (e.g. 'Demon Slayer', "
+            "'One Piece', 'Spy x Family'). Use 'modern anime chibi' if none specified."
+        ),
+    )
+    style_hallmarks: str = Field(
+        ...,
+        description=(
+            "2-3 concrete visual hallmarks of the detected anime style applied to chibi "
+            "rendering: colour palette behaviour, shading technique, linework character. "
+            "Leave as empty string if no specific style was requested."
+        ),
+    )
+    color_palette: str = Field(
+        ...,
+        description="Dominant colour palette for this character (e.g. 'golden yellow, cream white, warm browns').",
+    )
+    emotions: list[EmotionName] = Field(
+        default_factory=list,
+        description=(
+            "Emotions explicitly requested in the user prompt. "
+            "Must be values from the allowed emotion set. "
+            "Empty list if no emotions were specified — consumer will fall back to defaults."
+        ),
+    )
 
 
 class GenerationResult(BaseModel):
