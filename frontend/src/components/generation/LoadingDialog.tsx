@@ -1,14 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 
-const MESSAGES = [
+const DEFAULT_MESSAGES = [
   "Creating your masterpiece...",
   "Channeling anime energy...",
   "Painting every pixel...",
   "Almost there...",
 ];
 
-export default function LoadingDialog() {
+interface LoadingDialogProps {
+  messages?: string[];
+}
+
+export default function LoadingDialog({ messages = DEFAULT_MESSAGES }: LoadingDialogProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
@@ -98,7 +102,7 @@ export default function LoadingDialog() {
         duration: 0.25,
         ease: "power2.in",
         onComplete: () => {
-          setMsgIndex((prev) => (prev + 1) % MESSAGES.length);
+          setMsgIndex((prev) => (prev + 1) % messages.length);
           gsap.fromTo(msgEl, { opacity: 0, y: 7 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" });
         },
       });
@@ -168,7 +172,7 @@ export default function LoadingDialog() {
             ref={textRef}
             className="font-display font-semibold text-sm tracking-wide text-slate-700 dark:text-slate-200"
           >
-            {MESSAGES[msgIndex]}
+            {messages[msgIndex]}
           </p>
 
           <div className="flex gap-2">
