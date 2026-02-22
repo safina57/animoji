@@ -1,4 +1,11 @@
-export type EmojiStage = 'input' | 'loading' | 'generating' | 'complete';
+export const EMOJI_STAGE = {
+  INPUT:      'input',
+  LOADING:    'loading',
+  GENERATING: 'generating',
+  COMPLETE:   'complete',
+} as const;
+
+export type EmojiStage = typeof EMOJI_STAGE[keyof typeof EMOJI_STAGE];
 
 export interface EmojiVariant {
   emotion: string;

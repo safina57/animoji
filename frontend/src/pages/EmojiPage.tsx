@@ -9,6 +9,7 @@ import {
 import { EmojiInput, EmojiResultGrid, useEmojiStatus } from '@components/emoji';
 import LoadingDialog from '@components/generation/LoadingDialog';
 import PageDecorations from '@lib/decorations/PageDecorations/PageDecorations';
+import { EMOJI_STAGE } from '@customTypes/emoji';
 import { Alert, AlertTitle, AlertDescription } from '@lib/ui/alert';
 import { Button } from '@lib/ui/button';
 import { X } from 'lucide-react';
@@ -29,7 +30,7 @@ export default function EmojiPage() {
   // On mount: restore job from URL if present (refresh persistence via Redis SSE seed)
   useEffect(() => {
     const urlJobId = searchParams.get('jobId');
-    if (urlJobId && stage === 'input') {
+    if (urlJobId && stage === EMOJI_STAGE.INPUT) {
       dispatch(startEmojiGenerationFromUrl(urlJobId));
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -41,8 +42,13 @@ export default function EmojiPage() {
     }
   }, [jobId, setSearchParams]);
 
+  const isInputStage      = stage === EMOJI_STAGE.INPUT      || stage === EMOJI_STAGE.LOADING;
+  const isLoadingStage    = stage === EMOJI_STAGE.LOADING;
+  const isGeneratingStage = stage === EMOJI_STAGE.GENERATING || stage === EMOJI_STAGE.COMPLETE;
+  const isComplete        = stage === EMOJI_STAGE.COMPLETE;
+
   // SSE connection: active during loading and generating stages
-  useEmojiStatus(jobId, stage === 'loading' || stage === 'generating');
+  useEmojiStatus(jobId, isLoadingStage || stage === EMOJI_STAGE.GENERATING);
 
   function handleReset() {
     dispatch(resetEmoji());
@@ -79,19 +85,15 @@ export default function EmojiPage() {
         </div>
       )}
 
-      {/* Input form — shown while waiting to submit */}
-      {(stage === 'input' || stage === 'loading') && <EmojiInput />}
+      {isInputStage && <EmojiInput />}
+      {isLoadingStage && <LoadingDialog messages={EMOJI_LOADING_MESSAGES} />}
 
-      {/* Loading dialog — only until we know the variant count ("started" event) */}
-      {stage === 'loading' && <LoadingDialog messages={EMOJI_LOADING_MESSAGES} />}
-
-      {/* Result grid — appears the moment we receive the "started" SSE event */}
-      {(stage === 'generating' || stage === 'complete') && (
+      {isGeneratingStage && (
         <div className="flex-1 flex flex-col items-center justify-center overflow-y-auto py-10 px-4 md:px-8">
           <EmojiResultGrid
             variants={variants}
             totalVariants={totalVariants}
-            isComplete={stage === 'complete'}
+            isComplete={isComplete}
             onReset={handleReset}
           />
         </div>

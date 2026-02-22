@@ -7,6 +7,7 @@ import PageDecorations from "@lib/decorations/PageDecorations/PageDecorations";
 import { Alert, AlertTitle, AlertDescription } from "@lib/ui/alert";
 import { Button } from "@lib/ui/button";
 import { failGeneration } from "@store/slices/generationSlice";
+import { GENERATION_STAGE } from "@customTypes/generation";
 import { X } from "lucide-react";
 
 export default function CreatePage() {
@@ -15,8 +16,12 @@ export default function CreatePage() {
   const jobId = useAppSelector((s) => s.generation.jobId);
   const error = useAppSelector((s) => s.generation.error);
 
+  const isInputStage   = stage === GENERATION_STAGE.INPUT || stage === GENERATION_STAGE.LOADING;
+  const isLoadingStage = stage === GENERATION_STAGE.LOADING;
+  const isResultStage  = stage === GENERATION_STAGE.RESULT;
+
   // Listen for SSE status updates during the loading stage.
-  useJobStatus(jobId, stage === "loading");
+  useJobStatus(jobId, isLoadingStage);
 
   return (
     <main className="flex-1 flex flex-col overflow-hidden relative">
@@ -48,14 +53,10 @@ export default function CreatePage() {
         </div>
       )}
 
-      {/* ── Stage: Input (always visible when not in result) ── */}
-      {(stage === "input" || stage === "loading") && <GenerationInput />}
+      {isInputStage && <GenerationInput />}
+      {isLoadingStage && <LoadingDialog />}
 
-      {/* ── Stage: Loading dialog (overlays the input) ── */}
-      {stage === "loading" && <LoadingDialog />}
-
-      {/* ── Stage: Result ── */}
-      {stage === "result" && (
+      {isResultStage && (
         <div className="flex-1 max-w-[1440px] mx-auto w-full p-4 md:p-6 flex flex-col gap-6 overflow-hidden">
           <ResultView />
           <GenerationInput />

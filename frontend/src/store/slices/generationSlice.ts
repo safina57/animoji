@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { GENERATION_STAGE } from "@customTypes/generation";
 import type { GenerationStage, GenerationResult } from "@customTypes/generation";
 
 interface GenerationState {
@@ -13,7 +14,7 @@ interface GenerationState {
 }
 
 const initialState: GenerationState = {
-  stage: "input",
+  stage: GENERATION_STAGE.INPUT,
   prompt: "",
   referenceImage: null,
   referencePreviewUrl: null,
@@ -45,7 +46,7 @@ const generationSlice = createSlice({
     },
 
     startGeneration(state) {
-      state.stage = "loading";
+      state.stage = GENERATION_STAGE.LOADING;
       state.error = null;
       state.currentPrompt = state.prompt; // Save current prompt
       // Only clear job_id and reference if this is the first generation
@@ -71,7 +72,7 @@ const generationSlice = createSlice({
         iterationNum: number;
       }>
     ) {
-      state.stage = "result";
+      state.stage = GENERATION_STAGE.RESULT;
 
       // Add new result to the array
       state.results.push({
@@ -88,7 +89,7 @@ const generationSlice = createSlice({
 
     failGeneration(state, action: PayloadAction<string | null>) {
       if (action.payload) {
-        state.stage = "input";
+        state.stage = GENERATION_STAGE.INPUT;
       }
       state.error = action.payload;
     },
