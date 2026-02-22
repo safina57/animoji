@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import SakuraPetal, { type PetalProps } from "@lib/decorations/SakuraPetal/SakuraPetal";
+import { useEffect, useState } from "react";
+import FallingPetals from "@lib/decorations/FallingPetals/FallingPetals";
 import ToriiGate from "@lib/decorations/ToriiGate/ToriiGate";
 import SakuraTree from "@lib/decorations/SakuraTree/SakuraTree";
 import StonePath from "@lib/decorations/StonePath/StonePath";
@@ -22,46 +22,11 @@ export default function LoadingModal() {
     return () => clearInterval(interval);
   }, []);
 
-  // Generate randomized falling petals once on mount
-  const fallingPetals = useMemo(() => {
-    const petals: PetalProps[] = [];
-    const sizes: Array<"small" | "medium" | "large"> = [
-      "small",
-      "medium",
-      "large",
-    ];
-
-    // Background petals (10 petals, lighter, more transparent)
-    for (let i = 0; i < 10; i++) {
-      petals.push({
-        delay: `${Math.random() * 5}s`,
-        left: `${Math.random() * 100}%`,
-        size: sizes[Math.floor(Math.random() * sizes.length)],
-        duration: `${7 + Math.random() * 6}s`,
-      });
-    }
-
-    // Front petals (10 petals, larger, higher contrast) - only on lg+ screens
-    for (let i = 0; i < 10; i++) {
-      petals.push({
-        delay: `${Math.random() * 5}s`,
-        left: `${Math.random() * 100}%`,
-        size: sizes[Math.floor(Math.random() * sizes.length)],
-        duration: `${7 + Math.random() * 6}s`,
-      });
-    }
-
-    return petals;
-  }, []);
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center animate-fade-in select-none relative overflow-hidden bg-transparent">
       {/* Background falling petals (z-0) */}
-      <div className="absolute inset-0 pointer-events-none z-0">
-        {fallingPetals.slice(0, 10).map((petal, i) => (
-          <SakuraPetal key={`bg-${i}`} {...petal} />
-        ))}
-      </div>
+      <FallingPetals count={10} className="absolute inset-0 pointer-events-none z-0 overflow-hidden" />
 
       {/* Main scene container */}
       <div className="relative z-10 flex flex-col items-center w-full max-w-4xl h-[500px] justify-end pb-0 mb-8">
@@ -85,11 +50,7 @@ export default function LoadingModal() {
       </div>
 
       {/* Front falling petals (z-40) - hidden on mobile, visible on lg+ */}
-      <div className="hidden lg:block absolute inset-0 pointer-events-none z-40">
-        {fallingPetals.slice(10, 20).map((petal, i) => (
-          <SakuraPetal key={`fg-${i}`} {...petal} />
-        ))}
-      </div>
+      <FallingPetals count={10} className="hidden lg:block absolute inset-0 pointer-events-none z-40 overflow-hidden" />
 
       {/* Loading text (bottom, z-50) */}
       <div className="relative text-center space-y-2 z-50 mb-8">

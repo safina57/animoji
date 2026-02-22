@@ -9,6 +9,9 @@ import {
 } from "@store/slices/gallerySlice";
 import { ImageCard } from "@components/community/ImageCard";
 import { ImageDetailDialog } from "@components/community/ImageDetailDialog";
+import SkeletonGrid from "@components/community/SkeletonGrid";
+import ToriiGateIcon from "@lib/decorations/ToriiGateIcon/ToriiGateIcon";
+import SeigaihaOverlay from "@lib/decorations/SeigaihaOverlay/SeigaihaOverlay";
 import {
   NavigationMenu,
   NavigationMenuList,
@@ -18,49 +21,6 @@ import {
 } from "@lib/ui/navigation-menu";
 import { cn } from "@lib/utils";
 import type { ImageFeedItem } from "@customTypes/image";
-
-/* ── Torii Gate SVG (reused from CommunityPage pattern) ── */
-function ToriiGate({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 120 100"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      aria-hidden="true"
-    >
-      <rect x="5" y="18" width="110" height="8" rx="4" fill="currentColor" />
-      <rect x="15" y="28" width="90" height="6" rx="3" fill="currentColor" />
-      <rect x="20" y="34" width="8" height="62" rx="4" fill="currentColor" />
-      <rect x="92" y="34" width="8" height="62" rx="4" fill="currentColor" />
-      <rect x="10" y="12" width="14" height="8" rx="3" fill="currentColor" />
-      <rect x="96" y="12" width="14" height="8" rx="3" fill="currentColor" />
-    </svg>
-  );
-}
-
-function SkeletonCard({ tall }: { tall?: boolean }) {
-  return (
-    <div
-      className={[
-        "w-full break-inside-avoid rounded-xl bg-slate-200 dark:bg-slate-800 animate-pulse",
-        tall ? "h-72" : "h-48",
-      ].join(" ")}
-    />
-  );
-}
-
-const SKELETON_HEIGHTS: boolean[] = [
-  false, true, false, true, true, false, true, false,
-];
-
-const skeletonGrid = (
-  <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
-    {SKELETON_HEIGHTS.map((tall, i) => (
-      <SkeletonCard key={i} tall={tall} />
-    ))}
-  </div>
-);
 
 const loadingMoreSpinner = (
   <div className="flex justify-center mt-8">
@@ -118,7 +78,7 @@ function GallerySidebar({ value, onChange }: GallerySidebarProps) {
 function EmptyState({ visibility }: { visibility: GalleryVisibility }) {
   return (
     <div className="flex flex-col items-center justify-center py-24 text-center gap-6">
-      <ToriiGate className="w-32 h-32 text-primary opacity-10" />
+      <ToriiGateIcon className="w-32 h-32 text-primary opacity-10" />
       <div className="space-y-2">
         {visibility === "public" ? (
           <>
@@ -149,7 +109,7 @@ const endOfFeed = (
   <div className="flex flex-col items-center justify-center py-16 text-center gap-5">
     <div className="flex items-center gap-4 w-full max-w-sm">
       <div className="flex-1 border-t border-slate-200 dark:border-slate-700" />
-      <ToriiGate className="w-10 h-10 text-primary opacity-20" />
+      <ToriiGateIcon className="w-10 h-10 text-primary opacity-20" />
       <div className="flex-1 border-t border-slate-200 dark:border-slate-700" />
     </div>
     <div className="space-y-1.5">
@@ -231,7 +191,7 @@ export default function GalleryPage() {
   return (
     <div className="flex-1 bg-background-light dark:bg-background-dark relative">
       {/* Seigaiha pattern overlay */}
-      <div className="fixed inset-0 pattern-seigaiha pointer-events-none opacity-30 dark:opacity-20" />
+      <SeigaihaOverlay className="fixed opacity-30 dark:opacity-20" />
 
       {/* Header */}
       <div className="relative bg-gradient-to-r from-primary/10 via-fuji-blue/10 to-sakura-pink/10 border-b border-primary/10 overflow-hidden">
@@ -254,7 +214,7 @@ export default function GalleryPage() {
 
         {/* Decorative torii */}
         <div className="absolute right-8 top-1/2 -translate-y-1/2 hidden lg:block opacity-10 pointer-events-none text-primary">
-          <ToriiGate className="w-24 h-24" />
+          <ToriiGateIcon className="w-24 h-24" />
         </div>
       </div>
 
@@ -267,7 +227,7 @@ export default function GalleryPage() {
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          {isLoading ? skeletonGrid : null}
+          {isLoading ? <SkeletonGrid /> : null}
 
           {!isLoading && images.length === 0 ? (
             <EmptyState visibility={visibility} />

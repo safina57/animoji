@@ -4,6 +4,7 @@ import { useAppSelector, useAppDispatch } from "@hooks/redux";
 import { logout } from "@store/slices/authSlice";
 import { authService } from "@services/authService";
 import { Button } from "@lib/ui/button";
+import SeigaihaOverlay from "@lib/decorations/SeigaihaOverlay/SeigaihaOverlay";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -120,7 +121,7 @@ export default function Navbar() {
                   {/* Top accent bar */}
                   <div className="h-0.5 w-full bg-gradient-to-r from-primary/40 via-primary to-primary/40" />
                   {/* Seigaiha overlay */}
-                  <div className="absolute inset-0 pattern-seigaiha opacity-60 dark:opacity-25 pointer-events-none" />
+                  <SeigaihaOverlay className="absolute opacity-60 dark:opacity-25" />
 
                   <DropdownMenuLabel className="relative font-normal px-4 py-3 border-b border-primary/10">
                     <div className="flex items-center gap-3">

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import SeigaihaOverlay from "@lib/decorations/SeigaihaOverlay/SeigaihaOverlay";
 
 const DEFAULT_MESSAGES = [
   "Creating your masterpiece...",
@@ -130,7 +131,7 @@ export default function LoadingDialog({ messages = DEFAULT_MESSAGES }: LoadingDi
         "
       >
         {/* Seigaiha pattern overlay */}
-        <div className="absolute inset-0 pattern-seigaiha opacity-60 dark:opacity-30 pointer-events-none" />
+        <SeigaihaOverlay className="absolute opacity-60 dark:opacity-30" />
 
         {/* SVG + glow */}
         <div className="relative w-32 h-32">

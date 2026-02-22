@@ -3,11 +3,10 @@ import { useJobStatus } from "@components/generation/hooks/useJobStatus";
 import GenerationInput from "@components/generation/GenerationInput";
 import LoadingDialog from "@components/generation/LoadingDialog";
 import ResultView from "@components/generation/ResultView";
-import SakuraDecorationIcon from "@assets/icons/sakura-decoration.svg?react";
+import PageDecorations from "@lib/decorations/PageDecorations/PageDecorations";
 import { Alert, AlertTitle, AlertDescription } from "@lib/ui/alert";
 import { Button } from "@lib/ui/button";
 import { failGeneration } from "@store/slices/generationSlice";
-import CherryBlossom from "@lib/decorations/CherryBlossom/CherryBlossom";
 import { X } from "lucide-react";
 
 export default function CreatePage() {
@@ -64,34 +63,7 @@ export default function CreatePage() {
       )}
 
       {/* Decorative elements */}
-      <DecorationOrbs />
+      <PageDecorations />
     </main>
-  );
-}
-
-function DecorationOrbs() {
-  return (
-    <>
-      {/* Bottom gradient line */}
-      <div className="fixed bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent pointer-events-none" />
-
-      {/* Sakura petal top-left */}
-      <div className="fixed top-1/4 left-10 pointer-events-none opacity-10 dark:opacity-5 hidden xl:block">
-        <SakuraDecorationIcon />
-      </div>
-
-      {/* Cherry blossom bottom-left */}
-      <div className="fixed bottom-20 left-10 pointer-events-none text-sakura-pink hidden xl:block w-48 opacity-30 dark:opacity-15">
-        <CherryBlossom />
-      </div>
-
-      {/* Circle bottom-right */}
-      <div className="fixed bottom-1/4 right-10 pointer-events-none opacity-10 dark:opacity-5 hidden xl:block">
-        <div className="w-32 h-32 rounded-full border-2 border-primary" />
-      </div>
-
-      {/* Japanese pattern overlay */}
-      <div className="fixed inset-0 pattern-seigaiha pointer-events-none opacity-30 dark:opacity-20" />
-    </>
   );
 }
