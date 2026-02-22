@@ -3,6 +3,7 @@ import generationReducer from "./slices/generationSlice";
 import authReducer from "./slices/authSlice";
 import feedReducer from "./slices/feedSlice";
 import galleryReducer from "./slices/gallerySlice";
+import emojiReducer from "./slices/emojiSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,13 +11,14 @@ export const store = configureStore({
     auth: authReducer,
     feed: feedReducer,
     gallery: galleryReducer,
+    emoji: emojiReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
         // Allow File objects in state (referenceImage)
-        ignoredPaths: ["generation.referenceImage"],
-        ignoredActions: ["generation/setReferenceImage"],
+        ignoredPaths: ["generation.referenceImage", "emoji.referenceImage"],
+        ignoredActions: ["generation/setReferenceImage", "emoji/setEmojiReferenceImage"],
       },
     }),
 });

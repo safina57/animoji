@@ -65,6 +65,16 @@ func HandleEmojiStatusStream(w http.ResponseWriter, r *http.Request, eventManage
 	redisClient := cache.MustGetClient()
 	if meta, err := redisClient.GetEmojiJobMetadata(ctx, jobID); err == nil {
 		totalVariants = meta.TotalVariants
+
+		// Send "started" first so the client can render skeleton cards before any image
+		// arrives — only needed when some variants are still pending.
+		if totalVariants > 0 && len(meta.CompletedVariants) < totalVariants {
+			sendSSEEvent(w, flusher, map[string]any{
+				"type":  "started",
+				"total": totalVariants,
+			})
+		}
+
 		for _, v := range meta.CompletedVariants {
 			url, err := storageService.GetPresignedURLForKey(ctx, v.ResultKey, constants.PresignedURLExpiry)
 			if err != nil {
@@ -105,6 +115,11 @@ func HandleEmojiStatusStream(w http.ResponseWriter, r *http.Request, eventManage
 				if totalVariants == 0 {
 					totalVariants = event.TotalVariants
 				}
+				// Forward to client so it can switch from LoadingDialog to skeleton cards.
+				sendSSEEvent(w, flusher, map[string]any{
+					"type":  "started",
+					"total": totalVariants,
+				})
 				continue
 			}
 
