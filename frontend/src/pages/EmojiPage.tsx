@@ -88,15 +88,13 @@ export default function EmojiPage() {
 
       {/* Result grid — appears the moment we receive the "started" SSE event */}
       {(stage === 'generating' || stage === 'complete') && (
-        <div className="flex-1 overflow-y-auto custom-scrollbar">
-          <div className="min-h-full flex flex-col items-center justify-center py-10 px-4 md:px-8">
-            <EmojiResultGrid
-              variants={variants}
-              totalVariants={totalVariants}
-              isComplete={stage === 'complete'}
-              onReset={handleReset}
-            />
-          </div>
+        <div className="flex-1 flex flex-col items-center justify-center overflow-y-auto py-10 px-4 md:px-8">
+          <EmojiResultGrid
+            variants={variants}
+            totalVariants={totalVariants}
+            isComplete={stage === 'complete'}
+            onReset={handleReset}
+          />
         </div>
       )}
 

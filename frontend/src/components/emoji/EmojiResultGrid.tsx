@@ -68,15 +68,16 @@ export default function EmojiResultGrid({
         )}
       </div>
 
-      {/* Cards grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 md:gap-10 w-full max-w-3xl">
+      {/* Cards — flex row, auto-centered, fixed width per card */}
+      <div className="flex flex-wrap justify-center gap-8 md:gap-10">
         {slots.map((variant, i) => (
-          <EmojiVariantCard
-            key={variant?.emotion ?? `skeleton-${i}`}
-            variant={variant}
-            index={i}
-            isComplete={isComplete}
-          />
+          <div key={variant?.emotion ?? `skeleton-${i}`} className="w-52 md:w-60">
+            <EmojiVariantCard
+              variant={variant}
+              index={i}
+              isComplete={isComplete}
+            />
+          </div>
         ))}
       </div>
 
