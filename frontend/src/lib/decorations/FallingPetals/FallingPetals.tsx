@@ -19,8 +19,7 @@ interface FallingPetalsProps {
 }
 
 export default function FallingPetals({ count, className }: FallingPetalsProps) {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const resolved = useMemo(() => generatePetals(count), []);
+  const resolved = useMemo(() => generatePetals(count), [count]);
 
   return (
     <div className={className ?? "absolute inset-0 pointer-events-none overflow-hidden"}>

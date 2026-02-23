@@ -105,6 +105,7 @@ export default function UnifiedInput({ mode, onModeToggle }: UnifiedInputProps) 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (referencePreviewUrl) URL.revokeObjectURL(referencePreviewUrl);
     const previewUrl = URL.createObjectURL(file);
     isAnime
       ? dispatch(setReferenceImage({ file, previewUrl }))
@@ -112,6 +113,7 @@ export default function UnifiedInput({ mode, onModeToggle }: UnifiedInputProps) 
   }
 
   function removeImage() {
+    if (referencePreviewUrl) URL.revokeObjectURL(referencePreviewUrl);
     isAnime ? dispatch(setReferenceImage(null)) : dispatch(setEmojiReferenceImage(null));
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
@@ -262,6 +264,16 @@ export default function UnifiedInput({ mode, onModeToggle }: UnifiedInputProps) 
               >
                 <Send className="h-5 w-5" />
               </Button>
+            </div>
+
+            {/* Current mode badge */}
+            <div className="flex items-center gap-1.5 px-3 pb-1">
+              <span className="material-symbols-outlined text-[13px] text-primary/45">
+                {isAnime ? "auto_fix_high" : "emoji_emotions"}
+              </span>
+              <span className="font-display text-[10px] text-primary/45 uppercase tracking-widest">
+                {isAnime ? "Anime mode" : "Sticker mode"}
+              </span>
             </div>
           </div>
 

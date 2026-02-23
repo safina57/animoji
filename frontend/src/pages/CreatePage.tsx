@@ -17,6 +17,11 @@ import { EMOJI_STAGE } from "@customTypes/emoji";
 import type { CreateMode } from "@customTypes/generation";
 import { X } from "lucide-react";
 
+const PARAM_MODE   = "mode"   as const;
+const PARAM_JOB_ID = "jobId"  as const;
+const MODE_ANIME   = "anime"  as const;
+const MODE_EMOJI   = "emoji"  as const;
+
 const EMOJI_LOADING_MESSAGES = [
   "Creating your stickers...",
   "Removing backgrounds...",
@@ -29,7 +34,7 @@ export default function CreatePage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [mode, setMode] = useState<CreateMode>(() =>
-    searchParams.get("mode") === "emoji" ? "emoji" : "anime"
+    searchParams.get(PARAM_MODE) === MODE_EMOJI ? MODE_EMOJI : MODE_ANIME
   );
 
   /* ── Slice state ── */
@@ -46,7 +51,7 @@ export default function CreatePage() {
   const isEmojiGeneratingStage = emojiStage === EMOJI_STAGE.GENERATING || emojiStage === EMOJI_STAGE.COMPLETE;
   const isEmojiComplete        = emojiStage === EMOJI_STAGE.COMPLETE;
 
-  const isAnime = mode === "anime";
+  const isAnime = mode === MODE_ANIME;
   const error   = isAnime ? animeError : emojiError;
 
   /* ── SSE hooks (called unconditionally per Rules of Hooks) ── */
@@ -55,22 +60,22 @@ export default function CreatePage() {
 
   /* ── URL sync ── */
   useEffect(() => {
-    const params: Record<string, string> = {};
-    if (mode === "emoji") params.mode = "emoji";
-    if (mode === "emoji" && emojiJobId) params.jobId = emojiJobId;
+    const params: Record<string, string> = { [PARAM_MODE]: mode };
+    if (mode === MODE_EMOJI && emojiJobId) params[PARAM_JOB_ID] = emojiJobId;
     setSearchParams(params, { replace: true });
   }, [mode, emojiJobId, setSearchParams]);
 
   /* ── Emoji job restore on page refresh ── */
   useEffect(() => {
-    const urlJobId = searchParams.get("jobId");
-    if (urlJobId && emojiStage === EMOJI_STAGE.INPUT) {
+    const urlJobId  = searchParams.get(PARAM_JOB_ID);
+    const isEmojiMode = searchParams.get(PARAM_MODE) === MODE_EMOJI;
+    if (isEmojiMode && urlJobId && emojiStage === EMOJI_STAGE.INPUT) {
       dispatch(startEmojiGenerationFromUrl(urlJobId));
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function toggleMode() {
-    setMode((m) => (m === "anime" ? "emoji" : "anime"));
+    setMode((m) => (m === MODE_ANIME ? MODE_EMOJI : MODE_ANIME));
   }
 
   function dismissError() {
@@ -79,7 +84,7 @@ export default function CreatePage() {
 
   function handleEmojiReset() {
     dispatch(resetEmoji());
-    setSearchParams({ mode: "emoji" }, { replace: true });
+    setSearchParams({ [PARAM_MODE]: MODE_EMOJI }, { replace: true });
   }
 
   return (
