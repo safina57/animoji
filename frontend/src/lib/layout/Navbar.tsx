@@ -24,7 +24,6 @@ import {
 const NAV_LINKS = [
   { to: "/",        label: "Community", icon: "group"         },
   { to: "/create",  label: "Create",    icon: "auto_fix_high" },
-  { to: "/emoji",   label: "Stickers",  icon: "emoji_emotions"},
   { to: "/gallery", label: "Gallery",   icon: "photo_library" },
 ] as const;
 

@@ -1,3 +1,6 @@
+/** UI mode on the Create page */
+export type CreateMode = "anime" | "emoji";
+
 /** Stages of the generation flow */
 export const GENERATION_STAGE = {
   INPUT:   "input",
