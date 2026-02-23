@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { EMOJI_STAGE } from '@customTypes/emoji';
 import type { EmojiStage, EmojiVariant } from '@customTypes/emoji';
 
 interface EmojiState {
@@ -13,7 +14,7 @@ interface EmojiState {
 }
 
 const initialState: EmojiState = {
-  stage: 'input',
+  stage: EMOJI_STAGE.INPUT,
   jobId: null,
   prompt: '',
   referenceImage: null,
@@ -46,7 +47,7 @@ const emojiSlice = createSlice({
 
     // Fresh submission: clear all previous state and go to loading
     startEmojiGeneration(state) {
-      state.stage = 'loading';
+      state.stage = EMOJI_STAGE.LOADING;
       state.error = null;
       state.jobId = null;
       state.variants = [];
@@ -60,7 +61,7 @@ const emojiSlice = createSlice({
 
     // URL restore on page refresh: set jobId + go to loading so SSE seeds from Redis
     startEmojiGenerationFromUrl(state, action: PayloadAction<string>) {
-      state.stage = 'loading';
+      state.stage = EMOJI_STAGE.LOADING;
       state.jobId = action.payload;
       state.variants = [];
       state.totalVariants = 0;
@@ -73,8 +74,8 @@ const emojiSlice = createSlice({
 
     // Called for the "started" SSE event — transitions to 'generating' and sets skeleton count
     variantsInitialized(state, action: PayloadAction<number>) {
-      if (state.stage === 'loading') {
-        state.stage = 'generating';
+      if (state.stage === EMOJI_STAGE.LOADING) {
+        state.stage = EMOJI_STAGE.GENERATING;
       }
       if (state.totalVariants === 0) {
         state.totalVariants = action.payload;
@@ -87,8 +88,8 @@ const emojiSlice = createSlice({
       action: PayloadAction<{ emotion: string; variantUrl: string; total: number }>
     ) {
       // Transition from loading to generating on first variant
-      if (state.stage === 'loading') {
-        state.stage = 'generating';
+      if (state.stage === EMOJI_STAGE.LOADING) {
+        state.stage = EMOJI_STAGE.GENERATING;
         state.totalVariants = action.payload.total;
       }
       // Guard against duplicates (can happen on SSE reconnect)
@@ -103,8 +104,8 @@ const emojiSlice = createSlice({
     },
 
     variantFailed(state, action: PayloadAction<string>) {
-      if (state.stage === 'loading') {
-        state.stage = 'generating';
+      if (state.stage === EMOJI_STAGE.LOADING) {
+        state.stage = EMOJI_STAGE.GENERATING;
       }
       const exists = state.variants.find(v => v.emotion === action.payload);
       if (!exists) {
@@ -124,12 +125,12 @@ const emojiSlice = createSlice({
           state.variants.push({ emotion, variantUrl: url, status: 'completed' });
         }
       });
-      state.stage = 'complete';
+      state.stage = EMOJI_STAGE.COMPLETE;
     },
 
     failEmojiGeneration(state, action: PayloadAction<string | null>) {
       if (action.payload) {
-        state.stage = 'input';
+        state.stage = EMOJI_STAGE.INPUT;
       }
       state.error = action.payload;
     },

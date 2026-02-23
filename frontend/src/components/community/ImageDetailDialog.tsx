@@ -3,6 +3,7 @@ import { Heart, Download, Share2 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@lib/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@lib/ui/avatar";
 import { imageService } from "@services/imageService";
+import SeigaihaOverlay from "@lib/decorations/SeigaihaOverlay/SeigaihaOverlay";
 import { useAppDispatch, useAppSelector } from "@hooks/redux";
 import { updateLikedStatus } from "@store/slices/feedSlice";
 import type { ImageFeedItem, ImageDetailItem } from "@customTypes/image";
@@ -221,7 +222,7 @@ export function ImageDetailDialog({
           {/* Right: gallery card panel */}
           <div className="relative w-full md:w-72 shrink-0 flex flex-col overflow-y-auto border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-700 bg-paper-light dark:bg-paper-dark paper-texture bg-cover bg-center">
             {/* Seigaiha pattern overlay */}
-            <div className="absolute inset-0 pattern-seigaiha opacity-60 dark:opacity-25 pointer-events-none" />
+            <SeigaihaOverlay className="absolute opacity-60 dark:opacity-25" />
 
             {/* Top accent bar */}
             <div className="relative h-0.5 w-full bg-gradient-to-r from-primary/40 via-primary to-primary/40 shrink-0" />

@@ -1,5 +1,14 @@
+/** UI mode on the Create page */
+export type CreateMode = "anime" | "emoji";
+
 /** Stages of the generation flow */
-export type GenerationStage = "input" | "loading" | "result";
+export const GENERATION_STAGE = {
+  INPUT:   "input",
+  LOADING: "loading",
+  RESULT:  "result",
+} as const;
+
+export type GenerationStage = typeof GENERATION_STAGE[keyof typeof GENERATION_STAGE];
 
 /** Matches Go SubmitJobResponse */
 export interface SubmitJobResponse {

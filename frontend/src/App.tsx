@@ -8,7 +8,6 @@ import { AuthInitializer } from "@components/auth/AuthInitializer";
 
 const CommunityPage = lazy(() => import("@pages/CommunityPage"));
 const CreatePage = lazy(() => import("@pages/CreatePage"));
-const EmojiPage = lazy(() => import("@pages/EmojiPage"));
 const GalleryPage = lazy(() => import("@pages/GalleryPage"));
 const AuthPage = lazy(() => import("@pages/AuthPage"));
 const AuthCallbackPage = lazy(() => import("@pages/AuthCallbackPage"));
@@ -39,14 +38,6 @@ export default function App() {
                   element={
                     <ProtectedRoute>
                       <CreatePage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/emoji"
-                  element={
-                    <ProtectedRoute>
-                      <EmojiPage />
                     </ProtectedRoute>
                   }
                 />
