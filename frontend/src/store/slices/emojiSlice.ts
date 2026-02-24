@@ -85,7 +85,7 @@ const emojiSlice = createSlice({
     // Called for each variant_ready SSE event
     variantReady(
       state,
-      action: PayloadAction<{ emotion: string; variantUrl: string; total: number }>
+      action: PayloadAction<{ emotion: string; variantId?: string; variantUrl: string; total: number }>
     ) {
       // Transition from loading to generating on first variant
       if (state.stage === EMOJI_STAGE.LOADING) {
@@ -97,6 +97,7 @@ const emojiSlice = createSlice({
       if (!exists) {
         state.variants.push({
           emotion: action.payload.emotion,
+          variantId: action.payload.variantId,
           variantUrl: action.payload.variantUrl,
           status: 'completed',
         });
@@ -118,11 +119,19 @@ const emojiSlice = createSlice({
     },
 
     // Called for all_complete SSE event; fills any variants missed by individual events
-    allVariantsComplete(state, action: PayloadAction<Record<string, string>>) {
+    allVariantsComplete(
+      state,
+      action: PayloadAction<{ variantUrls: Record<string, string>; variantIds: Record<string, string> }>
+    ) {
       const existingEmotions = new Set(state.variants.map(v => v.emotion));
-      Object.entries(action.payload).forEach(([emotion, url]) => {
+      Object.entries(action.payload.variantUrls).forEach(([emotion, url]) => {
         if (!existingEmotions.has(emotion)) {
-          state.variants.push({ emotion, variantUrl: url, status: 'completed' });
+          state.variants.push({
+            emotion,
+            variantId: action.payload.variantIds[emotion],
+            variantUrl: url,
+            status: 'completed',
+          });
         }
       });
       state.stage = EMOJI_STAGE.COMPLETE;

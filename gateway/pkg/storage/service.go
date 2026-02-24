@@ -101,12 +101,12 @@ func (s *MinIOService) PublishEmojiFiles(
 		dstKey := fmt.Sprintf("%s%s/emoji_%s.png", constants.PrefixEmojisPublic, packIDStr, emotion)
 
 		if err := s.client.CopyObject(ctx, constants.BucketName, srcKey, dstKey); err != nil {
-			// Best-effort rollback of already-copied variants
-			go func(keys []string) {
-				for _, k := range keys {
+			keysToDel := append([]string{}, copied...)
+			go func() {
+				for _, k := range keysToDel {
 					_ = s.client.DeleteObject(context.Background(), constants.BucketName, k)
 				}
-			}(append([]string{}, copied...))
+			}()
 			return nil, fmt.Errorf("failed to copy emoji variant %q: %w", emotion, err)
 		}
 

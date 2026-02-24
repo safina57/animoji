@@ -93,10 +93,10 @@ export default function CreatePage() {
     setSearchParams({ [PARAM_MODE]: MODE_EMOJI }, { replace: true });
   }
 
-  async function handlePublishVariant(emotion: string) {
+  async function handlePublishVariant(variantId: string) {
     if (!emojiJobId) throw new Error('No active emoji job');
-    const result = await publishEmojiVariant(emojiJobId, emotion);
-    dispatch(variantPublished({ emotion, url: result.url }));
+    const result = await publishEmojiVariant(emojiJobId, variantId);
+    dispatch(variantPublished({ emotion: result.emotion, url: result.url }));
   }
 
   return (

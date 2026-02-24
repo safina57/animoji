@@ -9,6 +9,7 @@ export type EmojiStage = typeof EMOJI_STAGE[keyof typeof EMOJI_STAGE];
 
 export interface EmojiVariant {
   emotion: string;
+  variantId?: string;
   variantUrl: string;
   status: 'completed' | 'failed';
   publishedUrl?: string;
@@ -35,13 +36,15 @@ export interface EmojiVariantReadyEvent {
   type: 'variant_ready';
   emotion: string;
   variant_url: string;
+  variant_id: string;
   completed: number;
   total: number;
 }
 
 export interface EmojiAllCompleteEvent {
   type: 'all_complete';
-  variants: Record<string, string>; // emotion → presigned URL
+  variant_urls: Record<string, string>;
+  variant_ids: Record<string, string>;
 }
 
 export interface EmojiVariantFailedEvent {

@@ -26,7 +26,7 @@ func NewPublishEmojiHandler(repo *repository.Repository) *PublishEmojiHandler {
 }
 
 // HandlePublishEmojiVariant publishes a single emoji variant to permanent public storage.
-// POST /emojis/{job_id}/variants/{emotion}/publish
+// POST /emojis/{job_id}/variants/{variant_id}/publish
 func (h *PublishEmojiHandler) HandlePublishEmojiVariant(w http.ResponseWriter, r *http.Request) {
 	claims, err := auth.GetUserFromContext(r.Context())
 	if err != nil {
@@ -40,9 +40,10 @@ func (h *PublishEmojiHandler) HandlePublishEmojiVariant(w http.ResponseWriter, r
 		return
 	}
 
-	emotion := chi.URLParam(r, "emotion")
-	if emotion == "" {
-		respondError(w, "emotion is required", http.StatusBadRequest)
+	// variant_id is an opaque server-generated UUID
+	variantID := chi.URLParam(r, "variant_id")
+	if _, err := uuid.Parse(variantID); err != nil {
+		respondError(w, "invalid variant_id format", http.StatusBadRequest)
 		return
 	}
 
@@ -61,7 +62,7 @@ func (h *PublishEmojiHandler) HandlePublishEmojiVariant(w http.ResponseWriter, r
 	if metadata.UserID != claims.UserID {
 		logger.Warn().
 			Str("job_id", jobID).
-			Str("emotion", emotion).
+			Str("variant_id", variantID).
 			Str("metadata_user_id", metadata.UserID.String()).
 			Str("request_user_id", claims.UserID.String()).
 			Msg("User attempted to publish another user's emoji variant")
@@ -69,10 +70,10 @@ func (h *PublishEmojiHandler) HandlePublishEmojiVariant(w http.ResponseWriter, r
 		return
 	}
 
-	// Verify this emotion was actually generated.
-	var generatedKey string
+	var emotion, generatedKey string
 	for _, v := range metadata.CompletedVariants {
-		if v.Emotion == emotion {
+		if v.VariantID == variantID {
+			emotion = v.Emotion
 			generatedKey = v.ResultKey
 			break
 		}

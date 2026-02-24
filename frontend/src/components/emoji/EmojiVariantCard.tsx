@@ -32,6 +32,7 @@ interface EmojiVariantCardProps {
 export default function EmojiVariantCard({ variant, index, isComplete, onPublish }: EmojiVariantCardProps) {
   const [downloading, setDownloading] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
@@ -53,9 +54,12 @@ export default function EmojiVariantCard({ variant, index, isComplete, onPublish
     e.stopPropagation();
     if (!onPublish || publishing) return;
     setPublishing(true);
+    setPublishError(null);
     try {
       await onPublish();
       // On success, variant.publishedUrl will be set by Redux → isPublished becomes true
+    } catch (err) {
+      setPublishError(err instanceof Error ? err.message : 'Failed to publish');
     } finally {
       setPublishing(false);
     }
@@ -139,6 +143,13 @@ export default function EmojiVariantCard({ variant, index, isComplete, onPublish
           />
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
+
+          {/* Publish error message */}
+          {publishError && (
+            <div className="absolute top-2.5 inset-x-2.5 z-20 rounded-lg bg-red-500/90 text-white text-[10px] font-medium px-2 py-1 text-center backdrop-blur-sm">
+              {publishError}
+            </div>
+          )}
 
           {/* Action buttons — revealed on hover */}
           <div className="absolute bottom-3 inset-x-3 flex gap-1.5 justify-end opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-1 transition-all duration-300 z-20">

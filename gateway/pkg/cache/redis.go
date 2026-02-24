@@ -174,6 +174,7 @@ type EmojiVariantResult struct {
 	Emotion      string `json:"emotion"`
 	VariantIndex int    `json:"variant_index"`
 	ResultKey    string `json:"result_key"`
+	VariantID    string `json:"variant_id"` // opaque UUID used as publish token; never touches file paths
 }
 
 // EmojiJobMetadata represents temporary emoji job data cached in Redis
@@ -276,6 +277,10 @@ func (r *RedisClient) UpdateEmojiJobTotalVariants(ctx context.Context, jobID str
 // emoji job metadata using optimistic locking (WATCH/MULTI/EXEC).
 // Returns true when all variants are complete.
 func (r *RedisClient) AppendEmojiVariantResult(ctx context.Context, jobID string, variant EmojiVariantResult) (bool, error) {
+	// Defensive: guarantee a VariantID is always stored so the publish endpoint
+	if variant.VariantID == "" {
+		variant.VariantID = uuid.New().String()
+	}
 	key := r.emojiJobKey(jobID)
 	var allComplete bool
 

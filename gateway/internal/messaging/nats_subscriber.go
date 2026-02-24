@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	nats "github.com/nats-io/nats.go"
+	"github.com/google/uuid"
 	"github.com/safina57/animoji/gateway/internal/constants"
 	"github.com/safina57/animoji/gateway/internal/models"
 	"github.com/safina57/animoji/gateway/pkg/cache"
@@ -96,6 +97,8 @@ func (s *NatsSubscriber) SubscribeToEmojiStatusEvents(ctx context.Context) error
 
 		redisClient := cache.MustGetClient()
 
+		var variantID string
+
 		switch event.Status {
 		case constants.StatusStarted:
 			// Worker has resolved actual emotion count — update Redis so reconnecting
@@ -114,20 +117,24 @@ func (s *NatsSubscriber) SubscribeToEmojiStatusEvents(ctx context.Context) error
 
 		case constants.StatusCompleted:
 			if event.ResultKey != "" {
+				variantID = uuid.New().String()
 				variant := cache.EmojiVariantResult{
 					Emotion:      event.Emotion,
 					VariantIndex: event.VariantIndex,
 					ResultKey:    event.ResultKey,
+					VariantID:    variantID,
 				}
 				if _, err := redisClient.AppendEmojiVariantResult(ctx, jobID, variant); err != nil {
 					logger.Error().Err(err).
 						Str("job_id", jobID).
 						Str("emotion", event.Emotion).
 						Msg("Failed to append emoji variant result to Redis")
+					variantID = "" // clear so a broken entry is not forwarded
 				} else {
 					logger.Debug().
 						Str("job_id", jobID).
 						Str("emotion", event.Emotion).
+						Str("variant_id", variantID).
 						Int("variant_index", event.VariantIndex).
 						Msg("Appended emoji variant result to Redis")
 				}
@@ -139,6 +146,7 @@ func (s *NatsSubscriber) SubscribeToEmojiStatusEvents(ctx context.Context) error
 			Emotion:       event.Emotion,
 			VariantIndex:  event.VariantIndex,
 			ResultKey:     event.ResultKey,
+			VariantID:     variantID,
 			Status:        event.Status,
 			TotalVariants: event.TotalVariants,
 		})

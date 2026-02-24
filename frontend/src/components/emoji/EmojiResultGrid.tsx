@@ -8,7 +8,7 @@ interface EmojiResultGridProps {
   totalVariants: number;
   isComplete: boolean;
   onReset: () => void;
-  onPublishVariant: (emotion: string) => Promise<void>;
+  onPublishVariant: (variantId: string) => Promise<void>;
 }
 
 export default function EmojiResultGrid({
@@ -77,7 +77,7 @@ export default function EmojiResultGrid({
               variant={variant}
               index={i}
               isComplete={isComplete}
-              onPublish={variant ? () => onPublishVariant(variant.emotion) : undefined}
+              onPublish={variant?.variantId ? () => onPublishVariant(variant.variantId!) : undefined}
             />
           </div>
         ))}

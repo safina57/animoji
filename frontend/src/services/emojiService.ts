@@ -28,8 +28,8 @@ export async function submitEmojiJob(
   return response.json();
 }
 
-export async function publishEmojiVariant(jobId: string, emotion: string): Promise<PublishEmojiVariantResponse> {
-  const response = await fetch(`${API_URL}/emojis/${jobId}/variants/${emotion}/publish`, {
+export async function publishEmojiVariant(jobId: string, variantId: string): Promise<PublishEmojiVariantResponse> {
+  const response = await fetch(`${API_URL}/emojis/${jobId}/variants/${variantId}/publish`, {
     method: 'POST',
     credentials: 'include',
   });
