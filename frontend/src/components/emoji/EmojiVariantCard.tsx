@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Download } from 'lucide-react';
+import { Download, Link, Check, Upload } from 'lucide-react';
 import { Button } from '@lib/ui/button';
 import { cn } from '@lib/utils';
 import ToriiGateLoader from '@lib/decorations/ToriiGateLoader/ToriiGateLoader';
@@ -26,15 +26,21 @@ interface EmojiVariantCardProps {
   variant?: EmojiVariant;
   index: number;
   isComplete: boolean;
+  onPublish?: () => Promise<void>;
 }
 
-export default function EmojiVariantCard({ variant, index, isComplete }: EmojiVariantCardProps) {
+export default function EmojiVariantCard({ variant, index, isComplete, onPublish }: EmojiVariantCardProps) {
   const [downloading, setDownloading] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const isLoading = !variant;
   const isFailed = variant?.status === 'failed';
   const canDownload = isComplete && !isLoading && !isFailed && !!variant?.variantUrl;
+  const publishedUrl = variant?.publishedUrl;
+  const isPublished = !!publishedUrl;
 
   async function handleDownload(e: React.MouseEvent) {
     e.stopPropagation();
@@ -42,6 +48,33 @@ export default function EmojiVariantCard({ variant, index, isComplete }: EmojiVa
     setDownloading(true);
     await downloadVariant(variant.variantUrl, variant.emotion);
     setDownloading(false);
+  }
+
+  async function handlePublish(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!onPublish || publishing) return;
+    setPublishing(true);
+    setPublishError(null);
+    try {
+      await onPublish();
+      // On success, variant.publishedUrl will be set by Redux → isPublished becomes true
+    } catch (err) {
+      setPublishError(err instanceof Error ? err.message : 'Failed to publish');
+    } finally {
+      setPublishing(false);
+    }
+  }
+
+  async function handleCopyLink(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!publishedUrl) return;
+    try {
+      await navigator.clipboard.writeText(publishedUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      window.open(publishedUrl, '_blank');
+    }
   }
 
   return (
@@ -60,9 +93,19 @@ export default function EmojiVariantCard({ variant, index, isComplete }: EmojiVa
             ? 'border-primary/10'
             : isFailed
             ? 'border-red-300/30'
+            : isPublished
+            ? 'border-primary/30 group-hover:border-primary/50'
             : 'border-primary/10 group-hover:border-primary/25'
         )}
       />
+
+      {/* Published indicator badge */}
+      {isPublished && (
+        <div className="absolute top-2.5 left-2.5 z-20 flex items-center gap-1 bg-primary/90 text-white text-[10px] font-semibold rounded-full px-2 py-0.5 backdrop-blur-sm">
+          <Check className="h-2.5 w-2.5" />
+          Published
+        </div>
+      )}
 
       {/* Skeleton loading state */}
       {isLoading && (
@@ -101,18 +144,64 @@ export default function EmojiVariantCard({ variant, index, isComplete }: EmojiVa
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
 
-          <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-1 transition-all duration-300 z-20">
+          {/* Publish error message */}
+          {publishError && (
+            <div className="absolute top-2.5 inset-x-2.5 z-20 rounded-lg bg-red-500/90 text-white text-[10px] font-medium px-2 py-1 text-center backdrop-blur-sm">
+              {publishError}
+            </div>
+          )}
+
+          {/* Action buttons — revealed on hover */}
+          <div className="absolute bottom-3 inset-x-3 flex gap-1.5 justify-end opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-1 transition-all duration-300 z-20">
+
+            {/* Publish → Copy Link toggle */}
+            {isPublished ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleCopyLink}
+                className="flex-1 rounded-full backdrop-blur-sm shadow-lg h-8 px-3 gap-1.5 bg-primary/90 text-white border-0 hover:bg-primary active:scale-95 transition-all text-xs font-medium"
+                aria-label={`Copy link for ${variant?.emotion ?? ''} sticker`}
+              >
+                {copied ? <Check className="h-3.5 w-3.5 shrink-0" /> : <Link className="h-3.5 w-3.5 shrink-0" />}
+                {copied ? 'Copied!' : 'Copy Link'}
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handlePublish}
+                disabled={!isComplete || publishing || !onPublish}
+                className="flex-1 rounded-full backdrop-blur-sm shadow-lg h-8 px-3 gap-1.5 bg-white/90 dark:bg-paper-dark/90 text-primary border border-primary/10 hover:bg-primary hover:text-white hover:border-transparent disabled:opacity-60 active:scale-95 transition-all text-xs font-medium"
+                aria-label={`Publish ${variant?.emotion ?? ''} sticker`}
+              >
+                {publishing ? (
+                  <>
+                    <span className="h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-current/30 border-t-current" />
+                    Publishing...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-3.5 w-3.5 shrink-0" />
+                    Publish
+                  </>
+                )}
+              </Button>
+            )}
+
+            {/* Download */}
             <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={handleDownload}
               disabled={!canDownload || downloading}
-              className="rounded-full backdrop-blur-sm shadow-lg h-8 w-auto px-3 gap-1.5 bg-white/90 dark:bg-paper-dark/90 text-primary border border-primary/10 hover:bg-primary hover:text-white hover:border-transparent active:scale-95 transition-all text-xs font-medium"
+              className="rounded-full backdrop-blur-sm shadow-lg h-8 w-8 p-0 bg-white/90 dark:bg-paper-dark/90 text-primary border border-primary/10 hover:bg-primary hover:text-white hover:border-transparent active:scale-95 transition-all"
               aria-label={`Download ${variant?.emotion ?? ''} sticker`}
             >
               <Download className="h-3.5 w-3.5" />
-              {downloading ? 'Saving...' : 'Download'}
             </Button>
           </div>
         </>

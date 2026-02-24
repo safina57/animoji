@@ -37,12 +37,13 @@ export function useEmojiStatus(jobId: string | null, enabled: boolean) {
         dispatch(
           variantReady({
             emotion: data.emotion,
+            variantId: data.variant_id,
             variantUrl: data.variant_url,
             total: data.total,
           })
         );
       } else if (data.type === 'all_complete') {
-        dispatch(allVariantsComplete(data.variants));
+        dispatch(allVariantsComplete({ variantUrls: data.variant_urls, variantIds: data.variant_ids }));
         disconnect();
       } else if (data.type === 'variant_failed') {
         dispatch(variantFailed(data.emotion));

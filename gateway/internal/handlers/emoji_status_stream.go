@@ -61,6 +61,7 @@ func HandleEmojiStatusStream(w http.ResponseWriter, r *http.Request, eventManage
 
 	totalVariants := 0
 	variantURLs := make(map[string]string, 3)
+	variantIDs := make(map[string]string, 3)
 
 	redisClient := cache.MustGetClient()
 	if meta, err := redisClient.GetEmojiJobMetadata(ctx, jobID); err == nil {
@@ -85,10 +86,12 @@ func HandleEmojiStatusStream(w http.ResponseWriter, r *http.Request, eventManage
 				continue
 			}
 			variantURLs[v.Emotion] = url
+			variantIDs[v.Emotion] = v.VariantID
 			sendSSEEvent(w, flusher, map[string]any{
 				"type":        "variant_ready",
 				"emotion":     v.Emotion,
 				"variant_url": url,
+				"variant_id":  v.VariantID,
 				"completed":   len(variantURLs),
 				"total":       totalVariants,
 			})
@@ -96,8 +99,9 @@ func HandleEmojiStatusStream(w http.ResponseWriter, r *http.Request, eventManage
 		// If all variants were already completed before this connection, finish early.
 		if totalVariants > 0 && len(variantURLs) >= totalVariants {
 			sendSSEEvent(w, flusher, map[string]any{
-				"type":     "all_complete",
-				"variants": variantURLs,
+				"type":         "all_complete",
+				"variant_urls": variantURLs,
+				"variant_ids":  variantIDs,
 			})
 			return
 		}
@@ -147,20 +151,23 @@ func HandleEmojiStatusStream(w http.ResponseWriter, r *http.Request, eventManage
 				}
 
 				variantURLs[event.Emotion] = variantURL
+				variantIDs[event.Emotion] = event.VariantID
 				completed := len(variantURLs)
 
 				sendSSEEvent(w, flusher, map[string]any{
 					"type":        "variant_ready",
 					"emotion":     event.Emotion,
 					"variant_url": variantURL,
+					"variant_id":  event.VariantID,
 					"completed":   completed,
 					"total":       totalVariants,
 				})
 
 				if totalVariants > 0 && completed == totalVariants {
 					sendSSEEvent(w, flusher, map[string]any{
-						"type":     "all_complete",
-						"variants": variantURLs,
+						"type":         "all_complete",
+						"variant_urls": variantURLs,
+						"variant_ids":  variantIDs,
 					})
 					return
 				}

@@ -68,7 +68,8 @@ const PresignedURLExpiry = 1 * time.Hour
 // IsPrivateKey reports whether objectKey belongs to a private-visibility prefix.
 func IsPrivateKey(objectKey string) bool {
 	return strings.HasPrefix(objectKey, PrefixImagesPrivate) ||
-		strings.HasPrefix(objectKey, PrefixThumbnailsPrivate)
+		strings.HasPrefix(objectKey, PrefixThumbnailsPrivate) ||
+		strings.HasPrefix(objectKey, PrefixEmojisPrivate)
 }
 
 // Image dimension limits

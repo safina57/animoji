@@ -45,6 +45,7 @@ type EmojiPartialEvent struct {
 	Emotion       string `json:"emotion"`
 	VariantIndex  int    `json:"variant_index"`
 	ResultKey     string `json:"result_key"`
-	Status        string `json:"status"` // "started", "completed", or "failed"
+	VariantID     string `json:"variant_id,omitempty"` // set only on "completed" events
+	Status        string `json:"status"`               // "started", "completed", or "failed"
 	TotalVariants int    `json:"total_variants,omitempty"`
 }
