@@ -43,6 +43,7 @@ func newRouter(
 
 	// Create handlers
 	publishHandler := handlers.NewPublishImageHandler(repo)
+	publishEmojiHandler := handlers.NewPublishEmojiHandler(repo)
 	publicImagesHandler := handlers.NewPublicImagesHandler(repo, storageService)
 	userImagesHandler := handlers.NewUserImagesHandler(repo, storageService)
 	likeHandler := handlers.NewLikeImageHandler(repo)
@@ -78,6 +79,7 @@ func newRouter(
 		r.Get("/emoji-job-status/{job_id}/stream", func(w http.ResponseWriter, r *http.Request) {
 			handlers.HandleEmojiStatusStream(w, r, emojiEventManager, storageService)
 		})
+		r.Post("/emojis/{job_id}/variants/{emotion}/publish", publishEmojiHandler.HandlePublishEmojiVariant)
 
 		r.Post("/images/{image_id}/like", likeHandler.HandleLikeImage)
 		r.Delete("/images/{image_id}/like", likeHandler.HandleUnlikeImage)

@@ -84,6 +84,39 @@ func (s *MinIOService) PublishFiles(
 	return dstOriginalKey, dstResultKey, nil
 }
 
+// PublishEmojiFiles copies each completed emoji variant from tmp/ to its permanent
+// public location. Returns a map of emotion → permanent result key.
+func (s *MinIOService) PublishEmojiFiles(
+	ctx context.Context,
+	jobID string,
+	packID uuid.UUID,
+	emotions []string,
+) (map[string]string, error) {
+	packIDStr := packID.String()
+	resultKeys := make(map[string]string, len(emotions))
+	var copied []string
+
+	for _, emotion := range emotions {
+		srcKey := fmt.Sprintf("%s%s/emoji_%s.png", constants.PrefixTmp, jobID, emotion)
+		dstKey := fmt.Sprintf("%s%s/emoji_%s.png", constants.PrefixEmojisPublic, packIDStr, emotion)
+
+		if err := s.client.CopyObject(ctx, constants.BucketName, srcKey, dstKey); err != nil {
+			// Best-effort rollback of already-copied variants
+			go func(keys []string) {
+				for _, k := range keys {
+					_ = s.client.DeleteObject(context.Background(), constants.BucketName, k)
+				}
+			}(append([]string{}, copied...))
+			return nil, fmt.Errorf("failed to copy emoji variant %q: %w", emotion, err)
+		}
+
+		resultKeys[emotion] = dstKey
+		copied = append(copied, dstKey)
+	}
+
+	return resultKeys, nil
+}
+
 // DownloadFile downloads a file from MinIO using the object key
 func (s *MinIOService) DownloadFile(ctx context.Context, objectKey string) ([]byte, error) {
 	return s.client.DownloadFile(ctx, constants.BucketName, objectKey)

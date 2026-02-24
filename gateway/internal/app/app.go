@@ -38,6 +38,8 @@ func New(ctx context.Context) (*App, error) {
 		&models.Collection{},
 		&models.CollectionItem{},
 		&models.ShareLink{},
+		&models.EmojiPack{},
+		&models.EmojiVariant{},
 	)
 	if err != nil {
 		return nil, err

@@ -135,6 +135,14 @@ const emojiSlice = createSlice({
       state.error = action.payload;
     },
 
+    // Stamps a permanent URL onto a single variant after it is published.
+    variantPublished(state, action: PayloadAction<{ emotion: string; url: string }>) {
+      const variant = state.variants.find(v => v.emotion === action.payload.emotion);
+      if (variant) {
+        variant.publishedUrl = action.payload.url;
+      }
+    },
+
     resetEmoji() {
       return initialState;
     },
@@ -152,6 +160,7 @@ export const {
   variantFailed,
   allVariantsComplete,
   failEmojiGeneration,
+  variantPublished,
   resetEmoji,
 } = emojiSlice.actions;
 

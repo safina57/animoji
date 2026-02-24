@@ -1,4 +1,4 @@
-import type { SubmitEmojiJobResponse } from '@customTypes/emoji';
+import type { SubmitEmojiJobResponse, PublishEmojiVariantResponse } from '@customTypes/emoji';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -23,6 +23,20 @@ export async function submitEmojiJob(
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Failed to submit emoji job' }));
     throw new Error(error.error || 'Failed to submit emoji job');
+  }
+
+  return response.json();
+}
+
+export async function publishEmojiVariant(jobId: string, emotion: string): Promise<PublishEmojiVariantResponse> {
+  const response = await fetch(`${API_URL}/emojis/${jobId}/variants/${emotion}/publish`, {
+    method: 'POST',
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Failed to publish emoji' }));
+    throw new Error(error.error || 'Failed to publish emoji');
   }
 
   return response.json();

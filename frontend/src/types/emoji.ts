@@ -11,6 +11,13 @@ export interface EmojiVariant {
   emotion: string;
   variantUrl: string;
   status: 'completed' | 'failed';
+  publishedUrl?: string;
+}
+
+export interface PublishEmojiVariantResponse {
+  message: string;
+  emotion: string;
+  url: string;
 }
 
 export interface SubmitEmojiJobResponse {

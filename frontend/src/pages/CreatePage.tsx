@@ -11,7 +11,13 @@ import PageDecorations from "@lib/decorations/PageDecorations/PageDecorations";
 import { Alert, AlertTitle, AlertDescription } from "@lib/ui/alert";
 import { Button } from "@lib/ui/button";
 import { failGeneration } from "@store/slices/generationSlice";
-import { failEmojiGeneration, resetEmoji, startEmojiGenerationFromUrl } from "@store/slices/emojiSlice";
+import {
+  failEmojiGeneration,
+  resetEmoji,
+  startEmojiGenerationFromUrl,
+  variantPublished,
+} from "@store/slices/emojiSlice";
+import { publishEmojiVariant } from "@services/emojiService";
 import { GENERATION_STAGE } from "@customTypes/generation";
 import { EMOJI_STAGE } from "@customTypes/emoji";
 import type { CreateMode } from "@customTypes/generation";
@@ -87,6 +93,12 @@ export default function CreatePage() {
     setSearchParams({ [PARAM_MODE]: MODE_EMOJI }, { replace: true });
   }
 
+  async function handlePublishVariant(emotion: string) {
+    if (!emojiJobId) throw new Error('No active emoji job');
+    const result = await publishEmojiVariant(emojiJobId, emotion);
+    dispatch(variantPublished({ emotion, url: result.url }));
+  }
+
   return (
     <main className="flex-1 flex flex-col overflow-hidden relative">
 
@@ -128,6 +140,7 @@ export default function CreatePage() {
             totalVariants={totalVariants}
             isComplete={isEmojiComplete}
             onReset={handleEmojiReset}
+            onPublishVariant={handlePublishVariant}
           />
         </div>
       )}

@@ -8,6 +8,7 @@ interface EmojiResultGridProps {
   totalVariants: number;
   isComplete: boolean;
   onReset: () => void;
+  onPublishVariant: (emotion: string) => Promise<void>;
 }
 
 export default function EmojiResultGrid({
@@ -15,8 +16,8 @@ export default function EmojiResultGrid({
   totalVariants,
   isComplete,
   onReset,
+  onPublishVariant,
 }: EmojiResultGridProps) {
-  // While waiting for the "started" event, show 3 placeholders
   const displayCount = totalVariants > 0 ? totalVariants : 3;
   const slots = Array.from(
     { length: displayCount },
@@ -63,25 +64,26 @@ export default function EmojiResultGrid({
 
         {isComplete && (
           <p className="text-xs text-slate-400 uppercase tracking-widest animate-fade-in">
-            Hover a card to download
+            Publish to get a shareable link · or download directly
           </p>
         )}
       </div>
 
-      {/* Cards — flex row, auto-centered, fixed width per card */}
+      {/* Cards */}
       <div className="flex flex-wrap justify-center gap-8 md:gap-10">
         {slots.map((variant, i) => (
-          <div key={variant?.emotion ?? `skeleton-${i}`} className="w-52 md:w-60">
+          <div key={variant?.emotion ?? `skeleton-${i}`} className="w-64 md:w-72">
             <EmojiVariantCard
               variant={variant}
               index={i}
               isComplete={isComplete}
+              onPublish={variant ? () => onPublishVariant(variant.emotion) : undefined}
             />
           </div>
         ))}
       </div>
 
-      {/* Generate more — after completion */}
+      {/* Generate more */}
       {isComplete && (
         <div className="animate-fade-in pt-2">
           <Button
