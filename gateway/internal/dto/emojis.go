@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/safina57/animoji/gateway/internal/models"
-	"github.com/safina57/animoji/gateway/internal/storage"
+	"github.com/safina57/animoji/gateway/internal/services/storage"
 )
 
 // EmojiVariantDTO represents a single published emoji variant in the gallery response.

@@ -15,7 +15,7 @@ import (
 	"github.com/safina57/animoji/gateway/internal/models"
 	"github.com/safina57/animoji/gateway/internal/repository"
 	"github.com/safina57/animoji/gateway/internal/cache"
-	"github.com/safina57/animoji/gateway/internal/storage"
+	"github.com/safina57/animoji/gateway/internal/services/storage"
 	"github.com/safina57/animoji/gateway/pkg/logger"
 )
 

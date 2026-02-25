@@ -15,7 +15,7 @@ import (
 	authSvc "github.com/safina57/animoji/gateway/internal/services/auth"
 	emojiSvc "github.com/safina57/animoji/gateway/internal/services/emojis"
 	imageSvc "github.com/safina57/animoji/gateway/internal/services/images"
-	internalStorage "github.com/safina57/animoji/gateway/internal/storage"
+	internalStorage "github.com/safina57/animoji/gateway/internal/services/storage"
 )
 
 // newRouter creates and configures the HTTP router with domain-grouped handlers.

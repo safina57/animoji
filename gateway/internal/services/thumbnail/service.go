@@ -10,7 +10,7 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/google/uuid"
 	"github.com/safina57/animoji/gateway/internal/constants"
-	"github.com/safina57/animoji/gateway/internal/storage"
+	"github.com/safina57/animoji/gateway/internal/services/storage"
 	"github.com/safina57/animoji/gateway/pkg/logger"
 )
 
