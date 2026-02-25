@@ -6,12 +6,13 @@ import {
   navigationMenuTriggerStyle,
 } from "@lib/ui/navigation-menu";
 import { cn } from "@lib/utils";
+import { GALLERY_SECTION } from "@store/slices/gallerySlice";
 import type { GallerySection } from "@store/slices/gallerySlice";
 
 const NAV_ITEMS: { value: GallerySection; icon: string; label: string; labelJa: string }[] = [
-  { value: "public",  icon: "public",         label: "Public",   labelJa: "公開" },
-  { value: "private", icon: "lock",           label: "Private",  labelJa: "非公開" },
-  { value: "emojis",  icon: "emoji_emotions", label: "Stickers", labelJa: "スタンプ" },
+  { value: GALLERY_SECTION.PUBLIC,  icon: "public",         label: "Public",   labelJa: "公開" },
+  { value: GALLERY_SECTION.PRIVATE, icon: "lock",           label: "Private",  labelJa: "非公開" },
+  { value: GALLERY_SECTION.EMOJIS,  icon: "emoji_emotions", label: "Stickers", labelJa: "スタンプ" },
 ];
 
 interface GallerySidebarProps {

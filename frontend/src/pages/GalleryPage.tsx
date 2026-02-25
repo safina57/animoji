@@ -20,6 +20,7 @@ import SkeletonGrid from "@components/community/SkeletonGrid";
 import EmojiPackCard from "@components/emoji/EmojiPackCard";
 import { EmojiPackDetailDialog } from "@components/emoji/EmojiPackDetailDialog";
 import SeigaihaOverlay from "@lib/decorations/SeigaihaOverlay/SeigaihaOverlay";
+import { GALLERY_SECTION } from "@store/slices/gallerySlice";
 import type { GallerySection, GalleryVisibility } from "@store/slices/gallerySlice";
 import type { ImageFeedItem } from "@customTypes/image";
 import type { EmojiPackGalleryItem } from "@customTypes/emoji";
@@ -37,7 +38,7 @@ export default function GalleryPage() {
     useAppSelector((s) => s.emojiGallery);
   const user = useAppSelector((s) => s.auth.user);
 
-  const [section, setSection] = useState<GallerySection>("public");
+  const [section, setSection] = useState<GallerySection>(GALLERY_SECTION.PUBLIC);
   const [selectedImage, setSelectedImage] = useState<ImageFeedItem | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedPack, setSelectedPack] = useState<EmojiPackGalleryItem | null>(null);
@@ -52,7 +53,7 @@ export default function GalleryPage() {
 
   // Load emoji gallery when switching to the emojis section
   useEffect(() => {
-    if (section === "emojis") {
+    if (section === GALLERY_SECTION.EMOJIS && packs.length === 0 && !emojiIsLoading) {
       dispatch(loadEmojiGallery());
     }
   }, [dispatch, section]);
@@ -65,7 +66,7 @@ export default function GalleryPage() {
     const observer = new IntersectionObserver(
       (entries) => {
         if (!entries[0].isIntersecting) return;
-        if (section === "emojis") {
+        if (section === GALLERY_SECTION.EMOJIS) {
           if (emojiHasMore && !emojiIsLoadingMore && !emojiIsLoading) {
             dispatch(loadMoreEmojiGallery());
           }
@@ -85,7 +86,7 @@ export default function GalleryPage() {
   const handleSectionChange = useCallback(
     (s: GallerySection) => {
       setSection(s);
-      if (s === "public" || s === "private") {
+      if (s === GALLERY_SECTION.PUBLIC || s === GALLERY_SECTION.PRIVATE) {
         dispatch(setVisibility(s as GalleryVisibility));
       }
     },
@@ -111,7 +112,7 @@ export default function GalleryPage() {
     setPackDialogOpen(true);
   }, []);
 
-  const isEmojis = section === "emojis";
+  const isEmojis = section === GALLERY_SECTION.EMOJIS;
 
   return (
     <div className="flex-1 bg-background-light dark:bg-background-dark relative">
