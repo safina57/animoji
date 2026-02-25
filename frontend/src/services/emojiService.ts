@@ -5,7 +5,7 @@ export const EMOJI_GALLERY_PAGE_SIZE = 20;
 const API_URL = import.meta.env.VITE_API_URL;
 
 export function getEmojiStatusStreamUrl(jobId: string): string {
-  return `${API_URL}/emoji-job-status/${jobId}/stream`;
+  return `${API_URL}/emojis/jobs/${jobId}/stream`;
 }
 
 export async function submitEmojiJob(
@@ -16,7 +16,7 @@ export async function submitEmojiJob(
   formData.append('image', image);
   formData.append('prompt', prompt);
 
-  const response = await fetch(`${API_URL}/submit-emoji-job`, {
+  const response = await fetch(`${API_URL}/emojis/jobs`, {
     method: 'POST',
     credentials: 'include',
     body: formData,
@@ -41,7 +41,7 @@ export async function fetchMyEmojiPacks(limit: number, offset: number): Promise<
 }
 
 export async function publishEmojiVariant(jobId: string, variantId: string): Promise<PublishEmojiVariantResponse> {
-  const response = await fetch(`${API_URL}/emojis/${jobId}/variants/${variantId}/publish`, {
+  const response = await fetch(`${API_URL}/emojis/jobs/${jobId}/variants/${variantId}/publish`, {
     method: 'POST',
     credentials: 'include',
   });

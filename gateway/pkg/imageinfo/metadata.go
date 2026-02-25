@@ -1,6 +1,7 @@
 package imageinfo
 
 import (
+	"bytes"
 	"fmt"
 	"image"
 	_ "image/jpeg"
@@ -11,7 +12,6 @@ import (
 	"path/filepath"
 
 	"github.com/dustin/go-humanize"
-	"github.com/safina57/animoji/gateway/pkg/storage"
 )
 
 // ImageMetadataExtractor extracts image metadata
@@ -87,7 +87,7 @@ func (e *ImageMetadataExtractor) ExtractFromData(data []byte, filename string, s
 	mimeType := http.DetectContentType(data)
 
 	// Get dimensions by decoding image
-	width, height, err := e.getDimensionsFromReader(storage.NewBytesReader(data))
+	width, height, err := e.getDimensionsFromReader(bytes.NewReader(data))
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", ErrCannotDecodeImage, err)
 	}

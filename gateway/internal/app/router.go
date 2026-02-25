@@ -5,87 +5,92 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/safina57/animoji/gateway/internal/auth"
-	"github.com/safina57/animoji/gateway/internal/handlers"
+	internalAuth "github.com/safina57/animoji/gateway/internal/auth"
+	"github.com/safina57/animoji/gateway/internal/cache"
+	authHandlers "github.com/safina57/animoji/gateway/internal/handlers/auth"
+	emojiHandlers "github.com/safina57/animoji/gateway/internal/handlers/emojis"
+	imageHandlers "github.com/safina57/animoji/gateway/internal/handlers/images"
+	"github.com/safina57/animoji/gateway/internal/jobs"
 	"github.com/safina57/animoji/gateway/internal/messaging"
-	"github.com/safina57/animoji/gateway/internal/models"
 	appMiddleware "github.com/safina57/animoji/gateway/internal/middleware"
-	"github.com/safina57/animoji/gateway/internal/repository"
-	"github.com/safina57/animoji/gateway/pkg/storage"
+	authSvc "github.com/safina57/animoji/gateway/internal/services/auth"
+	emojiSvc "github.com/safina57/animoji/gateway/internal/services/emojis"
+	imageSvc "github.com/safina57/animoji/gateway/internal/services/images"
+	internalStorage "github.com/safina57/animoji/gateway/internal/services/storage"
 )
 
-// newRouter creates and configures the HTTP router
+// newRouter creates and configures the HTTP router with domain-grouped handlers.
 func newRouter(
-	imageEventManager *messaging.EventManager[models.StatusEvent],
-	emojiEventManager *messaging.EventManager[models.EmojiPartialEvent],
-	storageService *storage.MinIOService,
-	repo *repository.Repository,
-	authConfig *auth.AuthConfig,
+	imageEventManager *messaging.EventManager[jobs.ImageStatusEvent],
+	emojiEventManager *messaging.EventManager[jobs.EmojiPartialEvent],
+	storageService *internalStorage.MinIOService,
+	imageSvc *imageSvc.ImageService,
+	emojiSvc *emojiSvc.EmojiService,
+	authSvc *authSvc.AuthService,
+	authConfig *internalAuth.AuthConfig,
+	redisClient *cache.RedisClient,
 ) *chi.Mux {
 	r := chi.NewRouter()
 
-	// Middleware
+	// Global middleware
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
-
-	// CORS middleware for frontend integration
 	r.Use(appMiddleware.CORS)
 
-	// Create auth handlers
-	googleLogin, googleCallback, getMe, logout := handlers.NewAuthHandlers(
-		authConfig.GoogleConfig,
-		repo,
-		authConfig.PrivateKey,
-		authConfig.JWTExpiry,
-	)
+	// Construct domain handlers
+	authH := authHandlers.NewAuthHandler(authSvc, authConfig.GoogleConfig, authConfig.JWTExpiry)
+	imgH := imageHandlers.NewImageHandler(imageSvc, redisClient)
+	emojiH := emojiHandlers.NewEmojiHandler(emojiSvc, redisClient)
 
-	// Create handlers
-	publishHandler := handlers.NewPublishImageHandler(repo)
-	publishEmojiHandler := handlers.NewPublishEmojiHandler(repo)
-	publicImagesHandler := handlers.NewPublicImagesHandler(repo, storageService)
-	userImagesHandler := handlers.NewUserImagesHandler(repo, storageService)
-	userEmojisHandler := handlers.NewUserEmojisHandler(repo, storageService)
-	likeHandler := handlers.NewLikeImageHandler(repo)
+	// Health check
+	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"status":"healthy"}`))
+	})
 
-	// Public routes
-	r.Get("/health", handlers.HandleHealth)
-	r.Get("/auth/google/login", googleLogin)
-	r.Get("/auth/google/callback", googleCallback)
-	r.Post("/auth/logout", logout)
+	// Auth routes (public)
+	r.Get("/auth/google/login", authH.HandleGoogleLogin)
+	r.Get("/auth/google/callback", authH.HandleGoogleCallback)
+	r.Post("/auth/logout", authH.HandleLogout)
 
-	// Image routes — optionally authenticated so is_liked_by_user is populated for logged-in users
+	// Image routes — optionally authenticated
 	r.Group(func(r chi.Router) {
 		r.Use(appMiddleware.OptionalAuthenticate(authConfig.PublicKey))
-		r.Get("/images/public", publicImagesHandler.HandleGetPublicImages)
-		r.Get("/images/{image_id}", publicImagesHandler.HandleGetImageDetail)
+		r.Get("/images/public", imgH.HandleGetPublicImages)
+		r.Get("/images/{image_id}", imgH.HandleGetImageDetail)
 	})
 
 	// Protected routes
 	r.Group(func(r chi.Router) {
 		r.Use(appMiddleware.Authenticate(authConfig.PublicKey))
 
-		r.Get("/auth/me", getMe)
-		r.Get("/images/me", userImagesHandler.HandleGetMyImages)
-		r.Post("/submit-job", handlers.HandleSubmitJob)
-		r.Get("/job-status/{job_id}/stream", func(w http.ResponseWriter, r *http.Request) {
-			handlers.HandleJobStatusStream(w, r, imageEventManager, storageService)
-		})
-		r.Post("/jobs/{job_id}/refine", handlers.HandleRefineJob)
-		r.Post("/images/{job_id}/publish", publishHandler.HandlePublishImage)
+		// Auth
+		r.Get("/auth/me", authH.HandleGetMe)
 
-		// Emoji generation routes
-		r.Post("/submit-emoji-job", handlers.HandleSubmitEmojiJob)
-		r.Get("/emoji-job-status/{job_id}/stream", func(w http.ResponseWriter, r *http.Request) {
-			handlers.HandleEmojiStatusStream(w, r, emojiEventManager, storageService)
-		})
-		r.Post("/emojis/{job_id}/variants/{variant_id}/publish", publishEmojiHandler.HandlePublishEmojiVariant)
-		r.Get("/emojis/me", userEmojisHandler.HandleGetMyEmojiPacks)
+		// Image job lifecycle
+		r.Post("/images/jobs", imgH.HandleSubmitJob)
+		r.Get("/images/jobs/{job_id}/stream", imgH.HandleJobStatusStream(imageEventManager, storageService))
+		r.Post("/images/jobs/{job_id}/refine", imgH.HandleRefineJob)
+		r.Post("/images/jobs/{job_id}/publish", imgH.HandlePublishImage)
 
-		r.Post("/images/{image_id}/like", likeHandler.HandleLikeImage)
-		r.Delete("/images/{image_id}/like", likeHandler.HandleUnlikeImage)
-		r.Get("/images/{image_id}/liked", likeHandler.HandleCheckLiked)
+		// User image gallery
+		r.Get("/images/me", imgH.HandleGetMyImages)
+
+		// Image social
+		r.Post("/images/{image_id}/like", imgH.HandleLikeImage)
+		r.Delete("/images/{image_id}/like", imgH.HandleUnlikeImage)
+		r.Get("/images/{image_id}/liked", imgH.HandleCheckLiked)
+
+		// Emoji job lifecycle
+		r.Post("/emojis/jobs", emojiH.HandleSubmitEmojiJob)
+		r.Get("/emojis/jobs/{job_id}/stream", emojiH.HandleEmojiStatusStream(emojiEventManager, storageService))
+		r.Post("/emojis/jobs/{job_id}/variants/{variant_id}/publish", emojiH.HandlePublishEmojiVariant)
+
+		// User emoji gallery
+		r.Get("/emojis/me", emojiH.HandleGetMyEmojiPacks)
 	})
 
 	return r
