@@ -4,6 +4,7 @@ import type { ImageFeedItem } from "@customTypes/image";
 import type { RootState } from "@store/store";
 
 export type GalleryVisibility = "public" | "private";
+export type GallerySection = GalleryVisibility | "emojis";
 
 interface GalleryState {
   visibility: GalleryVisibility;

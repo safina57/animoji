@@ -62,3 +62,25 @@ export type EmojiSSEEvent =
   | EmojiAllCompleteEvent
   | EmojiVariantFailedEvent
   | EmojiTimeoutEvent;
+
+// ─── Gallery types ────────────────────────────────────────────────────────────
+
+export interface EmojiVariantGalleryItem {
+  id: string;
+  emotion: string;
+  url: string;
+}
+
+export interface EmojiPackGalleryItem {
+  id: string;
+  job_id: string;
+  created_at: string;
+  variants: EmojiVariantGalleryItem[];
+}
+
+export interface EmojiPacksResponse {
+  packs: EmojiPackGalleryItem[];
+  has_more: boolean;
+  offset: number;
+  limit: number;
+}
