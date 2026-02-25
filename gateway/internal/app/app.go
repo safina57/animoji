@@ -35,6 +35,7 @@ type App struct {
 	imageSvc          *imageSvc.ImageService
 	emojiSvc          *emojiSvc.EmojiService
 	authSvc           *authSvc.AuthService
+	redisClient       *cache.RedisClient
 }
 
 // New initializes and returns a configured App instance.
@@ -94,6 +95,7 @@ func New(ctx context.Context) (*App, error) {
 		imageSvc:          imageService,
 		emojiSvc:          emojiService,
 		authSvc:           authService,
+		redisClient:       redisClient,
 	}, nil
 }
 
@@ -119,6 +121,7 @@ func (a *App) Start(ctx context.Context) http.Handler {
 		a.emojiSvc,
 		a.authSvc,
 		a.authConfig,
+		a.redisClient,
 	)
 	return a.router
 }

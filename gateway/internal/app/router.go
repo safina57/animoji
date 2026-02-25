@@ -6,9 +6,10 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	internalAuth "github.com/safina57/animoji/gateway/internal/auth"
+	"github.com/safina57/animoji/gateway/internal/cache"
 	authHandlers "github.com/safina57/animoji/gateway/internal/handlers/auth"
-	imageHandlers "github.com/safina57/animoji/gateway/internal/handlers/images"
 	emojiHandlers "github.com/safina57/animoji/gateway/internal/handlers/emojis"
+	imageHandlers "github.com/safina57/animoji/gateway/internal/handlers/images"
 	"github.com/safina57/animoji/gateway/internal/jobs"
 	"github.com/safina57/animoji/gateway/internal/messaging"
 	appMiddleware "github.com/safina57/animoji/gateway/internal/middleware"
@@ -27,6 +28,7 @@ func newRouter(
 	emojiSvc *emojiSvc.EmojiService,
 	authSvc *authSvc.AuthService,
 	authConfig *internalAuth.AuthConfig,
+	redisClient *cache.RedisClient,
 ) *chi.Mux {
 	r := chi.NewRouter()
 
@@ -39,8 +41,8 @@ func newRouter(
 
 	// Construct domain handlers
 	authH := authHandlers.NewAuthHandler(authSvc, authConfig.GoogleConfig, authConfig.JWTExpiry)
-	imgH := imageHandlers.NewImageHandler(imageSvc)
-	emojiH := emojiHandlers.NewEmojiHandler(emojiSvc)
+	imgH := imageHandlers.NewImageHandler(imageSvc, redisClient)
+	emojiH := emojiHandlers.NewEmojiHandler(emojiSvc, redisClient)
 
 	// Health check
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {

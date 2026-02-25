@@ -66,7 +66,7 @@ func (h *ImageHandler) HandleJobStatusStream(
 					return
 				}
 				if event.Status == constants.StatusCompleted {
-					sendCompletedEvent(w, flusher, jobID, event.IterationNum, storageSvc, ctx)
+					sendCompletedEvent(w, flusher, jobID, event.IterationNum, storageSvc, h.redisClient, ctx)
 				}
 				if event.Status == constants.StatusFailed {
 					sendSSEEvent(w, flusher, map[string]string{"status": event.Status})
@@ -86,8 +86,7 @@ func (h *ImageHandler) HandleJobStatusStream(
 	}
 }
 
-func sendCompletedEvent(w http.ResponseWriter, flusher http.Flusher, jobID string, iterationNum int, storageSvc *storage.MinIOService, ctx context.Context) {
-	redisClient := cache.MustGetClient()
+func sendCompletedEvent(w http.ResponseWriter, flusher http.Flusher, jobID string, iterationNum int, storageSvc *storage.MinIOService, redisClient *cache.RedisClient, ctx context.Context) {
 	metadata, err := redisClient.GetJobMetadata(ctx, jobID)
 	if err != nil {
 		logger.Error().Err(err).Str("job_id", jobID).Msg("Failed to retrieve job metadata for SSE URLs")

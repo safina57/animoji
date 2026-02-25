@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	internalAuth "github.com/safina57/animoji/gateway/internal/auth"
+	"github.com/safina57/animoji/gateway/internal/cache"
 	"github.com/safina57/animoji/gateway/internal/constants"
 	"github.com/safina57/animoji/gateway/internal/dto"
 	"github.com/safina57/animoji/gateway/internal/handlers"
@@ -17,12 +18,16 @@ import (
 
 // ImageHandler holds the image service for all image HTTP endpoints.
 type ImageHandler struct {
-	svc *imagesSvc.ImageService
+	svc         *imagesSvc.ImageService
+	redisClient *cache.RedisClient
 }
 
 // NewImageHandler creates a new ImageHandler.
-func NewImageHandler(svc *imagesSvc.ImageService) *ImageHandler {
-	return &ImageHandler{svc: svc}
+func NewImageHandler(svc *imagesSvc.ImageService, redisClient *cache.RedisClient) *ImageHandler {
+	return &ImageHandler{
+		svc:         svc,
+		redisClient: redisClient,
+	}
 }
 
 // HandleSubmitJob handles POST /images/jobs

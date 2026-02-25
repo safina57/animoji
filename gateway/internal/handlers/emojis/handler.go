@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	internalAuth "github.com/safina57/animoji/gateway/internal/auth"
+	"github.com/safina57/animoji/gateway/internal/cache"
 	"github.com/safina57/animoji/gateway/internal/dto"
 	"github.com/safina57/animoji/gateway/internal/handlers"
 	emojisSvc "github.com/safina57/animoji/gateway/internal/services/emojis"
@@ -14,12 +15,16 @@ import (
 
 // EmojiHandler holds the emoji service for all emoji HTTP endpoints.
 type EmojiHandler struct {
-	svc *emojisSvc.EmojiService
+	svc         *emojisSvc.EmojiService
+	redisClient *cache.RedisClient
 }
 
 // NewEmojiHandler creates a new EmojiHandler.
-func NewEmojiHandler(svc *emojisSvc.EmojiService) *EmojiHandler {
-	return &EmojiHandler{svc: svc}
+func NewEmojiHandler(svc *emojisSvc.EmojiService, redisClient *cache.RedisClient) *EmojiHandler {
+	return &EmojiHandler{
+		svc:         svc,
+		redisClient: redisClient,
+	}
 }
 
 // HandleSubmitEmojiJob handles POST /emojis/jobs

@@ -9,7 +9,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/safina57/animoji/gateway/internal/cache"
 	"github.com/safina57/animoji/gateway/internal/constants"
 	"github.com/safina57/animoji/gateway/internal/handlers"
 	"github.com/safina57/animoji/gateway/internal/jobs"
@@ -63,8 +62,7 @@ func (h *EmojiHandler) HandleEmojiStatusStream(
 		variantURLs := make(map[string]string, 3)
 		variantIDs := make(map[string]string, 3)
 
-		redisClient := cache.MustGetClient()
-		if meta, err := redisClient.GetEmojiJobMetadata(ctx, jobID); err == nil {
+		if meta, err := h.redisClient.GetEmojiJobMetadata(ctx, jobID); err == nil {
 			totalVariants = meta.TotalVariants
 
 			if totalVariants > 0 && len(meta.CompletedVariants) < totalVariants {
