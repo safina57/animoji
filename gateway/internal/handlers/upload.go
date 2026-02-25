@@ -15,20 +15,20 @@ import (
 // ok=false on any failure so the caller can return immediately.
 func ParseImageUpload(w http.ResponseWriter, r *http.Request) (info *imageinfo.ImageInfo, prompt string, ok bool) {
 	if err := r.ParseMultipartForm(constants.MaxUploadSize); err != nil {
-		respondError(w, fmt.Sprintf("File too large (max %s)", humanize.Bytes(uint64(constants.MaxUploadSize))), http.StatusBadRequest)
+		RespondError(w, fmt.Sprintf("File too large (max %s)", humanize.Bytes(uint64(constants.MaxUploadSize))), http.StatusBadRequest)
 		return nil, "", false
 	}
 
 	file, header, err := r.FormFile("image")
 	if err != nil {
-		respondError(w, "No image provided", http.StatusBadRequest)
+		RespondError(w, "No image provided", http.StatusBadRequest)
 		return nil, "", false
 	}
 	defer file.Close()
 
 	prompt = r.FormValue("prompt")
 	if prompt == "" {
-		respondError(w, "Prompt is required", http.StatusBadRequest)
+		RespondError(w, "Prompt is required", http.StatusBadRequest)
 		return nil, "", false
 	}
 
@@ -36,18 +36,18 @@ func ParseImageUpload(w http.ResponseWriter, r *http.Request) (info *imageinfo.I
 	info, err = processor.ProcessReader(file, header.Filename, header.Size)
 	if err != nil {
 		if errors.Is(err, imageinfo.ErrFileTooLarge) {
-			respondError(w, err.Error(), http.StatusRequestEntityTooLarge)
+			RespondError(w, err.Error(), http.StatusRequestEntityTooLarge)
 			return nil, "", false
 		}
 		if errors.Is(err, imageinfo.ErrInvalidExtension) || errors.Is(err, imageinfo.ErrInvalidMIMEType) {
-			respondError(w, err.Error(), http.StatusUnsupportedMediaType)
+			RespondError(w, err.Error(), http.StatusUnsupportedMediaType)
 			return nil, "", false
 		}
 		if errors.Is(err, imageinfo.ErrCannotDecodeImage) {
-			respondError(w, "Invalid or corrupted image file", http.StatusBadRequest)
+			RespondError(w, "Invalid or corrupted image file", http.StatusBadRequest)
 			return nil, "", false
 		}
-		respondError(w, fmt.Sprintf("Image validation failed: %v", err), http.StatusBadRequest)
+		RespondError(w, fmt.Sprintf("Image validation failed: %v", err), http.StatusBadRequest)
 		return nil, "", false
 	}
 

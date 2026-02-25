@@ -9,10 +9,11 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"github.com/safina57/animoji/gateway/internal/cache"
 	"github.com/safina57/animoji/gateway/internal/constants"
+	"github.com/safina57/animoji/gateway/internal/handlers"
 	"github.com/safina57/animoji/gateway/internal/jobs"
 	"github.com/safina57/animoji/gateway/internal/messaging"
-	"github.com/safina57/animoji/gateway/internal/cache"
 	"github.com/safina57/animoji/gateway/internal/services/storage"
 	"github.com/safina57/animoji/gateway/pkg/logger"
 )
@@ -27,7 +28,7 @@ func (h *EmojiHandler) HandleEmojiStatusStream(
 	return func(w http.ResponseWriter, r *http.Request) {
 		jobID := chi.URLParam(r, "job_id")
 		if _, err := uuid.Parse(jobID); err != nil {
-			respondError(w, "Invalid job_id format", http.StatusBadRequest)
+			handlers.RespondError(w, "Invalid job_id format", http.StatusBadRequest)
 			return
 		}
 
@@ -43,7 +44,7 @@ func (h *EmojiHandler) HandleEmojiStatusStream(
 
 		flusher, ok := w.(http.Flusher)
 		if !ok {
-			respondError(w, "SSE not supported", http.StatusInternalServerError)
+			handlers.RespondError(w, "SSE not supported", http.StatusInternalServerError)
 			return
 		}
 
@@ -186,14 +187,4 @@ func sendSSEEvent(w http.ResponseWriter, flusher http.Flusher, data any) {
 	}
 	fmt.Fprintf(w, "data: %s\n\n", jsonData)
 	flusher.Flush()
-}
-
-func respondJSON(w http.ResponseWriter, data any, statusCode int) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(data) //nolint:errcheck
-}
-
-func respondError(w http.ResponseWriter, message string, statusCode int) {
-	respondJSON(w, map[string]string{"error": message}, statusCode)
 }

@@ -3,7 +3,6 @@ package auth
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -13,6 +12,7 @@ import (
 	"github.com/rs/zerolog/log"
 	internalAuth "github.com/safina57/animoji/gateway/internal/auth"
 	"github.com/safina57/animoji/gateway/internal/constants"
+	"github.com/safina57/animoji/gateway/internal/handlers"
 	authSvc "github.com/safina57/animoji/gateway/internal/services/auth"
 	"golang.org/x/oauth2"
 )
@@ -95,7 +95,7 @@ func (h *AuthHandler) HandleGoogleLogin(w http.ResponseWriter, r *http.Request) 
 	state, err := h.stateStore.generate()
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to generate OAuth state")
-		http.Error(w, `{"error":"internal server error"}`, http.StatusInternalServerError)
+		handlers.RespondError(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
 	authURL := h.googleConfig.AuthCodeURL(state, oauth2.AccessTypeOffline)
@@ -107,35 +107,35 @@ func (h *AuthHandler) HandleGoogleCallback(w http.ResponseWriter, r *http.Reques
 	state := r.URL.Query().Get("state")
 	if !h.stateStore.validate(state) {
 		log.Warn().Str("state", state).Msg("Invalid or expired OAuth state")
-		http.Error(w, `{"error":"invalid state parameter"}`, http.StatusBadRequest)
+		handlers.RespondError(w, "invalid state parameter", http.StatusBadRequest)
 		return
 	}
 
 	code := r.URL.Query().Get("code")
 	if code == "" {
 		log.Warn().Msg("Missing authorization code in OAuth callback")
-		http.Error(w, `{"error":"missing authorization code"}`, http.StatusBadRequest)
+		handlers.RespondError(w, "missing authorization code", http.StatusBadRequest)
 		return
 	}
 
 	token, err := h.googleConfig.Exchange(r.Context(), code)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to exchange authorization code")
-		http.Error(w, `{"error":"failed to exchange code"}`, http.StatusInternalServerError)
+		handlers.RespondError(w, "failed to exchange code", http.StatusInternalServerError)
 		return
 	}
 
 	userInfo, err := internalAuth.FetchGoogleUserInfo(r.Context(), h.googleConfig, token)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to fetch user info from Google")
-		http.Error(w, `{"error":"failed to fetch user info"}`, http.StatusInternalServerError)
+		handlers.RespondError(w, "failed to fetch user info", http.StatusInternalServerError)
 		return
 	}
 
 	jwtToken, err := h.svc.UpsertGoogleUser(r.Context(), userInfo.ID, userInfo.Email, userInfo.Name, &userInfo.Picture)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to upsert user and generate JWT")
-		http.Error(w, `{"error":"failed to create user"}`, http.StatusInternalServerError)
+		handlers.RespondError(w, "failed to create user", http.StatusInternalServerError)
 		return
 	}
 
@@ -162,21 +162,18 @@ func (h *AuthHandler) HandleGoogleCallback(w http.ResponseWriter, r *http.Reques
 func (h *AuthHandler) HandleGetMe(w http.ResponseWriter, r *http.Request) {
 	claims, err := internalAuth.GetUserFromContext(r.Context())
 	if err != nil {
-		http.Error(w, `{"error":"unauthorized"}`, http.StatusUnauthorized)
+		handlers.RespondError(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
 
 	response, err := h.svc.GetMe(r.Context(), claims.UserID)
 	if err != nil {
 		log.Error().Err(err).Str("user_id", claims.UserID.String()).Msg("Failed to fetch user")
-		http.Error(w, `{"error":"user not found"}`, http.StatusNotFound)
+		handlers.RespondError(w, "user not found", http.StatusNotFound)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		log.Error().Err(err).Msg("Failed to encode response")
-	}
+	handlers.RespondJSON(w, response, http.StatusOK)
 }
 
 // HandleLogout clears the authentication cookie.
@@ -193,7 +190,5 @@ func (h *AuthHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 
 	log.Info().Msg("User logged out")
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "logged out successfully"})
+	handlers.RespondJSON(w, map[string]string{"message": "logged out successfully"}, http.StatusOK)
 }

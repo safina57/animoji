@@ -26,7 +26,7 @@ func NewEmojiHandler(svc *emojisSvc.EmojiService) *EmojiHandler {
 func (h *EmojiHandler) HandleSubmitEmojiJob(w http.ResponseWriter, r *http.Request) {
 	claims, err := internalAuth.GetUserFromContext(r.Context())
 	if err != nil {
-		respondError(w, "unauthorized", http.StatusUnauthorized)
+		handlers.RespondError(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -38,30 +38,30 @@ func (h *EmojiHandler) HandleSubmitEmojiJob(w http.ResponseWriter, r *http.Reque
 
 	jobID, err := h.svc.SubmitEmojiJob(r.Context(), claims.UserID, info.Data, info.Extension, info.MIMEType, prompt)
 	if err != nil {
-		respondError(w, "Failed to submit emoji job", http.StatusInternalServerError)
+		handlers.RespondError(w, "Failed to submit emoji job", http.StatusInternalServerError)
 		return
 	}
 
-	respondJSON(w, dto.SubmitJobResponse{JobID: jobID, Message: "Emoji job submitted successfully"}, http.StatusAccepted)
+	handlers.RespondJSON(w, dto.SubmitJobResponse{JobID: jobID, Message: "Emoji job submitted successfully"}, http.StatusAccepted)
 }
 
 // HandlePublishEmojiVariant handles POST /emojis/jobs/{job_id}/variants/{variant_id}/publish
 func (h *EmojiHandler) HandlePublishEmojiVariant(w http.ResponseWriter, r *http.Request) {
 	claims, err := internalAuth.GetUserFromContext(r.Context())
 	if err != nil {
-		respondError(w, "unauthorized", http.StatusUnauthorized)
+		handlers.RespondError(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
 
 	jobID := chi.URLParam(r, "job_id")
 	if _, err := uuid.Parse(jobID); err != nil {
-		respondError(w, "invalid job_id format", http.StatusBadRequest)
+		handlers.RespondError(w, "invalid job_id format", http.StatusBadRequest)
 		return
 	}
 
 	variantID := chi.URLParam(r, "variant_id")
 	if _, err := uuid.Parse(variantID); err != nil {
-		respondError(w, "invalid variant_id format", http.StatusBadRequest)
+		handlers.RespondError(w, "invalid variant_id format", http.StatusBadRequest)
 		return
 	}
 
@@ -69,17 +69,17 @@ func (h *EmojiHandler) HandlePublishEmojiVariant(w http.ResponseWriter, r *http.
 	if err != nil {
 		switch {
 		case errors.Is(err, emojisSvc.ErrNotFound):
-			respondError(w, "Emoji job or variant not found or expired", http.StatusNotFound)
+			handlers.RespondError(w, "Emoji job or variant not found or expired", http.StatusNotFound)
 		case errors.Is(err, emojisSvc.ErrForbidden):
-			respondError(w, "Unauthorized to publish this emoji variant", http.StatusForbidden)
+			handlers.RespondError(w, "Unauthorized to publish this emoji variant", http.StatusForbidden)
 		default:
-			respondError(w, "Failed to publish emoji variant", http.StatusInternalServerError)
+			handlers.RespondError(w, "Failed to publish emoji variant", http.StatusInternalServerError)
 		}
 		return
 	}
 
 	if result.AlreadyPublished {
-		respondJSON(w, map[string]any{
+		handlers.RespondJSON(w, map[string]any{
 			"message": "Emoji variant already published",
 			"emotion": result.Emotion,
 			"url":     result.URL,
@@ -87,7 +87,7 @@ func (h *EmojiHandler) HandlePublishEmojiVariant(w http.ResponseWriter, r *http.
 		return
 	}
 
-	respondJSON(w, map[string]any{
+	handlers.RespondJSON(w, map[string]any{
 		"message": "Emoji variant published successfully",
 		"emotion": result.Emotion,
 		"url":     result.URL,
@@ -98,7 +98,7 @@ func (h *EmojiHandler) HandlePublishEmojiVariant(w http.ResponseWriter, r *http.
 func (h *EmojiHandler) HandleGetMyEmojiPacks(w http.ResponseWriter, r *http.Request) {
 	claims, err := internalAuth.GetUserFromContext(r.Context())
 	if err != nil {
-		respondError(w, "unauthorized", http.StatusUnauthorized)
+		handlers.RespondError(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -106,11 +106,11 @@ func (h *EmojiHandler) HandleGetMyEmojiPacks(w http.ResponseWriter, r *http.Requ
 
 	items, hasMore, err := h.svc.GetMyEmojiPacks(r.Context(), claims.UserID, params)
 	if err != nil {
-		respondError(w, "Failed to fetch emoji packs", http.StatusInternalServerError)
+		handlers.RespondError(w, "Failed to fetch emoji packs", http.StatusInternalServerError)
 		return
 	}
 
-	respondJSON(w, dto.EmojiPacksResponseDTO{
+	handlers.RespondJSON(w, dto.EmojiPacksResponseDTO{
 		Packs:   items,
 		HasMore: hasMore,
 		Offset:  params.Offset,

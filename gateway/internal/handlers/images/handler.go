@@ -29,7 +29,7 @@ func NewImageHandler(svc *imagesSvc.ImageService) *ImageHandler {
 func (h *ImageHandler) HandleSubmitJob(w http.ResponseWriter, r *http.Request) {
 	claims, err := internalAuth.GetUserFromContext(r.Context())
 	if err != nil {
-		respondError(w, "unauthorized", http.StatusUnauthorized)
+		handlers.RespondError(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -41,24 +41,24 @@ func (h *ImageHandler) HandleSubmitJob(w http.ResponseWriter, r *http.Request) {
 
 	jobID, err := h.svc.SubmitJob(r.Context(), claims.UserID, info.Data, info.Extension, info.MIMEType, prompt, info.Width, info.Height)
 	if err != nil {
-		respondError(w, "Failed to submit job", http.StatusInternalServerError)
+		handlers.RespondError(w, "Failed to submit job", http.StatusInternalServerError)
 		return
 	}
 
-	respondJSON(w, dto.SubmitJobResponse{JobID: jobID, Message: "Job submitted successfully"}, http.StatusAccepted)
+	handlers.RespondJSON(w, dto.SubmitJobResponse{JobID: jobID, Message: "Job submitted successfully"}, http.StatusAccepted)
 }
 
 // HandleRefineJob handles POST /images/jobs/{job_id}/refine
 func (h *ImageHandler) HandleRefineJob(w http.ResponseWriter, r *http.Request) {
 	claims, err := internalAuth.GetUserFromContext(r.Context())
 	if err != nil {
-		respondError(w, "unauthorized", http.StatusUnauthorized)
+		handlers.RespondError(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
 
 	jobID := chi.URLParam(r, "job_id")
 	if jobID == "" {
-		respondError(w, "job_id is required", http.StatusBadRequest)
+		handlers.RespondError(w, "job_id is required", http.StatusBadRequest)
 		return
 	}
 
@@ -66,7 +66,7 @@ func (h *ImageHandler) HandleRefineJob(w http.ResponseWriter, r *http.Request) {
 		Prompt string `json:"prompt"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.Prompt == "" {
-		respondError(w, "Refinement prompt is required", http.StatusBadRequest)
+		handlers.RespondError(w, "Refinement prompt is required", http.StatusBadRequest)
 		return
 	}
 
@@ -74,18 +74,18 @@ func (h *ImageHandler) HandleRefineJob(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, imagesSvc.ErrNotFound):
-			respondError(w, "Job not found or expired", http.StatusNotFound)
+			handlers.RespondError(w, "Job not found or expired", http.StatusNotFound)
 		case errors.Is(err, imagesSvc.ErrForbidden):
-			respondError(w, "Unauthorized to refine this job", http.StatusForbidden)
+			handlers.RespondError(w, "Unauthorized to refine this job", http.StatusForbidden)
 		case errors.Is(err, imagesSvc.ErrBadRequest):
-			respondError(w, "Job not completed yet, cannot refine", http.StatusBadRequest)
+			handlers.RespondError(w, "Job not completed yet, cannot refine", http.StatusBadRequest)
 		default:
-			respondError(w, "Failed to submit refinement", http.StatusInternalServerError)
+			handlers.RespondError(w, "Failed to submit refinement", http.StatusInternalServerError)
 		}
 		return
 	}
 
-	respondJSON(w, dto.SubmitJobResponse{
+	handlers.RespondJSON(w, dto.SubmitJobResponse{
 		JobID:   jobID,
 		Message: fmt.Sprintf("Refinement %d submitted successfully", iterationNum),
 	}, http.StatusAccepted)
@@ -95,13 +95,13 @@ func (h *ImageHandler) HandleRefineJob(w http.ResponseWriter, r *http.Request) {
 func (h *ImageHandler) HandlePublishImage(w http.ResponseWriter, r *http.Request) {
 	claims, err := internalAuth.GetUserFromContext(r.Context())
 	if err != nil {
-		respondError(w, "unauthorized", http.StatusUnauthorized)
+		handlers.RespondError(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
 
 	jobID := chi.URLParam(r, "job_id")
 	if jobID == "" {
-		respondError(w, "job_id is required", http.StatusBadRequest)
+		handlers.RespondError(w, "job_id is required", http.StatusBadRequest)
 		return
 	}
 
@@ -110,7 +110,7 @@ func (h *ImageHandler) HandlePublishImage(w http.ResponseWriter, r *http.Request
 		visibility = constants.VisibilityPrivate
 	}
 	if visibility != constants.VisibilityPublic && visibility != constants.VisibilityPrivate {
-		respondError(w, "visibility must be 'public' or 'private'", http.StatusBadRequest)
+		handlers.RespondError(w, "visibility must be 'public' or 'private'", http.StatusBadRequest)
 		return
 	}
 
@@ -118,18 +118,18 @@ func (h *ImageHandler) HandlePublishImage(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		switch {
 		case errors.Is(err, imagesSvc.ErrNotFound):
-			respondError(w, "Job not found or generated image missing", http.StatusNotFound)
+			handlers.RespondError(w, "Job not found or generated image missing", http.StatusNotFound)
 		case errors.Is(err, imagesSvc.ErrForbidden):
-			respondError(w, "Unauthorized to publish this image", http.StatusForbidden)
+			handlers.RespondError(w, "Unauthorized to publish this image", http.StatusForbidden)
 		case errors.Is(err, imagesSvc.ErrBadRequest):
-			respondError(w, "Image generation not completed yet", http.StatusBadRequest)
+			handlers.RespondError(w, "Image generation not completed yet", http.StatusBadRequest)
 		default:
-			respondError(w, "Failed to publish image", http.StatusInternalServerError)
+			handlers.RespondError(w, "Failed to publish image", http.StatusInternalServerError)
 		}
 		return
 	}
 
-	respondJSON(w, map[string]any{
+	handlers.RespondJSON(w, map[string]any{
 		"message":    "Image published successfully",
 		"image_id":   imageID,
 		"visibility": visibility,
@@ -147,11 +147,11 @@ func (h *ImageHandler) HandleGetPublicImages(w http.ResponseWriter, r *http.Requ
 
 	items, hasMore, err := h.svc.GetPublicImages(r.Context(), userID, params)
 	if err != nil {
-		respondError(w, "Failed to fetch images", http.StatusInternalServerError)
+		handlers.RespondError(w, "Failed to fetch images", http.StatusInternalServerError)
 		return
 	}
 
-	respondJSON(w, dto.PublicImagesResponseDTO{
+	handlers.RespondJSON(w, dto.PublicImagesResponseDTO{
 		Images:  items,
 		HasMore: hasMore,
 		Offset:  params.Offset,
@@ -163,28 +163,28 @@ func (h *ImageHandler) HandleGetPublicImages(w http.ResponseWriter, r *http.Requ
 func (h *ImageHandler) HandleGetImageDetail(w http.ResponseWriter, r *http.Request) {
 	imageID, err := uuid.Parse(chi.URLParam(r, "image_id"))
 	if err != nil {
-		respondError(w, "invalid image_id", http.StatusBadRequest)
+		handlers.RespondError(w, "invalid image_id", http.StatusBadRequest)
 		return
 	}
 
 	detail, err := h.svc.GetImageByID(r.Context(), imageID)
 	if err != nil {
 		if errors.Is(err, imagesSvc.ErrNotFound) {
-			respondError(w, "image not found", http.StatusNotFound)
+			handlers.RespondError(w, "image not found", http.StatusNotFound)
 			return
 		}
-		respondError(w, "Failed to fetch image", http.StatusInternalServerError)
+		handlers.RespondError(w, "Failed to fetch image", http.StatusInternalServerError)
 		return
 	}
 
-	respondJSON(w, detail, http.StatusOK)
+	handlers.RespondJSON(w, detail, http.StatusOK)
 }
 
 // HandleGetMyImages handles GET /images/me
 func (h *ImageHandler) HandleGetMyImages(w http.ResponseWriter, r *http.Request) {
 	claims, err := internalAuth.GetUserFromContext(r.Context())
 	if err != nil {
-		respondError(w, "unauthorized", http.StatusUnauthorized)
+		handlers.RespondError(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -197,11 +197,11 @@ func (h *ImageHandler) HandleGetMyImages(w http.ResponseWriter, r *http.Request)
 
 	items, hasMore, err := h.svc.GetMyImages(r.Context(), claims.UserID, visibility, params)
 	if err != nil {
-		respondError(w, "Failed to fetch images", http.StatusInternalServerError)
+		handlers.RespondError(w, "Failed to fetch images", http.StatusInternalServerError)
 		return
 	}
 
-	respondJSON(w, dto.PublicImagesResponseDTO{
+	handlers.RespondJSON(w, dto.PublicImagesResponseDTO{
 		Images:  items,
 		HasMore: hasMore,
 		Offset:  params.Offset,
@@ -213,76 +213,76 @@ func (h *ImageHandler) HandleGetMyImages(w http.ResponseWriter, r *http.Request)
 func (h *ImageHandler) HandleLikeImage(w http.ResponseWriter, r *http.Request) {
 	claims, err := internalAuth.GetUserFromContext(r.Context())
 	if err != nil {
-		respondError(w, "unauthorized", http.StatusUnauthorized)
+		handlers.RespondError(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
 
 	imageID, err := uuid.Parse(chi.URLParam(r, "image_id"))
 	if err != nil {
-		respondError(w, "invalid image_id", http.StatusBadRequest)
+		handlers.RespondError(w, "invalid image_id", http.StatusBadRequest)
 		return
 	}
 
 	if err := h.svc.LikeImage(r.Context(), claims.UserID, imageID); err != nil {
 		switch {
 		case errors.Is(err, imagesSvc.ErrNotFound):
-			respondError(w, "image not found", http.StatusNotFound)
+			handlers.RespondError(w, "image not found", http.StatusNotFound)
 		case errors.Is(err, imagesSvc.ErrConflict):
-			respondError(w, "already liked", http.StatusConflict)
+			handlers.RespondError(w, "already liked", http.StatusConflict)
 		default:
-			respondError(w, "failed to like image", http.StatusInternalServerError)
+			handlers.RespondError(w, "failed to like image", http.StatusInternalServerError)
 		}
 		return
 	}
 
-	respondJSON(w, map[string]string{"message": "liked"}, http.StatusOK)
+	handlers.RespondJSON(w, map[string]string{"message": "liked"}, http.StatusOK)
 }
 
 // HandleUnlikeImage handles DELETE /images/{image_id}/like
 func (h *ImageHandler) HandleUnlikeImage(w http.ResponseWriter, r *http.Request) {
 	claims, err := internalAuth.GetUserFromContext(r.Context())
 	if err != nil {
-		respondError(w, "unauthorized", http.StatusUnauthorized)
+		handlers.RespondError(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
 
 	imageID, err := uuid.Parse(chi.URLParam(r, "image_id"))
 	if err != nil {
-		respondError(w, "invalid image_id", http.StatusBadRequest)
+		handlers.RespondError(w, "invalid image_id", http.StatusBadRequest)
 		return
 	}
 
 	if err := h.svc.UnlikeImage(r.Context(), claims.UserID, imageID); err != nil {
 		if errors.Is(err, imagesSvc.ErrNotFound) {
-			respondError(w, "like not found", http.StatusNotFound)
+			handlers.RespondError(w, "like not found", http.StatusNotFound)
 			return
 		}
-		respondError(w, "failed to unlike image", http.StatusInternalServerError)
+		handlers.RespondError(w, "failed to unlike image", http.StatusInternalServerError)
 		return
 	}
 
-	respondJSON(w, map[string]string{"message": "unliked"}, http.StatusOK)
+	handlers.RespondJSON(w, map[string]string{"message": "unliked"}, http.StatusOK)
 }
 
 // HandleCheckLiked handles GET /images/{image_id}/liked
 func (h *ImageHandler) HandleCheckLiked(w http.ResponseWriter, r *http.Request) {
 	claims, err := internalAuth.GetUserFromContext(r.Context())
 	if err != nil {
-		respondError(w, "unauthorized", http.StatusUnauthorized)
+		handlers.RespondError(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
 
 	imageID, err := uuid.Parse(chi.URLParam(r, "image_id"))
 	if err != nil {
-		respondError(w, "invalid image_id", http.StatusBadRequest)
+		handlers.RespondError(w, "invalid image_id", http.StatusBadRequest)
 		return
 	}
 
 	liked, err := h.svc.HasUserLikedImage(r.Context(), claims.UserID, imageID)
 	if err != nil {
-		respondError(w, "failed to check like status", http.StatusInternalServerError)
+		handlers.RespondError(w, "failed to check like status", http.StatusInternalServerError)
 		return
 	}
 
-	respondJSON(w, map[string]bool{"liked": liked}, http.StatusOK)
+	handlers.RespondJSON(w, map[string]bool{"liked": liked}, http.StatusOK)
 }
