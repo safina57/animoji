@@ -1,7 +1,10 @@
 import { useState } from 'react';
-import { Check, Link, Download, X } from 'lucide-react';
-import { Dialog, DialogContent } from '@lib/ui/dialog';
-import { Button } from '@lib/ui/button';
+import { Check, Link, Download } from 'lucide-react';
+import { Dialog, DialogContent, DialogTitle } from '@lib/ui/dialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@lib/ui/avatar';
+import SeigaihaOverlay from '@lib/decorations/SeigaihaOverlay/SeigaihaOverlay';
+import TempleBuilding from '@lib/decorations/TempleBuilding/TempleBuilding';
+import { useAppSelector } from '@hooks/redux';
 import { cn } from '@lib/utils';
 import type { EmojiPackGalleryItem, EmojiVariantGalleryItem } from '@customTypes/emoji';
 
@@ -16,7 +19,7 @@ function capitalize(s: string) {
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, {
+  return new Date(iso).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -40,38 +43,88 @@ async function downloadVariant(url: string, emotion: string) {
   }
 }
 
+
 export function EmojiPackDetailDialog({ pack, open, onClose }: EmojiPackDetailDialogProps) {
+  const user = useAppSelector((s) => s.auth.user);
+
   if (!pack) return null;
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
-      <DialogContent className="max-w-2xl p-0 overflow-hidden rounded-2xl border-slate-200/60 dark:border-slate-700/60">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
-          <div>
-            <h2 className="text-base font-display font-bold text-slate-900 dark:text-white">
-              Sticker Pack
-            </h2>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 font-japanese">
-              スタンプパック · {formatDate(pack.created_at)}
-            </p>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="h-8 w-8 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      {/* Exact same shell as ImageDetailDialog */}
+      <DialogContent className="w-[95vw] max-w-5xl p-0 gap-0 overflow-hidden rounded-2xl border border-slate-200/70 dark:border-slate-700/50 bg-white dark:bg-slate-900 shadow-2xl shadow-black/20 dark:shadow-black/60">
+        <DialogTitle className="sr-only">Sticker Pack</DialogTitle>
 
-        {/* Variants grid */}
-        <div className="p-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {pack.variants.map((variant) => (
-              <VariantItem key={variant.id} variant={variant} />
-            ))}
+        <div className="flex flex-col md:flex-row md:max-h-[88vh]">
+          {/* Left: variants grid — fills like the image panel */}
+          <div className="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark">
+            <div className="min-h-full flex items-center justify-center p-6">
+              <div className="flex flex-wrap justify-center gap-4">
+                {pack.variants.map((variant) => (
+                  <div key={variant.id} className="w-44 sm:w-48 shrink-0">
+                    <VariantItem variant={variant} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right: metadata panel — exact structure from ImageDetailDialog */}
+          <div className="relative w-full md:w-72 shrink-0 flex flex-col overflow-y-auto border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-700 bg-paper-light dark:bg-paper-dark paper-texture bg-cover bg-center">
+            <SeigaihaOverlay className="absolute opacity-60 dark:opacity-25" />
+
+            {/* Top accent bar */}
+            <div className="relative h-0.5 w-full bg-gradient-to-r from-primary/40 via-primary to-primary/40 shrink-0" />
+
+            <div className="relative flex flex-col gap-5 p-6 flex-1">
+              {/* User info */}
+              <div className="flex items-center gap-3">
+                <Avatar size="lg">
+                  <AvatarImage src={user?.avatar_url ?? ''} alt={user?.name ?? ''} />
+                  <AvatarFallback>
+                    {user?.name?.charAt(0).toUpperCase() ?? '?'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <p className="font-display font-semibold text-slate-900 dark:text-white leading-tight truncate">
+                    {user?.name ?? 'You'}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {formatDate(pack.created_at)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="h-px bg-primary/10" />
+
+              {/* Pack info — mirrors the Prompt section */}
+              <div className="space-y-2">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  Sticker Pack
+                </p>
+                <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                  {pack.variants.length} emotion{pack.variants.length !== 1 ? 's' : ''}
+                </p>
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {pack.variants.map((v) => (
+                    <span
+                      key={v.id}
+                      className="text-[10px] bg-primary/8 dark:bg-primary/12 text-primary border border-primary/15 rounded-full px-2 py-0.5 font-medium"
+                    >
+                      {capitalize(v.emotion)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Temple decoration — same as ImageDetailDialog's short-prompt filler */}
+              <div className="flex flex-col items-center gap-3 py-4 mt-auto select-none">
+                <TempleBuilding className="w-24 h-24 text-primary opacity-[0.11] dark:opacity-[0.08]" />
+                <p className="text-[10px] font-japanese text-muted-foreground tracking-widest">
+                  あなたのスタンプ
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </DialogContent>
@@ -79,19 +132,16 @@ export function EmojiPackDetailDialog({ pack, open, onClose }: EmojiPackDetailDi
   );
 }
 
+/* ── Single variant card inside the dialog ── */
 function VariantItem({ variant }: { variant: EmojiVariantGalleryItem }) {
   const [loaded, setLoaded] = useState(false);
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
   async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(variant.url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      window.open(variant.url, '_blank');
-    }
+    await navigator.clipboard.writeText(variant.url).catch(() => {});
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   }
 
   async function handleDownload() {
@@ -100,50 +150,56 @@ function VariantItem({ variant }: { variant: EmojiVariantGalleryItem }) {
     setDownloading(false);
   }
 
+  /* Exact button style lifted from ImageDetailDialog's action overlay */
+  const btnBase =
+    'flex items-center gap-1.5 px-3 py-2 rounded-full backdrop-blur-sm shadow-lg text-sm font-medium border transition-all';
+  const btnIdle =
+    'bg-white/90 dark:bg-paper-dark/90 text-primary border-primary/10 hover:bg-primary hover:text-white hover:border-transparent';
+  const btnActive = 'bg-primary/90 text-white border-transparent';
+
   return (
-    <div className="group flex flex-col items-center gap-2">
-      {/* Image container */}
-      <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-gradient-to-br from-slate-50 to-white dark:from-slate-800/60 dark:to-slate-900/80 border border-slate-100 dark:border-slate-700/40">
-        {!loaded && (
-          <div className="absolute inset-0 animate-pulse bg-slate-100 dark:bg-slate-700/50 rounded-xl" />
+    <div className="group relative aspect-square rounded-xl overflow-hidden bg-white dark:bg-slate-900 flex items-center justify-center">
+      {!loaded && (
+        <div className="absolute inset-0 animate-pulse bg-slate-100 dark:bg-slate-800/60 rounded-xl" />
+      )}
+      <img
+        src={variant.url}
+        alt={`${variant.emotion} sticker`}
+        className={cn(
+          'absolute inset-0 w-full h-full object-contain p-4 transition-opacity duration-300',
+          loaded ? 'opacity-100' : 'opacity-0'
         )}
-        <img
-          src={variant.url}
-          alt={`${variant.emotion} sticker`}
-          className={cn(
-            'absolute inset-0 w-full h-full object-contain p-3 transition-opacity duration-300',
-            loaded ? 'opacity-100' : 'opacity-0'
-          )}
-          onLoad={() => setLoaded(true)}
-        />
-        {/* Hover overlay */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-200 rounded-xl flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+        onLoad={() => setLoaded(true)}
+      />
+
+      {/* Gradient scrim — same as ImageDetailDialog */}
+      <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/65 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+
+      {/* Action row — split left/right, matches ImageDetailDialog overlay layout */}
+      <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+
+
+        {/* Right: copy + download */}
+        <div className="flex items-center gap-1.5">
           <button
+            type="button"
             onClick={handleCopy}
-            className="h-8 w-8 rounded-full bg-white/90 flex items-center justify-center shadow-md hover:bg-primary hover:text-white transition-colors"
+            className={cn(btnBase, copied ? btnActive : btnIdle)}
             aria-label={`Copy link for ${variant.emotion}`}
           >
-            {copied ? <Check className="h-3.5 w-3.5 text-primary group-hover:text-white" /> : <Link className="h-3.5 w-3.5" />}
+            {copied ? <Check className="w-3.5 h-3.5" /> : <Link className="w-3.5 h-3.5" />}
+            <span>{copied ? 'Copied!' : 'Copy'}</span>
           </button>
           <button
+            type="button"
             onClick={handleDownload}
             disabled={downloading}
-            className="h-8 w-8 rounded-full bg-white/90 flex items-center justify-center shadow-md hover:bg-primary hover:text-white transition-colors disabled:opacity-60"
+            className={cn(btnBase, btnIdle, 'disabled:opacity-60')}
             aria-label={`Download ${variant.emotion} sticker`}
           >
-            <Download className="h-3.5 w-3.5" />
+            <Download className="w-3.5 h-3.5" />
           </button>
         </div>
-      </div>
-
-      {/* Label + copy */}
-      <div className="flex items-center gap-1.5">
-        <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
-          {capitalize(variant.emotion)}
-        </span>
-        {copied && (
-          <span className="text-[10px] text-primary font-semibold animate-fade-in">Copied!</span>
-        )}
       </div>
     </div>
   );
