@@ -51,12 +51,12 @@ export default function GalleryPage() {
     dispatch(loadGallery(visibility));
   }, [dispatch, visibility]);
 
-  // Load emoji gallery when switching to the emojis section
+  // Load emoji gallery when switching to the emojis section — skip if already loaded
   useEffect(() => {
     if (section === GALLERY_SECTION.EMOJIS && packs.length === 0 && !emojiIsLoading) {
       dispatch(loadEmojiGallery());
     }
-  }, [dispatch, section]);
+  }, [dispatch, section, packs.length, emojiIsLoading]);
 
   // Infinite scroll — delegates to the correct thunk based on active section
   useEffect(() => {
