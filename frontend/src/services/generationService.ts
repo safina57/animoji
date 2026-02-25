@@ -3,7 +3,7 @@ import type { SubmitJobResponse, PublishImageResponse } from "@customTypes/gener
 const API_URL = import.meta.env.VITE_API_URL;
 
 export function getJobStatusStreamUrl(jobId: string): string {
-  return `${API_URL}/job-status/${jobId}/stream`;
+  return `${API_URL}/images/jobs/${jobId}/stream`;
 }
 
 export async function submitJob(image: File, prompt: string): Promise<SubmitJobResponse> {
@@ -11,7 +11,7 @@ export async function submitJob(image: File, prompt: string): Promise<SubmitJobR
   formData.append('image', image);
   formData.append('prompt', prompt);
 
-  const response = await fetch(`${API_URL}/submit-job`, {
+  const response = await fetch(`${API_URL}/images/jobs`, {
     method: 'POST',
     credentials: 'include', // Send cookies with request
     body: formData,
@@ -29,7 +29,7 @@ export async function submitRefinement(
   jobId: string,
   refinementPrompt: string
 ): Promise<SubmitJobResponse> {
-  const response = await fetch(`${API_URL}/jobs/${jobId}/refine`, {
+  const response = await fetch(`${API_URL}/images/jobs/${jobId}/refine`, {
     method: 'POST',
     credentials: 'include',
     headers: {
@@ -52,7 +52,7 @@ export async function publishImage(
   visibility: 'public' | 'private'
 ): Promise<PublishImageResponse> {
   const response = await fetch(
-    `${API_URL}/images/${jobId}/publish?visibility=${visibility}`,
+    `${API_URL}/images/jobs/${jobId}/publish?visibility=${visibility}`,
     {
       method: 'POST',
       credentials: 'include',

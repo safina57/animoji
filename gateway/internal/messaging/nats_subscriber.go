@@ -8,7 +8,7 @@ import (
 	nats "github.com/nats-io/nats.go"
 	"github.com/google/uuid"
 	"github.com/safina57/animoji/gateway/internal/constants"
-	"github.com/safina57/animoji/gateway/internal/models"
+	"github.com/safina57/animoji/gateway/internal/jobs"
 	"github.com/safina57/animoji/gateway/pkg/cache"
 	"github.com/safina57/animoji/gateway/pkg/logger"
 )
@@ -16,12 +16,12 @@ import (
 // NatsSubscriber handles NATS subscriptions for status events
 type NatsSubscriber struct {
 	client            *NatsClient
-	eventManager      *EventManager[models.StatusEvent]
-	emojiEventManager *EventManager[models.EmojiPartialEvent]
+	eventManager      *EventManager[jobs.ImageStatusEvent]
+	emojiEventManager *EventManager[jobs.EmojiPartialEvent]
 }
 
 // NewNatsSubscriber creates a new NATS subscriber
-func NewNatsSubscriber(client *NatsClient, eventManager *EventManager[models.StatusEvent], emojiEventManager *EventManager[models.EmojiPartialEvent]) *NatsSubscriber {
+func NewNatsSubscriber(client *NatsClient, eventManager *EventManager[jobs.ImageStatusEvent], emojiEventManager *EventManager[jobs.EmojiPartialEvent]) *NatsSubscriber {
 	return &NatsSubscriber{
 		client:            client,
 		eventManager:      eventManager,
@@ -32,7 +32,7 @@ func NewNatsSubscriber(client *NatsClient, eventManager *EventManager[models.Sta
 // SubscribeToStatusEvents subscribes to job status updates on anime.status.*
 func (s *NatsSubscriber) SubscribeToStatusEvents(ctx context.Context) error {
 	_, err := s.client.conn.Subscribe("anime.status.*", func(msg *nats.Msg) {
-		var event models.StatusEvent
+		var event jobs.ImageStatusEvent
 		if err := json.Unmarshal(msg.Data, &event); err != nil {
 			logger.Error().Err(err).Str("subject", msg.Subject).Msg("Failed to parse status event")
 			return
@@ -81,7 +81,7 @@ func (s *NatsSubscriber) SubscribeToStatusEvents(ctx context.Context) error {
 // SubscribeToEmojiStatusEvents subscribes to emoji variant completion events on emoji.status.*
 func (s *NatsSubscriber) SubscribeToEmojiStatusEvents(ctx context.Context) error {
 	_, err := s.client.conn.Subscribe("emoji.status.*", func(msg *nats.Msg) {
-		var event models.EmojiStatusEvent
+		var event jobs.EmojiStatusEvent
 		if err := json.Unmarshal(msg.Data, &event); err != nil {
 			logger.Error().Err(err).Str("subject", msg.Subject).Msg("Failed to parse emoji status event")
 			return
@@ -142,7 +142,7 @@ func (s *NatsSubscriber) SubscribeToEmojiStatusEvents(ctx context.Context) error
 		}
 
 		// Route every event (started / completed / failed) to the SSE handler
-		s.emojiEventManager.NotifyJob(jobID, models.EmojiPartialEvent{
+		s.emojiEventManager.NotifyJob(jobID, jobs.EmojiPartialEvent{
 			Emotion:       event.Emotion,
 			VariantIndex:  event.VariantIndex,
 			ResultKey:     event.ResultKey,

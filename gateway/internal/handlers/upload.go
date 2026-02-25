@@ -6,37 +6,30 @@ import (
 	"net/http"
 
 	"github.com/dustin/go-humanize"
-	"github.com/safina57/animoji/gateway/internal/auth"
 	"github.com/safina57/animoji/gateway/internal/constants"
 	"github.com/safina57/animoji/gateway/pkg/imageinfo"
 )
 
-// parseImageUpload handles the shared auth + multipart parsing + image validation
-// logic for image submission handlers. It writes error responses directly and
-// returns ok=false on any failure so the caller can return immediately.
-func parseImageUpload(w http.ResponseWriter, r *http.Request) (claims *auth.JWTClaims, info *imageinfo.ImageInfo, prompt string, ok bool) {
-	claims, err := auth.GetUserFromContext(r.Context())
-	if err != nil {
-		respondError(w, "unauthorized", http.StatusUnauthorized)
-		return nil, nil, "", false
-	}
-
+// ParseImageUpload parses a multipart form upload, validates the image, and returns
+// the parsed ImageInfo and prompt. It writes error responses directly and returns
+// ok=false on any failure so the caller can return immediately.
+func ParseImageUpload(w http.ResponseWriter, r *http.Request) (info *imageinfo.ImageInfo, prompt string, ok bool) {
 	if err := r.ParseMultipartForm(constants.MaxUploadSize); err != nil {
 		respondError(w, fmt.Sprintf("File too large (max %s)", humanize.Bytes(uint64(constants.MaxUploadSize))), http.StatusBadRequest)
-		return nil, nil, "", false
+		return nil, "", false
 	}
 
 	file, header, err := r.FormFile("image")
 	if err != nil {
 		respondError(w, "No image provided", http.StatusBadRequest)
-		return nil, nil, "", false
+		return nil, "", false
 	}
 	defer file.Close()
 
 	prompt = r.FormValue("prompt")
 	if prompt == "" {
 		respondError(w, "Prompt is required", http.StatusBadRequest)
-		return nil, nil, "", false
+		return nil, "", false
 	}
 
 	processor := imageinfo.NewImageProcessor(imageinfo.DefaultConfig())
@@ -44,19 +37,19 @@ func parseImageUpload(w http.ResponseWriter, r *http.Request) (claims *auth.JWTC
 	if err != nil {
 		if errors.Is(err, imageinfo.ErrFileTooLarge) {
 			respondError(w, err.Error(), http.StatusRequestEntityTooLarge)
-			return nil, nil, "", false
+			return nil, "", false
 		}
 		if errors.Is(err, imageinfo.ErrInvalidExtension) || errors.Is(err, imageinfo.ErrInvalidMIMEType) {
 			respondError(w, err.Error(), http.StatusUnsupportedMediaType)
-			return nil, nil, "", false
+			return nil, "", false
 		}
 		if errors.Is(err, imageinfo.ErrCannotDecodeImage) {
 			respondError(w, "Invalid or corrupted image file", http.StatusBadRequest)
-			return nil, nil, "", false
+			return nil, "", false
 		}
 		respondError(w, fmt.Sprintf("Image validation failed: %v", err), http.StatusBadRequest)
-		return nil, nil, "", false
+		return nil, "", false
 	}
 
-	return claims, info, prompt, true
+	return info, prompt, true
 }
