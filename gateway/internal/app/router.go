@@ -15,14 +15,14 @@ import (
 	authSvc "github.com/safina57/animoji/gateway/internal/services/auth"
 	emojiSvc "github.com/safina57/animoji/gateway/internal/services/emojis"
 	imageSvc "github.com/safina57/animoji/gateway/internal/services/images"
-	"github.com/safina57/animoji/gateway/pkg/storage"
+	internalStorage "github.com/safina57/animoji/gateway/internal/storage"
 )
 
 // newRouter creates and configures the HTTP router with domain-grouped handlers.
 func newRouter(
 	imageEventManager *messaging.EventManager[jobs.ImageStatusEvent],
 	emojiEventManager *messaging.EventManager[jobs.EmojiPartialEvent],
-	storageService *storage.MinIOService,
+	storageService *internalStorage.MinIOService,
 	imageSvc *imageSvc.ImageService,
 	emojiSvc *emojiSvc.EmojiService,
 	authSvc *authSvc.AuthService,

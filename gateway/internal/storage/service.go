@@ -7,20 +7,23 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/safina57/animoji/gateway/internal/constants"
+	pkgstorage "github.com/safina57/animoji/gateway/pkg/storage"
 )
 
+// MinIOService wraps the low-level MinIOClient with domain-specific storage operations.
 type MinIOService struct {
-	client *MinIOClient
+	client *pkgstorage.MinIOClient
 }
 
-func NewMinIOService() *MinIOService {
+// NewMinIOService creates a MinIOService using the provided raw MinIO client.
+func NewMinIOService(client *pkgstorage.MinIOClient) *MinIOService {
 	return &MinIOService{
-		client: MustGetClient(),
+		client: client,
 	}
 }
 
-// UploadTmpOriginal uploads a validated original image to the tmp/ prefix
-// Returns the object key stored in MinIO
+// UploadTmpOriginal uploads a validated original image to the tmp/ prefix.
+// Returns the object key stored in MinIO.
 func (s *MinIOService) UploadTmpOriginal(ctx context.Context, jobID string, data []byte, ext string, mimeType string) (string, error) {
 	objectKey := fmt.Sprintf("%s%s/original.%s", constants.PrefixTmp, jobID, ext)
 	if err := s.client.UploadFile(ctx, constants.BucketName, objectKey, data, mimeType); err != nil {
@@ -39,13 +42,13 @@ func (s *MinIOService) UploadTmpEmojiOriginal(ctx context.Context, jobID string,
 	return objectKey, nil
 }
 
-// CheckTmpResultExists checks if a tmp result image exists for a job at a given iteration
+// CheckTmpResultExists checks if a tmp result image exists for a job at a given iteration.
 func (s *MinIOService) CheckTmpResultExists(ctx context.Context, jobID string, iterationNum int) (bool, error) {
 	objectKey := fmt.Sprintf("%s%s/result_v%d.png", constants.PrefixTmp, jobID, iterationNum)
 	return s.client.ObjectExists(ctx, constants.BucketName, objectKey)
 }
 
-// GetPresignedURLForKey generates a presigned URL for any arbitrary object key
+// GetPresignedURLForKey generates a presigned URL for any arbitrary object key.
 func (s *MinIOService) GetPresignedURLForKey(ctx context.Context, objectKey string, expiry time.Duration) (string, error) {
 	return s.client.GetPresignedURL(ctx, constants.BucketName, objectKey, expiry)
 }
@@ -60,7 +63,6 @@ func (s *MinIOService) PublishFiles(
 	visibility string,
 ) (string, string, error) {
 	prefix := constants.ImagePrefix(visibility)
-
 	imageIDStr := imageID.String()
 
 	srcOriginalKey := fmt.Sprintf("%s%s/original.%s", constants.PrefixTmp, jobID, originalExt)
@@ -74,7 +76,6 @@ func (s *MinIOService) PublishFiles(
 	}
 
 	if err := s.client.CopyObject(ctx, constants.BucketName, srcResultKey, dstResultKey); err != nil {
-		// Best-effort rollback of the already-copied original — non-blocking
 		go func(key string) {
 			_ = s.client.DeleteObject(context.Background(), constants.BucketName, key)
 		}(dstOriginalKey)
@@ -117,22 +118,22 @@ func (s *MinIOService) PublishEmojiFiles(
 	return resultKeys, nil
 }
 
-// DownloadFile downloads a file from MinIO using the object key
+// DownloadFile downloads a file from MinIO using the object key.
 func (s *MinIOService) DownloadFile(ctx context.Context, objectKey string) ([]byte, error) {
 	return s.client.DownloadFile(ctx, constants.BucketName, objectKey)
 }
 
-// UploadFile uploads a file to MinIO using the object key
+// UploadFile uploads a file to MinIO using the object key.
 func (s *MinIOService) UploadFile(ctx context.Context, objectKey string, data []byte, contentType string) error {
 	return s.client.UploadFile(ctx, constants.BucketName, objectKey, data, contentType)
 }
 
-// DeleteObject removes an object from the bucket by key
+// DeleteObject removes an object from the bucket by key.
 func (s *MinIOService) DeleteObject(ctx context.Context, objectKey string) error {
 	return s.client.DeleteObject(ctx, constants.BucketName, objectKey)
 }
 
-// GetPublicURL returns the public URL for a given object key in the default bucket
+// GetPublicURL returns the public URL for a given object key in the default bucket.
 func (s *MinIOService) GetPublicURL(objectKey string) string {
 	return s.client.GetPublicURL(constants.BucketName, objectKey)
 }

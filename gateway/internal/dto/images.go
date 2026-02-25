@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/safina57/animoji/gateway/internal/models"
-	"github.com/safina57/animoji/gateway/pkg/storage"
+	"github.com/safina57/animoji/gateway/internal/storage"
 )
 
 // SubmitJobResponse is returned when a job is successfully submitted to the queue

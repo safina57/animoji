@@ -10,16 +10,16 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/google/uuid"
 	"github.com/safina57/animoji/gateway/internal/constants"
+	"github.com/safina57/animoji/gateway/internal/storage"
 	"github.com/safina57/animoji/gateway/pkg/logger"
-	"github.com/safina57/animoji/gateway/pkg/storage"
 )
 
-// ThumbnailService handles thumbnail generation and storage
+// ThumbnailService handles thumbnail generation and storage.
 type ThumbnailService struct {
 	storage *storage.MinIOService
 }
 
-// NewThumbnailService creates a new thumbnail service
+// NewThumbnailService creates a new ThumbnailService.
 func NewThumbnailService(storage *storage.MinIOService) *ThumbnailService {
 	return &ThumbnailService{
 		storage: storage,
@@ -34,19 +34,16 @@ func (s *ThumbnailService) GenerateThumbnail(
 	visibility string,
 	generatedKey string,
 ) (string, error) {
-	// Download the generated image from MinIO
 	imageData, err := s.storage.DownloadFile(ctx, generatedKey)
 	if err != nil {
 		return "", fmt.Errorf("failed to download image for thumbnail generation: %w", err)
 	}
 
-	// Decode the image
 	img, _, err := image.Decode(bytes.NewReader(imageData))
 	if err != nil {
 		return "", fmt.Errorf("failed to decode image: %w", err)
 	}
 
-	// Calculate new dimensions (scale by factor, preserving aspect ratio)
 	bounds := img.Bounds()
 	originalWidth := bounds.Dx()
 	originalHeight := bounds.Dy()
@@ -60,16 +57,13 @@ func (s *ThumbnailService) GenerateThumbnail(
 		newHeight = 1
 	}
 
-	// Resize image maintaining aspect ratio
 	thumbnail := imaging.Resize(img, newWidth, newHeight, imaging.Lanczos)
 
-	// Encode to PNG
 	var buf bytes.Buffer
 	if err := png.Encode(&buf, thumbnail); err != nil {
 		return "", fmt.Errorf("failed to encode thumbnail: %w", err)
 	}
 
-	// Upload thumbnail keyed by image UUID under the correct visibility prefix
 	key := fmt.Sprintf("%s%s/thumbnail.png", constants.ThumbnailPrefix(visibility), imageID.String())
 	if err := s.storage.UploadFile(ctx, key, buf.Bytes(), "image/png"); err != nil {
 		return "", fmt.Errorf("failed to upload thumbnail: %w", err)

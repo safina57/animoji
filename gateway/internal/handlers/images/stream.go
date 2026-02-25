@@ -13,9 +13,9 @@ import (
 	"github.com/safina57/animoji/gateway/internal/constants"
 	"github.com/safina57/animoji/gateway/internal/jobs"
 	"github.com/safina57/animoji/gateway/internal/messaging"
-	"github.com/safina57/animoji/gateway/pkg/cache"
+	"github.com/safina57/animoji/gateway/internal/cache"
+	"github.com/safina57/animoji/gateway/internal/storage"
 	"github.com/safina57/animoji/gateway/pkg/logger"
-	"github.com/safina57/animoji/gateway/pkg/storage"
 )
 
 const sseTimeout = 2 * time.Minute

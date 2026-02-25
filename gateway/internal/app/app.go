@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/safina57/animoji/gateway/internal/auth"
+	"github.com/safina57/animoji/gateway/internal/cache"
 	"github.com/safina57/animoji/gateway/internal/jobs"
 	"github.com/safina57/animoji/gateway/internal/messaging"
 	"github.com/safina57/animoji/gateway/internal/models"
@@ -13,10 +14,10 @@ import (
 	authSvc "github.com/safina57/animoji/gateway/internal/services/auth"
 	emojiSvc "github.com/safina57/animoji/gateway/internal/services/emojis"
 	imageSvc "github.com/safina57/animoji/gateway/internal/services/images"
-	"github.com/safina57/animoji/gateway/pkg/cache"
+	internalStorage "github.com/safina57/animoji/gateway/internal/storage"
 	"github.com/safina57/animoji/gateway/pkg/database"
 	"github.com/safina57/animoji/gateway/pkg/logger"
-	"github.com/safina57/animoji/gateway/pkg/storage"
+	pkgstorage "github.com/safina57/animoji/gateway/pkg/storage"
 	"gorm.io/gorm"
 )
 
@@ -28,7 +29,7 @@ type App struct {
 	natsClient        *messaging.NatsClient
 	imageEventManager *messaging.EventManager[jobs.ImageStatusEvent]
 	emojiEventManager *messaging.EventManager[jobs.EmojiPartialEvent]
-	storageService    *storage.MinIOService
+	storageService    *internalStorage.MinIOService
 	natsSubscriber    *messaging.NatsSubscriber
 	authConfig        *auth.AuthConfig
 	imageSvc          *imageSvc.ImageService
@@ -54,7 +55,8 @@ func New(ctx context.Context) (*App, error) {
 
 	repo := repository.NewRepository(db)
 
-	if _, err := storage.GetClient(); err != nil {
+	storageClient, err := pkgstorage.GetClient()
+	if err != nil {
 		return nil, err
 	}
 
@@ -65,7 +67,7 @@ func New(ctx context.Context) (*App, error) {
 
 	imageEventManager := messaging.NewEventManager[jobs.ImageStatusEvent](1)
 	emojiEventManager := messaging.NewEventManager[jobs.EmojiPartialEvent](4)
-	storageService := storage.NewMinIOService()
+	storageService := internalStorage.NewMinIOService(storageClient)
 
 	natsSubscriber := messaging.NewNatsSubscriber(natsClient, imageEventManager, emojiEventManager)
 

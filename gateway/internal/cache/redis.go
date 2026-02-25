@@ -43,7 +43,6 @@ var (
 
 // NewRedisClient creates a new Redis client instance
 func NewRedisClient() *RedisClient {
-	// Read Redis configuration from environment
 	host := os.Getenv("REDIS_HOST")
 	port := os.Getenv("REDIS_PORT")
 	password := os.Getenv("REDIS_PASSWORD")
@@ -65,7 +64,6 @@ func MustGetClient() *RedisClient {
 	redisClientOnce.Do(func() {
 		redisClientInstance = NewRedisClient()
 
-		// Test connection
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
@@ -91,13 +89,11 @@ func (r *RedisClient) jobKey(jobID string) string {
 func (r *RedisClient) SetJobMetadata(ctx context.Context, jobID string, metadata *JobMetadata) error {
 	key := r.jobKey(jobID)
 
-	// Serialize metadata to JSON
 	data, err := json.Marshal(metadata)
 	if err != nil {
 		return fmt.Errorf("failed to marshal job metadata: %w", err)
 	}
 
-	// Store in Redis with TTL
 	if err := r.client.Set(ctx, key, data, r.ttl).Err(); err != nil {
 		return fmt.Errorf("failed to set job metadata in Redis: %w", err)
 	}
@@ -114,7 +110,6 @@ func (r *RedisClient) SetJobMetadata(ctx context.Context, jobID string, metadata
 func (r *RedisClient) GetJobMetadata(ctx context.Context, jobID string) (*JobMetadata, error) {
 	key := r.jobKey(jobID)
 
-	// Get data from Redis
 	data, err := r.client.Get(ctx, key).Bytes()
 	if err != nil {
 		if err == redis.Nil {
@@ -123,7 +118,6 @@ func (r *RedisClient) GetJobMetadata(ctx context.Context, jobID string) (*JobMet
 		return nil, fmt.Errorf("failed to get job metadata from Redis: %w", err)
 	}
 
-	// Deserialize JSON
 	var metadata JobMetadata
 	if err := json.Unmarshal(data, &metadata); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal job metadata: %w", err)
@@ -138,19 +132,16 @@ func (r *RedisClient) GetJobMetadata(ctx context.Context, jobID string) (*JobMet
 
 // AppendJobGeneratedKey appends a new generated result key and stores the latest response ID
 func (r *RedisClient) AppendJobGeneratedKey(ctx context.Context, jobID string, generatedKey string, responseID string) error {
-	// Get existing metadata
 	metadata, err := r.GetJobMetadata(ctx, jobID)
 	if err != nil {
 		return err
 	}
 
-	// Append generated key and update response ID for next iteration
 	metadata.GeneratedKeys = append(metadata.GeneratedKeys, generatedKey)
 	if responseID != "" {
 		metadata.LastResponseID = responseID
 	}
 
-	// Save updated metadata
 	return r.SetJobMetadata(ctx, jobID, metadata)
 }
 
@@ -277,7 +268,6 @@ func (r *RedisClient) UpdateEmojiJobTotalVariants(ctx context.Context, jobID str
 // emoji job metadata using optimistic locking (WATCH/MULTI/EXEC).
 // Returns true when all variants are complete.
 func (r *RedisClient) AppendEmojiVariantResult(ctx context.Context, jobID string, variant EmojiVariantResult) (bool, error) {
-	// Defensive: guarantee a VariantID is always stored so the publish endpoint
 	if variant.VariantID == "" {
 		variant.VariantID = uuid.New().String()
 	}
@@ -315,7 +305,7 @@ func (r *RedisClient) AppendEmojiVariantResult(ctx context.Context, jobID string
 			return allComplete, nil
 		}
 		if errors.Is(err, redis.TxFailedErr) {
-			continue // key modified by another writer, retry
+			continue
 		}
 		return false, fmt.Errorf("failed to atomically append emoji variant result: %w", err)
 	}
