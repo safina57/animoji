@@ -3,7 +3,14 @@ import { imageService, GALLERY_PAGE_SIZE } from "@services/imageService";
 import type { ImageFeedItem } from "@customTypes/image";
 import type { RootState } from "@store/store";
 
-export type GalleryVisibility = "public" | "private";
+export const GALLERY_SECTION = {
+  PUBLIC:  "public",
+  PRIVATE: "private",
+  EMOJIS:  "emojis",
+} as const;
+
+export type GalleryVisibility = typeof GALLERY_SECTION.PUBLIC | typeof GALLERY_SECTION.PRIVATE;
+export type GallerySection    = typeof GALLERY_SECTION[keyof typeof GALLERY_SECTION];
 
 interface GalleryState {
   visibility: GalleryVisibility;
@@ -16,7 +23,7 @@ interface GalleryState {
 }
 
 const initialState: GalleryState = {
-  visibility: "public",
+  visibility: GALLERY_SECTION.PUBLIC,
   images: [],
   offset: 0,
   hasMore: true,

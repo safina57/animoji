@@ -1,4 +1,5 @@
 import ToriiGateIcon from "@lib/decorations/ToriiGateIcon/ToriiGateIcon";
+import { GALLERY_SECTION } from "@store/slices/gallerySlice";
 import type { GalleryVisibility } from "@store/slices/gallerySlice";
 
 interface GalleryEmptyStateProps {
@@ -10,7 +11,7 @@ export default function GalleryEmptyState({ visibility }: GalleryEmptyStateProps
     <div className="flex flex-col items-center justify-center py-24 text-center gap-6">
       <ToriiGateIcon className="w-32 h-32 text-primary opacity-10" />
       <div className="space-y-2">
-        {visibility === "public" ? (
+        {visibility === GALLERY_SECTION.PUBLIC ? (
           <>
             <p className="text-lg font-japanese text-slate-400 dark:text-slate-500">
               公開された作品はありません

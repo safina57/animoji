@@ -6,23 +6,25 @@ import {
   navigationMenuTriggerStyle,
 } from "@lib/ui/navigation-menu";
 import { cn } from "@lib/utils";
-import type { GalleryVisibility } from "@store/slices/gallerySlice";
+import { GALLERY_SECTION } from "@store/slices/gallerySlice";
+import type { GallerySection } from "@store/slices/gallerySlice";
 
-const NAV_ITEMS: { value: GalleryVisibility; icon: string; label: string; labelJa: string }[] = [
-  { value: "public",  icon: "public", label: "Public",  labelJa: "公開" },
-  { value: "private", icon: "lock",   label: "Private", labelJa: "非公開" },
+const NAV_ITEMS: { value: GallerySection; icon: string; label: string; labelJa: string }[] = [
+  { value: GALLERY_SECTION.PUBLIC,  icon: "public",         label: "Public",   labelJa: "公開" },
+  { value: GALLERY_SECTION.PRIVATE, icon: "lock",           label: "Private",  labelJa: "非公開" },
+  { value: GALLERY_SECTION.EMOJIS,  icon: "emoji_emotions", label: "Stickers", labelJa: "スタンプ" },
 ];
 
 interface GallerySidebarProps {
-  value: GalleryVisibility;
-  onChange: (v: GalleryVisibility) => void;
+  value: GallerySection;
+  onChange: (v: GallerySection) => void;
 }
 
 export default function GallerySidebar({ value, onChange }: GallerySidebarProps) {
   return (
     <aside className="w-full md:w-52 shrink-0">
       <p className="hidden md:block mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
-        My Images
+        My Gallery
       </p>
 
       <NavigationMenu orientation="vertical" className="max-w-none w-full">

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/safina57/animoji/gateway/internal/dto"
 	"github.com/safina57/animoji/gateway/internal/models"
 	"gorm.io/gorm"
 )
@@ -63,6 +64,22 @@ func (r *Repository) CreateEmojiVariant(ctx context.Context, variant *models.Emo
 		return fmt.Errorf("creating emoji variant: %w", err)
 	}
 	return nil
+}
+
+// GetUserEmojiPacks retrieves a user's published emoji packs (with variants) ordered newest first.
+func (r *Repository) GetUserEmojiPacks(ctx context.Context, userID uuid.UUID, params dto.PaginationParams) ([]*models.EmojiPack, error) {
+	var packs []*models.EmojiPack
+	err := r.db.WithContext(ctx).
+		Preload("Variants").
+		Where("user_id = ?", userID).
+		Order("created_at DESC").
+		Limit(params.Limit).
+		Offset(params.Offset).
+		Find(&packs).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user emoji packs: %w", err)
+	}
+	return packs, nil
 }
 
 // CreateEmojiPack persists an emoji pack and its variants in a single transaction.

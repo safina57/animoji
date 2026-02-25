@@ -4,6 +4,7 @@ import authReducer from "./slices/authSlice";
 import feedReducer from "./slices/feedSlice";
 import galleryReducer from "./slices/gallerySlice";
 import emojiReducer from "./slices/emojiSlice";
+import emojiGalleryReducer from "./slices/emojiGallerySlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     feed: feedReducer,
     gallery: galleryReducer,
     emoji: emojiReducer,
+    emojiGallery: emojiGalleryReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

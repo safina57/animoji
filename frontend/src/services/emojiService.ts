@@ -1,4 +1,6 @@
-import type { SubmitEmojiJobResponse, PublishEmojiVariantResponse } from '@customTypes/emoji';
+import type { SubmitEmojiJobResponse, PublishEmojiVariantResponse, EmojiPacksResponse } from '@customTypes/emoji';
+
+export const EMOJI_GALLERY_PAGE_SIZE = 20;
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -25,6 +27,16 @@ export async function submitEmojiJob(
     throw new Error(error.error || 'Failed to submit emoji job');
   }
 
+  return response.json();
+}
+
+export async function fetchMyEmojiPacks(limit: number, offset: number): Promise<EmojiPacksResponse> {
+  const response = await fetch(`${API_URL}/emojis/me?limit=${limit}&offset=${offset}`, {
+    credentials: 'include',
+  });
+  if (!response.ok) {
+    throw new Error('Failed to fetch your emoji packs');
+  }
   return response.json();
 }
 
