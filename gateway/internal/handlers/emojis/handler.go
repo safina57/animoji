@@ -59,13 +59,13 @@ func (h *EmojiHandler) HandlePublishEmojiVariant(w http.ResponseWriter, r *http.
 	}
 
 	jobID := chi.URLParam(r, "job_id")
-	if _, err := uuid.Parse(jobID); err != nil {
+	if _, parseErr := uuid.Parse(jobID); parseErr != nil {
 		handlers.RespondError(w, "invalid job_id format", http.StatusBadRequest)
 		return
 	}
 
 	variantID := chi.URLParam(r, "variant_id")
-	if _, err := uuid.Parse(variantID); err != nil {
+	if _, parseErr := uuid.Parse(variantID); parseErr != nil {
 		handlers.RespondError(w, "invalid variant_id format", http.StatusBadRequest)
 		return
 	}

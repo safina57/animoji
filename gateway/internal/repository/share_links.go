@@ -148,6 +148,8 @@ func (r *Repository) CleanupExpiredShareLinks(ctx context.Context) (int64, error
 // generateSecureToken generates a cryptographically secure random token
 func generateSecureToken(length int) (string, error) {
 	bytes := make([]byte, length)
-	rand.Read(bytes)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", fmt.Errorf("failed to generate random bytes: %w", err)
+	}
 	return hex.EncodeToString(bytes), nil
 }

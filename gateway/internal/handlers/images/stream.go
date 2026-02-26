@@ -51,7 +51,7 @@ func (h *ImageHandler) HandleJobStatusStream(
 
 		ctx := r.Context()
 
-		fmt.Fprintf(w, ": connected\n\n")
+		_, _ = fmt.Fprintf(w, ": connected\n\n")
 		flusher.Flush()
 
 		eventChan := em.Register(jobID)
@@ -126,7 +126,7 @@ func sendSSEEvent(w http.ResponseWriter, flusher http.Flusher, data any) {
 		logger.Error().Err(err).Msg("Failed to marshal SSE event data")
 		return
 	}
-	fmt.Fprintf(w, "data: %s\n\n", jsonData)
+	_, _ = fmt.Fprintf(w, "data: %s\n\n", jsonData)
 	flusher.Flush()
 }
 

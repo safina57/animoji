@@ -40,7 +40,7 @@ func (e *ImageMetadataExtractor) Extract(path string) (*ImageInfo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cannot open file: %w", err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	width, height, err := e.getDimensionsFromReader(file)
 	if err != nil {
@@ -69,7 +69,7 @@ func (e *ImageMetadataExtractor) detectMIMEType(path string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	// Read first 512 bytes for MIME detection
 	buffer := make([]byte, 512)

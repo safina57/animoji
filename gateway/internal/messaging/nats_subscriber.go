@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"strings"
 
-	nats "github.com/nats-io/nats.go"
 	"github.com/google/uuid"
+	nats "github.com/nats-io/nats.go"
+	"github.com/safina57/animoji/gateway/internal/cache"
 	"github.com/safina57/animoji/gateway/internal/constants"
 	"github.com/safina57/animoji/gateway/internal/jobs"
-	"github.com/safina57/animoji/gateway/internal/cache"
 	"github.com/safina57/animoji/gateway/pkg/logger"
 )
 

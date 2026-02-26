@@ -10,13 +10,13 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"github.com/safina57/animoji/gateway/internal/cache"
 	"github.com/safina57/animoji/gateway/internal/constants"
 	"github.com/safina57/animoji/gateway/internal/dto"
 	"github.com/safina57/animoji/gateway/internal/jobs"
 	"github.com/safina57/animoji/gateway/internal/messaging"
 	"github.com/safina57/animoji/gateway/internal/models"
 	"github.com/safina57/animoji/gateway/internal/repository"
-	"github.com/safina57/animoji/gateway/internal/cache"
 	"github.com/safina57/animoji/gateway/internal/services/storage"
 	"github.com/safina57/animoji/gateway/internal/services/thumbnail"
 	"github.com/safina57/animoji/gateway/pkg/logger"
@@ -80,8 +80,8 @@ func (s *ImageService) SubmitJob(
 		IterationNum:  0,
 		CreatedAt:     time.Now(),
 	}
-	if err := s.redisClient.SetJobMetadata(ctx, jobID, metadata); err != nil {
-		logger.Error().Err(err).Str("job_id", jobID).Msg("Failed to cache job metadata in Redis")
+	if cacheErr := s.redisClient.SetJobMetadata(ctx, jobID, metadata); cacheErr != nil {
+		logger.Error().Err(cacheErr).Str("job_id", jobID).Msg("Failed to cache job metadata in Redis")
 	}
 
 	message := jobs.ImageJobMessage{
@@ -139,8 +139,8 @@ func (s *ImageService) RefineJob(
 	metadata.IterationNum++
 	combinedPrompt := strings.Join(metadata.Prompts, ". ")
 
-	if err := s.redisClient.SetJobMetadata(ctx, jobID, metadata); err != nil {
-		return 0, fmt.Errorf("update job metadata: %w", err)
+	if cacheErr := s.redisClient.SetJobMetadata(ctx, jobID, metadata); cacheErr != nil {
+		return 0, fmt.Errorf("update job metadata: %w", cacheErr)
 	}
 
 	message := jobs.ImageJobMessage{

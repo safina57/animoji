@@ -77,8 +77,8 @@ func (v *ImageValidator) validateExtension(path string) error {
 // ValidateMIMEType checks if MIME type is allowed
 func (v *ImageValidator) ValidateMIMEType(mimeType string) error {
 	if slices.Contains(v.config.AllowedMIMETypes, mimeType) {
-			return nil
-		}
+		return nil
+	}
 
 	return fmt.Errorf("%w: %s (allowed: %v)",
 		ErrInvalidMIMEType, mimeType, v.config.AllowedMIMETypes)

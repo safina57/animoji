@@ -47,7 +47,7 @@ func (c *MinIOClient) DownloadFile(ctx context.Context, bucketName, objectKey st
 	if err != nil {
 		return nil, fmt.Errorf("failed to get object: %w", err)
 	}
-	defer object.Close()
+	defer func() { _ = object.Close() }()
 
 	// Read all data into memory
 	data, err := io.ReadAll(object)
@@ -127,5 +127,3 @@ func (c *MinIOClient) GetPublicURL(bucketName, objectKey string) string {
 	}
 	return fmt.Sprintf("%s/%s/%s", c.publicBaseURL, bucketName, strings.Join(segments, "/"))
 }
-
-

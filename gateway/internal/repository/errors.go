@@ -9,10 +9,10 @@ import (
 
 // Custom error types for better error handling
 var (
-	ErrNotFound          = errors.New("record not found")
-	ErrDuplicateKey      = errors.New("duplicate key violation")
+	ErrNotFound            = errors.New("record not found")
+	ErrDuplicateKey        = errors.New("duplicate key violation")
 	ErrForeignKeyViolation = errors.New("foreign key constraint violation")
-	ErrInvalidInput      = errors.New("invalid input")
+	ErrInvalidInput        = errors.New("invalid input")
 )
 
 // NotFoundError represents a specific record not found error

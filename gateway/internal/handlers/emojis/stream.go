@@ -49,7 +49,7 @@ func (h *EmojiHandler) HandleEmojiStatusStream(
 
 		ctx := r.Context()
 
-		fmt.Fprintf(w, ": connected\n\n")
+		_, _ = fmt.Fprintf(w, ": connected\n\n")
 		flusher.Flush()
 
 		// Register FIRST so no future events are missed while we seed from Redis.
@@ -183,6 +183,6 @@ func sendSSEEvent(w http.ResponseWriter, flusher http.Flusher, data any) {
 		logger.Error().Err(err).Msg("Failed to marshal SSE event data")
 		return
 	}
-	fmt.Fprintf(w, "data: %s\n\n", jsonData)
+	_, _ = fmt.Fprintf(w, "data: %s\n\n", jsonData)
 	flusher.Flush()
 }

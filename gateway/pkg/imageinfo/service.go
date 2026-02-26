@@ -38,8 +38,8 @@ func (p *ImageProcessor) ProcessReader(r io.Reader, filename string, size int64)
 	}
 
 	// Step 2: Validate buffered content (size, extension, MIME type)
-	if err := p.validator.ValidateBufferedContent(data, filename, size); err != nil {
-		return nil, err
+	if validateErr := p.validator.ValidateBufferedContent(data, filename, size); validateErr != nil {
+		return nil, validateErr
 	}
 
 	// Step 3: Extract metadata
@@ -58,7 +58,7 @@ func (p *ImageProcessor) ProcessReader(r io.Reader, filename string, size int64)
 		targetW, targetH := p.validator.ClampDimensions(info.Width, info.Height)
 
 		format, _ := imaging.FormatFromFilename("x." + info.Extension)
-		
+
 		resized, err := resizeImageData(info.Data, targetW, targetH, format)
 		if err != nil {
 			return nil, fmt.Errorf("failed to resize image to valid dimensions: %w", err)

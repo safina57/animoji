@@ -8,13 +8,13 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/safina57/animoji/gateway/internal/cache"
 	"github.com/safina57/animoji/gateway/internal/constants"
 	"github.com/safina57/animoji/gateway/internal/dto"
 	"github.com/safina57/animoji/gateway/internal/jobs"
 	"github.com/safina57/animoji/gateway/internal/messaging"
 	"github.com/safina57/animoji/gateway/internal/models"
 	"github.com/safina57/animoji/gateway/internal/repository"
-	"github.com/safina57/animoji/gateway/internal/cache"
 	"github.com/safina57/animoji/gateway/internal/services/storage"
 	"github.com/safina57/animoji/gateway/pkg/logger"
 )
@@ -73,8 +73,8 @@ func (s *EmojiService) SubmitEmojiJob(
 		CompletedVariants: []cache.EmojiVariantResult{},
 		CreatedAt:         time.Now(),
 	}
-	if err := s.redisClient.SetEmojiJobMetadata(ctx, jobID, metadata); err != nil {
-		logger.Error().Err(err).Str("job_id", jobID).Msg("Failed to cache emoji job metadata in Redis")
+	if cacheErr := s.redisClient.SetEmojiJobMetadata(ctx, jobID, metadata); cacheErr != nil {
+		logger.Error().Err(cacheErr).Str("job_id", jobID).Msg("Failed to cache emoji job metadata in Redis")
 	}
 
 	msg := jobs.EmojiJobMessage{
@@ -104,8 +104,8 @@ func (s *EmojiService) SubmitEmojiJob(
 
 // PublishEmojiVariantResult holds the response for a successful emoji variant publish.
 type PublishEmojiVariantResult struct {
-	Emotion   string
-	URL       string
+	Emotion          string
+	URL              string
 	AlreadyPublished bool
 }
 

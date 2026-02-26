@@ -8,14 +8,14 @@ import (
 
 // EmojiPack represents a published set of emoji variants for a job.
 type EmojiPack struct {
-	ID        uuid.UUID      `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
-	UserID    uuid.UUID      `gorm:"type:uuid;not null;index" json:"user_id"`
-	JobID     string         `gorm:"uniqueIndex;not null" json:"job_id"`
-	CreatedAt time.Time      `gorm:"not null;default:now()" json:"created_at"`
+	ID        uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+	UserID    uuid.UUID `gorm:"type:uuid;not null;index" json:"user_id"`
+	JobID     string    `gorm:"uniqueIndex;not null" json:"job_id"`
+	CreatedAt time.Time `gorm:"not null;default:now()" json:"created_at"`
 
 	// Relationships
-	User     User            `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"user,omitempty"`
-	Variants []EmojiVariant  `gorm:"foreignKey:PackID;constraint:OnDelete:CASCADE" json:"variants,omitempty"`
+	User     User           `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"user,omitempty"`
+	Variants []EmojiVariant `gorm:"foreignKey:PackID;constraint:OnDelete:CASCADE" json:"variants,omitempty"`
 }
 
 func (EmojiPack) TableName() string { return "emoji_packs" }
