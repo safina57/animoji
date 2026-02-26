@@ -1,14 +1,14 @@
-import type { CreateMode } from "@customTypes/generation";
+import type { CreateMode } from "@customTypes/generation"
 
 interface ModeToggleProps {
-  mode: CreateMode;
-  onToggle: () => void;
-  currentLabel: string;
-  switchLabel: string;
+  mode: CreateMode
+  onToggle: () => void
+  currentLabel: string
+  switchLabel: string
 }
 
 export default function ModeToggle({ mode, onToggle, currentLabel, switchLabel }: ModeToggleProps) {
-  const isAnime = mode === "anime";
+  const isAnime = mode === "anime"
 
   return (
     <div className="relative group/mode shrink-0">
@@ -31,5 +31,5 @@ export default function ModeToggle({ mode, onToggle, currentLabel, switchLabel }
         <div className="absolute left-3 top-full w-2 h-2 bg-slate-900 dark:bg-slate-800 rotate-45 border-r border-b border-white/10 -mt-1" />
       </div>
     </div>
-  );
+  )
 }

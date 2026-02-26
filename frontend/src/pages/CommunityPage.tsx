@@ -1,77 +1,77 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useAppDispatch, useAppSelector } from "@hooks/redux";
-import { loadFeed, loadMoreFeed } from "@store/slices/feedSlice";
-import { imageService } from "@services/imageService";
-import { ImageCard } from "@components/community/ImageCard";
-import { ImageDetailDialog } from "@components/community/ImageDetailDialog";
-import CommunityHeader from "@components/community/CommunityHeader";
-import FeedEmptyState from "@components/community/FeedEmptyState";
-import FeedEndMarker from "@components/community/FeedEndMarker";
-import SkeletonGrid from "@components/community/SkeletonGrid";
-import SeigaihaOverlay from "@lib/decorations/SeigaihaOverlay/SeigaihaOverlay";
-import type { ImageFeedItem } from "@customTypes/image";
+import { useCallback, useEffect, useRef, useState } from "react"
+import { useAppDispatch, useAppSelector } from "@hooks/redux"
+import { loadFeed, loadMoreFeed } from "@store/slices/feedSlice"
+import { imageService } from "@services/imageService"
+import { ImageCard } from "@components/community/ImageCard"
+import { ImageDetailDialog } from "@components/community/ImageDetailDialog"
+import CommunityHeader from "@components/community/CommunityHeader"
+import FeedEmptyState from "@components/community/FeedEmptyState"
+import FeedEndMarker from "@components/community/FeedEndMarker"
+import SkeletonGrid from "@components/community/SkeletonGrid"
+import SeigaihaOverlay from "@lib/decorations/SeigaihaOverlay/SeigaihaOverlay"
+import type { ImageFeedItem } from "@customTypes/image"
 
 const loadingMoreSpinner = (
   <div className="flex justify-center mt-8">
     <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
   </div>
-);
+)
 
 export default function CommunityPage() {
-  const dispatch = useAppDispatch();
-  const { images, hasMore, isLoading, isLoadingMore } = useAppSelector((s) => s.feed);
+  const dispatch = useAppDispatch()
+  const { images, hasMore, isLoading, isLoadingMore } = useAppSelector((s) => s.feed)
 
-  const [selectedImage, setSelectedImage] = useState<ImageFeedItem | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<ImageFeedItem | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
 
-  const sentinelRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null)
 
   // Initial load + deep-link: open the dialog for ?image={id} on page load
   useEffect(() => {
-    dispatch(loadFeed());
+    dispatch(loadFeed())
 
-    const imageId = new URLSearchParams(window.location.search).get("image");
+    const imageId = new URLSearchParams(window.location.search).get("image")
     if (imageId) {
       imageService
         .fetchImageDetail(imageId)
         .then((img) => {
-          setSelectedImage(img);
-          setDialogOpen(true);
+          setSelectedImage(img)
+          setDialogOpen(true)
         })
         .catch(() => {
           // Unknown or private image — silently ignore
-        });
+        })
     }
-  }, [dispatch]);
+  }, [dispatch])
 
   // Infinite scroll sentinel
   useEffect(() => {
-    const el = sentinelRef.current;
-    if (!el) return;
+    const el = sentinelRef.current
+    if (!el) return
 
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !isLoadingMore && !isLoading) {
-          dispatch(loadMoreFeed());
+          dispatch(loadMoreFeed())
         }
       },
       { rootMargin: "100px" }
-    );
+    )
 
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [dispatch, hasMore, isLoading, isLoadingMore]);
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [dispatch, hasMore, isLoading, isLoadingMore])
 
   const handleCardClick = useCallback((item: ImageFeedItem) => {
-    setSelectedImage(item);
-    setDialogOpen(true);
-    window.history.replaceState({}, "", `?image=${item.id}`);
-  }, []);
+    setSelectedImage(item)
+    setDialogOpen(true)
+    window.history.replaceState({}, "", `?image=${item.id}`)
+  }, [])
 
   const handleDialogClose = useCallback(() => {
-    setDialogOpen(false);
-    window.history.replaceState({}, "", window.location.pathname);
-  }, []);
+    setDialogOpen(false)
+    window.history.replaceState({}, "", window.location.pathname)
+  }, [])
 
   return (
     <div className="flex-1 bg-background-light dark:bg-background-dark overflow-y-auto relative">
@@ -99,5 +99,5 @@ export default function CommunityPage() {
 
       <ImageDetailDialog item={selectedImage} open={dialogOpen} onClose={handleDialogClose} />
     </div>
-  );
+  )
 }

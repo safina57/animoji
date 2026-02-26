@@ -1,12 +1,9 @@
 interface SakuraTreeIconProps {
-  position: "left" | "right";
-  className?: string;
+  position: "left" | "right"
+  className?: string
 }
 
-export default function SakuraTreeIcon({
-  position,
-  className,
-}: SakuraTreeIconProps) {
+export default function SakuraTreeIcon({ position, className }: SakuraTreeIconProps) {
   return (
     <svg
       width="200"
@@ -16,13 +13,7 @@ export default function SakuraTreeIcon({
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
-        <linearGradient
-          id={`trunkGradient${position}`}
-          x1="0%"
-          y1="0%"
-          x2="100%"
-          y2="0%"
-        >
+        <linearGradient id={`trunkGradient${position}`} x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="#3E2723" />
           <stop offset="40%" stopColor="#5D4037" />
           <stop offset="100%" stopColor="#3E2723" />
@@ -66,5 +57,5 @@ export default function SakuraTreeIcon({
         fill="none"
       />
     </svg>
-  );
+  )
 }

@@ -1,53 +1,52 @@
-import { useState } from 'react';
-import { Check, Link, Download } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle } from '@lib/ui/dialog';
-import { Avatar, AvatarFallback, AvatarImage } from '@lib/ui/avatar';
-import SeigaihaOverlay from '@lib/decorations/SeigaihaOverlay/SeigaihaOverlay';
-import TempleBuilding from '@lib/decorations/TempleBuilding/TempleBuilding';
-import { useAppSelector } from '@hooks/redux';
-import { cn } from '@lib/utils';
-import type { EmojiPackGalleryItem, EmojiVariantGalleryItem } from '@customTypes/emoji';
+import { useState } from "react"
+import { Check, Link, Download } from "lucide-react"
+import { Dialog, DialogContent, DialogTitle } from "@lib/ui/dialog"
+import { Avatar, AvatarFallback, AvatarImage } from "@lib/ui/avatar"
+import SeigaihaOverlay from "@lib/decorations/SeigaihaOverlay/SeigaihaOverlay"
+import TempleBuilding from "@lib/decorations/TempleBuilding/TempleBuilding"
+import { useAppSelector } from "@hooks/redux"
+import { cn } from "@lib/utils"
+import type { EmojiPackGalleryItem, EmojiVariantGalleryItem } from "@customTypes/emoji"
 
 interface EmojiPackDetailDialogProps {
-  pack: EmojiPackGalleryItem | null;
-  open: boolean;
-  onClose: () => void;
+  pack: EmojiPackGalleryItem | null
+  open: boolean
+  onClose: () => void
 }
 
 function capitalize(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1);
+  return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  return new Date(iso).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })
 }
 
 async function downloadVariant(url: string, emotion: string) {
   try {
-    const res = await fetch(url);
-    const blob = await res.blob();
-    const objectUrl = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = objectUrl;
-    a.download = `sticker-${emotion}.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(objectUrl);
+    const res = await fetch(url)
+    const blob = await res.blob()
+    const objectUrl = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = objectUrl
+    a.download = `sticker-${emotion}.png`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(objectUrl)
   } catch {
-    window.open(url, '_blank');
+    window.open(url, "_blank")
   }
 }
 
-
 export function EmojiPackDetailDialog({ pack, open, onClose }: EmojiPackDetailDialogProps) {
-  const user = useAppSelector((s) => s.auth.user);
+  const user = useAppSelector((s) => s.auth.user)
 
-  if (!pack) return null;
+  if (!pack) return null
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -80,14 +79,12 @@ export function EmojiPackDetailDialog({ pack, open, onClose }: EmojiPackDetailDi
               {/* User info */}
               <div className="flex items-center gap-3">
                 <Avatar size="lg">
-                  <AvatarImage src={user?.avatar_url ?? ''} alt={user?.name ?? ''} />
-                  <AvatarFallback>
-                    {user?.name?.charAt(0).toUpperCase() ?? '?'}
-                  </AvatarFallback>
+                  <AvatarImage src={user?.avatar_url ?? ""} alt={user?.name ?? ""} />
+                  <AvatarFallback>{user?.name?.charAt(0).toUpperCase() ?? "?"}</AvatarFallback>
                 </Avatar>
                 <div className="min-w-0">
                   <p className="font-display font-semibold text-slate-900 dark:text-white leading-tight truncate">
-                    {user?.name ?? 'You'}
+                    {user?.name ?? "You"}
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {formatDate(pack.created_at)}
@@ -103,7 +100,7 @@ export function EmojiPackDetailDialog({ pack, open, onClose }: EmojiPackDetailDi
                   Sticker Pack
                 </p>
                 <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-                  {pack.variants.length} emotion{pack.variants.length !== 1 ? 's' : ''}
+                  {pack.variants.length} emotion{pack.variants.length !== 1 ? "s" : ""}
                 </p>
                 <div className="flex flex-wrap gap-1.5 pt-1">
                   {pack.variants.map((v) => (
@@ -129,33 +126,33 @@ export function EmojiPackDetailDialog({ pack, open, onClose }: EmojiPackDetailDi
         </div>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
 /* ── Single variant card inside the dialog ── */
 function VariantItem({ variant }: { variant: EmojiVariantGalleryItem }) {
-  const [loaded, setLoaded] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [downloading, setDownloading] = useState(false);
+  const [loaded, setLoaded] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [downloading, setDownloading] = useState(false)
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(variant.url).catch(() => {});
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    await navigator.clipboard.writeText(variant.url).catch(() => {})
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   async function handleDownload() {
-    setDownloading(true);
-    await downloadVariant(variant.url, variant.emotion);
-    setDownloading(false);
+    setDownloading(true)
+    await downloadVariant(variant.url, variant.emotion)
+    setDownloading(false)
   }
 
   /* Exact button style lifted from ImageDetailDialog's action overlay */
   const btnBase =
-    'flex items-center gap-1.5 px-3 py-2 rounded-full backdrop-blur-sm shadow-lg text-sm font-medium border transition-all';
+    "flex items-center gap-1.5 px-3 py-2 rounded-full backdrop-blur-sm shadow-lg text-sm font-medium border transition-all"
   const btnIdle =
-    'bg-white/90 dark:bg-paper-dark/90 text-primary border-primary/10 hover:bg-primary hover:text-white hover:border-transparent';
-  const btnActive = 'bg-primary/90 text-white border-transparent';
+    "bg-white/90 dark:bg-paper-dark/90 text-primary border-primary/10 hover:bg-primary hover:text-white hover:border-transparent"
+  const btnActive = "bg-primary/90 text-white border-transparent"
 
   return (
     <div className="group relative aspect-square rounded-xl overflow-hidden bg-white dark:bg-slate-900 flex items-center justify-center">
@@ -166,8 +163,8 @@ function VariantItem({ variant }: { variant: EmojiVariantGalleryItem }) {
         src={variant.url}
         alt={`${variant.emotion} sticker`}
         className={cn(
-          'absolute inset-0 w-full h-full object-contain p-4 transition-opacity duration-300',
-          loaded ? 'opacity-100' : 'opacity-0'
+          "absolute inset-0 w-full h-full object-contain p-4 transition-opacity duration-300",
+          loaded ? "opacity-100" : "opacity-0"
         )}
         onLoad={() => setLoaded(true)}
       />
@@ -177,8 +174,6 @@ function VariantItem({ variant }: { variant: EmojiVariantGalleryItem }) {
 
       {/* Action row — split left/right, matches ImageDetailDialog overlay layout */}
       <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-
-
         {/* Right: copy + download */}
         <div className="flex items-center gap-1.5">
           <button
@@ -188,13 +183,13 @@ function VariantItem({ variant }: { variant: EmojiVariantGalleryItem }) {
             aria-label={`Copy link for ${variant.emotion}`}
           >
             {copied ? <Check className="w-3.5 h-3.5" /> : <Link className="w-3.5 h-3.5" />}
-            <span>{copied ? 'Copied!' : 'Copy'}</span>
+            <span>{copied ? "Copied!" : "Copy"}</span>
           </button>
           <button
             type="button"
             onClick={handleDownload}
             disabled={downloading}
-            className={cn(btnBase, btnIdle, 'disabled:opacity-60')}
+            className={cn(btnBase, btnIdle, "disabled:opacity-60")}
             aria-label={`Download ${variant.emotion} sticker`}
           >
             <Download className="w-3.5 h-3.5" />
@@ -202,5 +197,5 @@ function VariantItem({ variant }: { variant: EmojiVariantGalleryItem }) {
         </div>
       </div>
     </div>
-  );
+  )
 }

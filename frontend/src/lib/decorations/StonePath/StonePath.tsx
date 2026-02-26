@@ -14,5 +14,5 @@ export default function StonePath() {
         <div className="absolute top-1 right-6 w-12 h-4 bg-white opacity-10 rounded-full blur-[1px]"></div>
       </div>
     </div>
-  );
+  )
 }

@@ -1,6 +1,6 @@
 """NATS client wrapper for message queue operations."""
 
-from typing import Callable, Awaitable
+from collections.abc import Awaitable, Callable
 
 import nats
 from nats.aio.client import Client as NATSClient
@@ -57,10 +57,10 @@ class NatsClient:
 
         try:
             await self.client.subscribe(subject, cb=callback)
-            logger.info(f"Subscribed to NATS subject", extra={"subject": subject})
+            logger.info("Subscribed to NATS subject", extra={"subject": subject})
         except Exception as e:
             logger.error(
-                f"Failed to subscribe to NATS subject",
+                "Failed to subscribe to NATS subject",
                 extra={"subject": subject, "error": str(e)},
             )
             raise
@@ -78,10 +78,10 @@ class NatsClient:
 
         try:
             await self.client.publish(subject, data)
-            logger.debug(f"Published to NATS subject", extra={"subject": subject})
+            logger.debug("Published to NATS subject", extra={"subject": subject})
         except Exception as e:
             logger.error(
-                f"Failed to publish to NATS subject",
+                "Failed to publish to NATS subject",
                 extra={"subject": subject, "error": str(e)},
             )
             raise

@@ -1,9 +1,9 @@
-import ToriiGateIcon from "@lib/decorations/ToriiGateIcon/ToriiGateIcon";
-import { GALLERY_SECTION } from "@store/slices/gallerySlice";
-import type { GalleryVisibility } from "@store/slices/gallerySlice";
+import ToriiGateIcon from "@lib/decorations/ToriiGateIcon/ToriiGateIcon"
+import { GALLERY_SECTION } from "@store/slices/gallerySlice"
+import type { GalleryVisibility } from "@store/slices/gallerySlice"
 
 interface GalleryEmptyStateProps {
-  visibility: GalleryVisibility;
+  visibility: GalleryVisibility
 }
 
 export default function GalleryEmptyState({ visibility }: GalleryEmptyStateProps) {
@@ -32,5 +32,5 @@ export default function GalleryEmptyState({ visibility }: GalleryEmptyStateProps
         )}
       </div>
     </div>
-  );
+  )
 }

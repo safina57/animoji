@@ -28,5 +28,5 @@ export default function ToriiGate() {
         <div className="w-6 h-3 bg-[var(--color-stone-gray)] rounded-sm shadow"></div>
       </div>
     </div>
-  );
+  )
 }

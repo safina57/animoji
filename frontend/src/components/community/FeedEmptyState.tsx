@@ -1,4 +1,4 @@
-import ToriiGateIcon from "@lib/decorations/ToriiGateIcon/ToriiGateIcon";
+import ToriiGateIcon from "@lib/decorations/ToriiGateIcon/ToriiGateIcon"
 
 export default function FeedEmptyState() {
   return (
@@ -13,5 +13,5 @@ export default function FeedEmptyState() {
         </p>
       </div>
     </div>
-  );
+  )
 }

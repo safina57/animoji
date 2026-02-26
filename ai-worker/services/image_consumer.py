@@ -2,26 +2,27 @@
 
 import json
 import logging
+
 from nats.aio.msg import Msg
 
+from core.logger import get_logger
 from core.minio_client import MinioClient, get_minio_client
 from core.nats_client import NatsClient, get_nats_client
 from core.settings import Settings, get_settings
 from models.job import ImageJobMessage
-from core.logger import get_logger
 from services.image_processor import ImageProcessor, get_image_processor
 
 
 class ImageJobConsumer:
     """
     Consumes job messages from NATS queue and processes them.
-    
+
     Workflow:
     1. Receive message from subject
     2. Download original image from MinIO
     3. Process image with AI model
     4. Upload result to MinIO
-    
+
     """
 
     def __init__(
@@ -34,7 +35,7 @@ class ImageJobConsumer:
     ):
         """
         Initialize the job consumer with injected dependencies.
-        
+
         Args:
             nats_client: NATS messaging client
             minio_client: MinIO storage client
@@ -66,7 +67,9 @@ class ImageJobConsumer:
             )
 
         except Exception as e:
-            self.logger.error(f"Failed to start job consumer: {e}", extra={"error": str(e)})
+            self.logger.error(
+                f"Failed to start job consumer: {e}", extra={"error": str(e)}
+            )
             raise
 
     async def _publish_status(
@@ -99,7 +102,12 @@ class ImageJobConsumer:
 
             self.logger.info(
                 "Published status to NATS",
-                extra={"job_id": job_id, "status": status, "iteration_num": iteration_num, "subject": subject},
+                extra={
+                    "job_id": job_id,
+                    "status": status,
+                    "iteration_num": iteration_num,
+                    "subject": subject,
+                },
             )
         except Exception as e:
             self.logger.error(
@@ -110,7 +118,7 @@ class ImageJobConsumer:
     async def _handle_message(self, msg: Msg) -> None:
         """
         Handle incoming NATS message.
-        
+
         Args:
             msg: NATS message containing job data
         """
@@ -154,12 +162,22 @@ class ImageJobConsumer:
             output_key = f"tmp/{job_id}/result_v{job_message.iteration_num}.png"
             self.logger.info(
                 "Uploading processed image",
-                extra={"job_id": job_id, "output_key": output_key, "iteration_num": job_message.iteration_num},
+                extra={
+                    "job_id": job_id,
+                    "output_key": output_key,
+                    "iteration_num": job_message.iteration_num,
+                },
             )
-            await self.minio_client.upload_file(output_key, processed_data, content_type)
+            await self.minio_client.upload_file(
+                output_key, processed_data, content_type
+            )
 
             await self._publish_status(
-                job_id, "completed", output_key, job_message.iteration_num, result.response_id
+                job_id,
+                "completed",
+                output_key,
+                job_message.iteration_num,
+                result.response_id,
             )
 
             self.logger.info(
@@ -185,6 +203,7 @@ class ImageJobConsumer:
             )
             if job_id:
                 await self._publish_status(job_id, "failed")
+
 
 _job_consumer: ImageJobConsumer | None = None
 

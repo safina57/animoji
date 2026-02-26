@@ -1,29 +1,29 @@
-import ImageCompareSlider from "@components/generation/ImageCompareSlider";
-import PublishButton from "@components/generation/PublishButton";
-import type { GenerationResult } from "@customTypes/generation";
+import ImageCompareSlider from "@components/generation/ImageCompareSlider"
+import PublishButton from "@components/generation/PublishButton"
+import type { GenerationResult } from "@customTypes/generation"
 
 interface ResultItemProps {
-  result: GenerationResult;
-  index: number;
-  isLatest: boolean;
-  jobId: string | null;
+  result: GenerationResult
+  index: number
+  isLatest: boolean
+  jobId: string | null
 }
 
 export default function ResultItem({ result, index, isLatest, jobId }: ResultItemProps) {
-  const timeAgo = formatTimeAgo(result.timestamp);
+  const timeAgo = formatTimeAgo(result.timestamp)
 
   async function handleDownload(url: string, iterationNum: number) {
     try {
-      const res = await fetch(url);
-      const blob = await res.blob();
-      const objectUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = objectUrl;
-      a.download = `animoji-take-${iterationNum}.png`;
-      a.click();
-      URL.revokeObjectURL(objectUrl);
+      const res = await fetch(url)
+      const blob = await res.blob()
+      const objectUrl = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = objectUrl
+      a.download = `animoji-take-${iterationNum}.png`
+      a.click()
+      URL.revokeObjectURL(objectUrl)
     } catch {
-      window.open(url, "_blank", "noopener,noreferrer");
+      window.open(url, "_blank", "noopener,noreferrer")
     }
   }
 
@@ -54,9 +54,7 @@ export default function ResultItem({ result, index, isLatest, jobId }: ResultIte
                 </span>
               )}
             </div>
-            <p className="text-sm text-slate-600 dark:text-slate-400 italic">
-              "{result.prompt}"
-            </p>
+            <p className="text-sm text-slate-600 dark:text-slate-400 italic">"{result.prompt}"</p>
           </div>
         </div>
 
@@ -71,7 +69,10 @@ export default function ResultItem({ result, index, isLatest, jobId }: ResultIte
 
           {/* Download button — visible on hover */}
           <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <ActionButton icon="download" onClick={() => handleDownload(result.generatedImageUrl, result.iterationNum)} />
+            <ActionButton
+              icon="download"
+              onClick={() => handleDownload(result.generatedImageUrl, result.iterationNum)}
+            />
           </div>
 
           {/* Publish button — always visible, latest only */}
@@ -83,7 +84,7 @@ export default function ResultItem({ result, index, isLatest, jobId }: ResultIte
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 function ActionButton({ icon, onClick }: { icon: string; onClick?: () => void }) {
@@ -94,16 +95,16 @@ function ActionButton({ icon, onClick }: { icon: string; onClick?: () => void })
     >
       <span className="material-symbols-outlined text-lg">{icon}</span>
     </button>
-  );
+  )
 }
 
 function formatTimeAgo(timestamp: number): string {
-  const seconds = Math.floor((Date.now() - timestamp) / 1000);
-  if (seconds < 60) return "just now";
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  const seconds = Math.floor((Date.now() - timestamp) / 1000)
+  if (seconds < 60) return "just now"
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  return `${days}d ago`
 }

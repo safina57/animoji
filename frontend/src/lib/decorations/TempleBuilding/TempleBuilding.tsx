@@ -1,5 +1,5 @@
 interface TempleBuildingProps {
-  className?: string;
+  className?: string
 }
 
 export default function TempleBuilding({ className }: TempleBuildingProps) {
@@ -34,5 +34,5 @@ export default function TempleBuilding({ className }: TempleBuildingProps) {
       <rect x="5" y="101" width="110" height="5" rx="2" fill="currentColor" />
       <rect x="0" y="106" width="120" height="5" rx="2" fill="currentColor" />
     </svg>
-  );
+  )
 }

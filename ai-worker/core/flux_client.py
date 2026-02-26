@@ -6,8 +6,8 @@ import logging
 
 import httpx
 
-from core.settings import get_settings
 from core.logger import get_logger
+from core.settings import get_settings
 from models.image_generation import FluxRequest
 
 _MAX_RETRIES = 3
@@ -79,20 +79,20 @@ class FluxClient:
                 "FLUX API request failed",
                 extra={
                     "status_code": response.status_code,
-                    "response_body": response.text
+                    "response_body": response.text,
                 },
             )
         response.raise_for_status()
         data = response.json()
 
         # Log response structure without the bulky base64 image data
-        sanitized = {
-            k: v for k, v in data.items() if k != "data"
-        }
+        sanitized = {k: v for k, v in data.items() if k != "data"}
         if "data" in data and isinstance(data["data"], list):
             sanitized["data"] = [
-                {k: (f"<{len(v)} chars>" if k == "b64_json" else v)
-                 for k, v in item.items()}
+                {
+                    k: (f"<{len(v)} chars>" if k == "b64_json" else v)
+                    for k, v in item.items()
+                }
                 for item in data["data"]
             ]
         self.logger.info(
@@ -101,6 +101,7 @@ class FluxClient:
         )
 
         return data
+
 
 _flux_client: FluxClient | None = None
 

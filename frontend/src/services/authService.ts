@@ -1,10 +1,10 @@
-import type { User } from "@customTypes/auth";
+import type { User } from "@customTypes/auth"
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL
 
 export const authService = {
   loginWithGoogle: () => {
-    window.location.href = `${API_URL}/auth/google/login`;
+    window.location.href = `${API_URL}/auth/google/login`
   },
 
   getMe: async (): Promise<User> => {
@@ -14,13 +14,13 @@ export const authService = {
         "Content-Type": "application/json",
       },
       credentials: "include", // Send cookies with request
-    });
+    })
 
     if (!response.ok) {
-      throw new Error("Failed to fetch user profile");
+      throw new Error("Failed to fetch user profile")
     }
 
-    return response.json();
+    return response.json()
   },
 
   logout: async (): Promise<void> => {
@@ -30,10 +30,10 @@ export const authService = {
         "Content-Type": "application/json",
       },
       credentials: "include", // Send cookies with request
-    });
+    })
 
     if (!response.ok) {
-      throw new Error("Failed to logout");
+      throw new Error("Failed to logout")
     }
   },
-};
+}

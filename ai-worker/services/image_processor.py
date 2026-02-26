@@ -2,26 +2,26 @@
 
 import base64
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from pydantic_ai import Agent, BinaryContent
 from pydantic_ai.models.openai import OpenAIResponsesModelSettings
 
 from core.flux_client import FluxClient, get_flux_client
+from core.logger import get_logger
+from core.prompt_agent import get_prompt_agent
 from core.settings import Settings, get_settings
 from models.image_generation import (
     EnhancedPrompt,
     FluxRequest,
     GenerationResult,
 )
-from core.logger import get_logger
-from core.prompt_agent import get_prompt_agent
 
 
 class ImageProcessor:
     """
     Orchestrates the image-generation pipeline
-    
+
     """
 
     def __init__(
@@ -63,8 +63,7 @@ class ImageProcessor:
         """
         # ── Stage 1: prompt enhancement ──────────────────────────────
         self.logger.info(
-            "Enhancing prompt",
-            extra={"job_id": job_id, "mime_type": input_mime_type}
+            "Enhancing prompt", extra={"job_id": job_id, "mime_type": input_mime_type}
         )
 
         # Build model settings — pass previous response ID when refining an existing job
@@ -77,9 +76,14 @@ class ImageProcessor:
         agent_input = (
             user_prompt
             if previous_response_id
-            else [user_prompt, BinaryContent(data=input_image_data, media_type=input_mime_type)]
+            else [
+                user_prompt,
+                BinaryContent(data=input_image_data, media_type=input_mime_type),
+            ]
         )
-        agent_result = await self.prompt_agent.run(agent_input, model_settings=model_settings)
+        agent_result = await self.prompt_agent.run(
+            agent_input, model_settings=model_settings
+        )
         enhanced: EnhancedPrompt = agent_result.output
 
         # Extract response ID for conversation continuity in future iterations
@@ -97,11 +101,13 @@ class ImageProcessor:
 
         # ── Stage 2: FLUX image generation ───────────────────────────
         # Encode input image as base64 for FLUX API
-        input_image_b64 = base64.b64encode(input_image_data).decode('utf-8')
+        input_image_b64 = base64.b64encode(input_image_data).decode("utf-8")
 
         # Use provided dimensions or fall back to settings defaults
         width = target_width if target_width is not None else self.settings.flux_width
-        height = target_height if target_height is not None else self.settings.flux_height
+        height = (
+            target_height if target_height is not None else self.settings.flux_height
+        )
 
         flux_request = FluxRequest(
             prompt=enhanced.enhanced_text,
@@ -132,9 +138,10 @@ class ImageProcessor:
                     "height": flux_request.height,
                     "input_image_size": len(input_image_b64),
                 },
-                "generated_at": datetime.now(timezone.utc).isoformat(),
+                "generated_at": datetime.now(UTC).isoformat(),
             },
         )
+
 
 _image_processor: ImageProcessor | None = None
 

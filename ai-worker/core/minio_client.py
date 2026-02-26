@@ -32,7 +32,9 @@ class MinioClient:
                 extra={"endpoint": settings.minio_endpoint, "bucket": self.bucket},
             )
         except Exception as e:
-            logger.error(f"Failed to initialize MinIO client: {e}", extra={"error": str(e)})
+            logger.error(
+                f"Failed to initialize MinIO client: {e}", extra={"error": str(e)}
+            )
             raise
 
     def _download_sync(self, key: str) -> bytes:
@@ -46,7 +48,7 @@ class MinioClient:
     async def download_file(self, key: str) -> bytes:
         """
         Download a file from MinIO asynchronously.
-        
+
         Offloads blocking I/O to thread pool to avoid blocking event loop.
 
         Args:
@@ -60,12 +62,14 @@ class MinioClient:
         """
         try:
             data = await asyncio.to_thread(self._download_sync, key)
-            logger.info(f"Downloaded file from MinIO", extra={"key": key, "size": len(data)})
+            logger.info(
+                "Downloaded file from MinIO", extra={"key": key, "size": len(data)}
+            )
             return data
 
         except S3Error as e:
             logger.error(
-                f"Failed to download from MinIO",
+                "Failed to download from MinIO",
                 extra={"key": key, "error": str(e), "code": e.code},
             )
             raise
@@ -84,10 +88,12 @@ class MinioClient:
         )
         return key
 
-    async def upload_file(self, key: str, data: bytes, content_type: str = "image/png") -> str:
+    async def upload_file(
+        self, key: str, data: bytes, content_type: str = "image/png"
+    ) -> str:
         """
         Upload a file to MinIO asynchronously.
-        
+
         Offloads blocking I/O to thread pool to avoid blocking event loop.
 
         Args:
@@ -106,14 +112,14 @@ class MinioClient:
             await asyncio.to_thread(self._upload_sync, key, data, content_type)
 
             logger.info(
-                f"Uploaded file to MinIO",
+                "Uploaded file to MinIO",
                 extra={"key": key, "size": length, "content_type": content_type},
             )
             return key
 
         except S3Error as e:
             logger.error(
-                f"Failed to upload to MinIO",
+                "Failed to upload to MinIO",
                 extra={"key": key, "error": str(e), "code": e.code},
             )
             raise

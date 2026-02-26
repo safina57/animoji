@@ -1,13 +1,13 @@
-import { useAppDispatch, useAppSelector } from "@hooks/redux";
-import { resetGeneration } from "@store/slices/generationSlice";
-import ResultItem from "@components/generation/ResultItem";
+import { useAppDispatch, useAppSelector } from "@hooks/redux"
+import { resetGeneration } from "@store/slices/generationSlice"
+import ResultItem from "@components/generation/ResultItem"
 
 export default function ResultView() {
-  const dispatch = useAppDispatch();
-  const results = useAppSelector((s) => s.generation.results);
-  const jobId = useAppSelector((s) => s.generation.jobId);
+  const dispatch = useAppDispatch()
+  const results = useAppSelector((s) => s.generation.results)
+  const jobId = useAppSelector((s) => s.generation.jobId)
 
-  if (results.length === 0) return null;
+  if (results.length === 0) return null
 
   return (
     <div className="flex-1 overflow-y-auto custom-scrollbar">
@@ -45,5 +45,5 @@ export default function ResultView() {
         </div>
       </div>
     </div>
-  );
+  )
 }

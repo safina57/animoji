@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react"
 
 interface ImageCompareSliderProps {
-  leftImage: string;
-  rightImage: string;
-  leftLabel?: string;
-  rightLabel?: string;
-  initialPosition?: number;
+  leftImage: string
+  rightImage: string
+  leftLabel?: string
+  rightLabel?: string
+  initialPosition?: number
 }
 
 export default function ImageCompareSlider({
@@ -15,65 +15,62 @@ export default function ImageCompareSlider({
   rightLabel = "Anime",
   initialPosition = 50,
 }: ImageCompareSliderProps) {
-  const [position, setPosition] = useState(initialPosition);
-  const [containerWidth, setContainerWidth] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const isDragging = useRef(false);
+  const [position, setPosition] = useState(initialPosition)
+  const [containerWidth, setContainerWidth] = useState(0)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const isDragging = useRef(false)
 
   // Track container width with ResizeObserver
   useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
+    const el = containerRef.current
+    if (!el) return
 
     const observer = new ResizeObserver(([entry]) => {
-      setContainerWidth(entry.contentRect.width);
-    });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+      setContainerWidth(entry.contentRect.width)
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
-  const updatePosition = useCallback(
-    (clientX: number) => {
-      const el = containerRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const x = clientX - rect.left;
-      const pct = Math.max(0, Math.min(100, (x / rect.width) * 100));
-      setPosition(pct);
-    },
-    []
-  );
+  const updatePosition = useCallback((clientX: number) => {
+    const el = containerRef.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const x = clientX - rect.left
+    const pct = Math.max(0, Math.min(100, (x / rect.width) * 100))
+    setPosition(pct)
+  }, [])
 
   const onPointerDown = useCallback(
     (e: React.PointerEvent) => {
-      isDragging.current = true;
-      (e.target as HTMLElement).setPointerCapture(e.pointerId);
-      updatePosition(e.clientX);
+      isDragging.current = true
+      ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
+      updatePosition(e.clientX)
     },
     [updatePosition]
-  );
+  )
 
   const onPointerMove = useCallback(
     (e: React.PointerEvent) => {
-      if (!isDragging.current) return;
-      updatePosition(e.clientX);
+      if (!isDragging.current) return
+      updatePosition(e.clientX)
     },
     [updatePosition]
-  );
+  )
 
   const onPointerUp = useCallback(() => {
-    isDragging.current = false;
-  }, []);
+    isDragging.current = false
+  }, [])
 
   const onKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      setPosition((p) => Math.max(0, p - 2));
+      e.preventDefault()
+      setPosition((p) => Math.max(0, p - 2))
     } else if (e.key === "ArrowRight") {
-      e.preventDefault();
-      setPosition((p) => Math.min(100, p + 2));
+      e.preventDefault()
+      setPosition((p) => Math.min(100, p + 2))
     }
-  }, []);
+  }, [])
 
   return (
     <div
@@ -123,9 +120,7 @@ export default function ImageCompareSlider({
         className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-primary border-2 border-white shadow-lg flex items-center justify-center pointer-events-none"
         style={{ left: `${position}%` }}
       >
-        <span className="material-symbols-outlined text-white text-lg">
-          drag_indicator
-        </span>
+        <span className="material-symbols-outlined text-white text-lg">drag_indicator</span>
       </div>
 
       {/* Labels */}
@@ -136,5 +131,5 @@ export default function ImageCompareSlider({
         {rightLabel}
       </div>
     </div>
-  );
+  )
 }

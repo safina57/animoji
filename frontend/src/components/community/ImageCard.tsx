@@ -1,79 +1,82 @@
-import { memo, useState, useCallback } from "react";
-import { Heart, Share2, Check } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@lib/ui/avatar";
-import { Button } from "@lib/ui/button";
-import { cn } from "@lib/utils";
-import { imageService } from "@services/imageService";
-import { useAppDispatch, useAppSelector } from "@hooks/redux";
-import { updateLikedStatus } from "@store/slices/feedSlice";
-import type { ImageFeedItem } from "@customTypes/image";
+import { memo, useState, useCallback } from "react"
+import { Heart, Share2, Check } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@lib/ui/avatar"
+import { Button } from "@lib/ui/button"
+import { cn } from "@lib/utils"
+import { imageService } from "@services/imageService"
+import { useAppDispatch, useAppSelector } from "@hooks/redux"
+import { updateLikedStatus } from "@store/slices/feedSlice"
+import type { ImageFeedItem } from "@customTypes/image"
 
 interface ImageCardProps {
-  item: ImageFeedItem;
-  onClick: (item: ImageFeedItem) => void;
-  onLikeToggle?: (imageId: string, liked: boolean) => void;
+  item: ImageFeedItem
+  onClick: (item: ImageFeedItem) => void
+  onLikeToggle?: (imageId: string, liked: boolean) => void
 }
 
 export const ImageCard = memo(function ImageCard({ item, onClick, onLikeToggle }: ImageCardProps) {
-  const dispatch = useAppDispatch();
-  const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated);
+  const dispatch = useAppDispatch()
+  const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated)
 
-  const [loaded, setLoaded] = useState(false);
-  const [likeLoading, setLikeLoading] = useState(false);
-  const [shareCopied, setShareCopied] = useState(false);
+  const [loaded, setLoaded] = useState(false)
+  const [likeLoading, setLikeLoading] = useState(false)
+  const [shareCopied, setShareCopied] = useState(false)
 
-  const isLiked = item.is_liked_by_user === true;
+  const isLiked = item.is_liked_by_user === true
 
-  const handleLike = useCallback(async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!isAuthenticated) {
-      window.location.href = "/auth";
-      return;
-    }
-    if (likeLoading) return;
-    setLikeLoading(true);
-    const newLiked = !isLiked;
-    if (onLikeToggle) {
-      onLikeToggle(item.id, newLiked);
-    } else {
-      dispatch(updateLikedStatus({ imageId: item.id, liked: newLiked }));
-    }
-    try {
-      if (isLiked) {
-        await imageService.unlikeImage(item.id);
-      } else {
-        await imageService.likeImage(item.id);
+  const handleLike = useCallback(
+    async (e: React.MouseEvent) => {
+      e.stopPropagation()
+      if (!isAuthenticated) {
+        window.location.href = "/auth"
+        return
       }
-    } catch {
+      if (likeLoading) return
+      setLikeLoading(true)
+      const newLiked = !isLiked
       if (onLikeToggle) {
-        onLikeToggle(item.id, isLiked);
+        onLikeToggle(item.id, newLiked)
       } else {
-        dispatch(updateLikedStatus({ imageId: item.id, liked: isLiked }));
+        dispatch(updateLikedStatus({ imageId: item.id, liked: newLiked }))
       }
-    } finally {
-      setLikeLoading(false);
-    }
-  }, [dispatch, isAuthenticated, isLiked, item.id, likeLoading, onLikeToggle]);
+      try {
+        if (isLiked) {
+          await imageService.unlikeImage(item.id)
+        } else {
+          await imageService.likeImage(item.id)
+        }
+      } catch {
+        if (onLikeToggle) {
+          onLikeToggle(item.id, isLiked)
+        } else {
+          dispatch(updateLikedStatus({ imageId: item.id, liked: isLiked }))
+        }
+      } finally {
+        setLikeLoading(false)
+      }
+    },
+    [dispatch, isAuthenticated, isLiked, item.id, likeLoading, onLikeToggle]
+  )
 
-  const handleShare = useCallback(async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    try {
-      await navigator.clipboard.writeText(
-        `${window.location.origin}?image=${item.id}`
-      );
-      setShareCopied(true);
-      setTimeout(() => setShareCopied(false), 2000);
-    } catch {
-      // clipboard unavailable — fail silently
-    }
-  }, [item.id]);
+  const handleShare = useCallback(
+    async (e: React.MouseEvent) => {
+      e.stopPropagation()
+      try {
+        await navigator.clipboard.writeText(`${window.location.origin}?image=${item.id}`)
+        setShareCopied(true)
+        setTimeout(() => setShareCopied(false), 2000)
+      } catch {
+        // clipboard unavailable — fail silently
+      }
+    },
+    [item.id]
+  )
 
   const actionBase =
-    "rounded-full backdrop-blur-sm shadow-lg h-8 w-8 active:scale-95 border transition-all";
+    "rounded-full backdrop-blur-sm shadow-lg h-8 w-8 active:scale-95 border transition-all"
   const actionIdle =
-    "bg-white/90 dark:bg-paper-dark/90 text-primary border-primary/10 hover:bg-primary hover:text-white hover:border-transparent";
-  const actionActive =
-    "bg-primary text-white hover:bg-primary/90 border-transparent";
+    "bg-white/90 dark:bg-paper-dark/90 text-primary border-primary/10 hover:bg-primary hover:text-white hover:border-transparent"
+  const actionActive = "bg-primary text-white hover:bg-primary/90 border-transparent"
 
   return (
     <div
@@ -82,8 +85,8 @@ export const ImageCard = memo(function ImageCard({ item, onClick, onLikeToggle }
       onClick={() => onClick(item)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onClick(item);
+          e.preventDefault()
+          onClick(item)
         }
       }}
       className="group relative w-full text-left break-inside-avoid rounded-xl overflow-hidden bg-white dark:bg-slate-900 shadow-md hover:shadow-xl hover:border-primary/20 border border-transparent transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer"
@@ -128,11 +131,7 @@ export const ImageCard = memo(function ImageCard({ item, onClick, onLikeToggle }
             className={cn(actionBase, shareCopied ? actionActive : actionIdle)}
             aria-label="Share"
           >
-            {shareCopied ? (
-              <Check className="h-3.5 w-3.5" />
-            ) : (
-              <Share2 className="h-3.5 w-3.5" />
-            )}
+            {shareCopied ? <Check className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
           </Button>
         </div>
       </div>
@@ -150,5 +149,5 @@ export const ImageCard = memo(function ImageCard({ item, onClick, onLikeToggle }
         </span>
       </div>
     </div>
-  );
-});
+  )
+})

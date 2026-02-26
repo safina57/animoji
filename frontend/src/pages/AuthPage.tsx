@@ -1,26 +1,26 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { authService } from "@services/authService";
-import { useAppSelector } from "@hooks/redux";
-import { Button } from "@lib/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@lib/ui/card";
-import FallingPetals from "@lib/decorations/FallingPetals/FallingPetals";
-import GoogleLogo from "@components/auth/GoogleLogo";
-import SeigaihaOverlay from "@lib/decorations/SeigaihaOverlay/SeigaihaOverlay";
+import { useEffect } from "react"
+import { useNavigate } from "react-router-dom"
+import { authService } from "@services/authService"
+import { useAppSelector } from "@hooks/redux"
+import { Button } from "@lib/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@lib/ui/card"
+import FallingPetals from "@lib/decorations/FallingPetals/FallingPetals"
+import GoogleLogo from "@components/auth/GoogleLogo"
+import SeigaihaOverlay from "@lib/decorations/SeigaihaOverlay/SeigaihaOverlay"
 
 export default function AuthPage() {
-  const { isAuthenticated, error } = useAppSelector((state) => state.auth);
-  const navigate = useNavigate();
+  const { isAuthenticated, error } = useAppSelector((state) => state.auth)
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/create");
+      navigate("/create")
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate])
 
   const handleGoogleLogin = () => {
-    authService.loginWithGoogle();
-  };
+    authService.loginWithGoogle()
+  }
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-background-light dark:bg-background-dark transition-colors duration-500">
@@ -29,12 +29,7 @@ export default function AuthPage() {
 
       {/* Sakura tree — top-right, flush with edge */}
       <div className="fixed right-0 top-0 pointer-events-none select-none w-[560px] md:w-[720px] opacity-55 dark:opacity-30">
-        <img
-          src="/sakura_tree.png"
-          alt=""
-          aria-hidden
-          className="w-full h-auto object-contain"
-        />
+        <img src="/sakura_tree.png" alt="" aria-hidden className="w-full h-auto object-contain" />
       </div>
 
       {/* Vertical welcome text — left side */}
@@ -70,9 +65,7 @@ export default function AuthPage() {
           <div className="h-0.5 w-full bg-gradient-to-r from-primary/40 via-primary to-primary/40" />
 
           <CardHeader className="space-y-2 text-center pt-8 pb-4">
-            <CardTitle className="font-display text-3xl text-primary">
-              Welcome
-            </CardTitle>
+            <CardTitle className="font-display text-3xl text-primary">Welcome</CardTitle>
             <CardDescription className="text-base font-japanese">
               サインインして始めましょう
             </CardDescription>
@@ -128,5 +121,5 @@ export default function AuthPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

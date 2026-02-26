@@ -1,0 +1,24 @@
+version: "2" # golangci-lint v2 config schema (matches golangci-lint-action@v6 / v2.1.6)
+
+linters:
+  default: none # opt-in only — know exactly what checks your code passes
+  enable:
+    - gofmt # canonical Go formatter; CI fails if code needs reformatting
+    - govet # same checks as "go vet": printf mismatches, suspicious constructs, etc.
+    - errcheck # every ignored error return value must be explicit (use _ = or handle it)
+    - staticcheck # ~150 checks covering nil pointer dereferences, deprecated API usage,
+      # unreachable code, incorrect string conversions, and more
+    - ineffassign # assignments that are immediately overwritten or never read
+    - unused # exported identifiers (functions, types, vars) that are never referenced
+
+linters-settings:
+  govet:
+    enable-all: true # includes the shadow analyser (warns on variable shadowing)
+
+  gofmt:
+    simplify: true # applies gofmt -s simplifications (e.g., []T{T{}} → []T{{}})
+
+issues:
+  exclude-use-default: false # don't hide any issues — show the full picture
+  max-issues-per-linter: 0 # default caps at 3 per file; 0 = unlimited
+  max-same-issues: 0 # default caps identical issues at 3; 0 = unlimited

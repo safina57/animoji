@@ -9,7 +9,7 @@ router = APIRouter(tags=["health"])
 async def health_check():
     """
     Health check endpoint.
-    
+
     Returns:
         Status indicating the service is healthy
     """

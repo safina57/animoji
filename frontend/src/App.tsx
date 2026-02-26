@@ -1,24 +1,24 @@
-import { lazy, Suspense } from "react";
-import { Provider } from "react-redux";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { store } from "@store/store";
-import Navbar from "@lib/layout/Navbar";
-import { ProtectedRoute } from "@components/auth/ProtectedRoute";
-import { AuthInitializer } from "@components/auth/AuthInitializer";
+import { lazy, Suspense } from "react"
+import { Provider } from "react-redux"
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import { store } from "@store/store"
+import Navbar from "@lib/layout/Navbar"
+import { ProtectedRoute } from "@components/auth/ProtectedRoute"
+import { AuthInitializer } from "@components/auth/AuthInitializer"
 
-const CommunityPage = lazy(() => import("@pages/CommunityPage"));
-const CreatePage = lazy(() => import("@pages/CreatePage"));
-const GalleryPage = lazy(() => import("@pages/GalleryPage"));
-const AuthPage = lazy(() => import("@pages/AuthPage"));
-const AuthCallbackPage = lazy(() => import("@pages/AuthCallbackPage"));
-const NotFoundPage = lazy(() => import("@pages/NotFoundPage"));
+const CommunityPage = lazy(() => import("@pages/CommunityPage"))
+const CreatePage = lazy(() => import("@pages/CreatePage"))
+const GalleryPage = lazy(() => import("@pages/GalleryPage"))
+const AuthPage = lazy(() => import("@pages/AuthPage"))
+const AuthCallbackPage = lazy(() => import("@pages/AuthCallbackPage"))
+const NotFoundPage = lazy(() => import("@pages/NotFoundPage"))
 
 function PageFallback() {
   return (
     <div className="flex-1 flex items-center justify-center">
       <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
     </div>
-  );
+  )
 }
 
 export default function App() {
@@ -57,5 +57,5 @@ export default function App() {
         </AuthInitializer>
       </BrowserRouter>
     </Provider>
-  );
+  )
 }

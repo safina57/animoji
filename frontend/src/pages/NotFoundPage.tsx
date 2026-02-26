@@ -1,24 +1,22 @@
-import { Link } from "react-router-dom";
-import { Button } from "@lib/ui/button";
-import { Home, Wand2 } from "lucide-react";
-import FallingPetals from "@lib/decorations/FallingPetals/FallingPetals";
-import ToriiGateSilhouette from "@lib/decorations/ToriiGateSilhouette/ToriiGateSilhouette";
-import SeigaihaOverlay from "@lib/decorations/SeigaihaOverlay/SeigaihaOverlay";
+import { Link } from "react-router-dom"
+import { Button } from "@lib/ui/button"
+import { Home, Wand2 } from "lucide-react"
+import FallingPetals from "@lib/decorations/FallingPetals/FallingPetals"
+import ToriiGateSilhouette from "@lib/decorations/ToriiGateSilhouette/ToriiGateSilhouette"
+import SeigaihaOverlay from "@lib/decorations/SeigaihaOverlay/SeigaihaOverlay"
 
 const STARS = Array.from({ length: 58 }, (_, i) => ({
   left: `${((i * 37 + 13) % 96) + 2}%`,
-  top:  `${((i * 61 + 7)  % 58) + 1}%`,
+  top: `${((i * 61 + 7) % 58) + 1}%`,
   size: (i % 3) + 1,
-  delay:    `${((i * 0.41) % 4).toFixed(1)}s`,
+  delay: `${((i * 0.41) % 4).toFixed(1)}s`,
   duration: `${(2.2 + (i % 4) * 0.55).toFixed(1)}s`,
-}));
-
+}))
 
 /* ─── Page ─── */
 export default function NotFoundPage() {
   return (
     <div className="relative flex-1 min-h-[calc(100vh-4rem)] overflow-hidden flex items-center justify-center isolate bg-background-light dark:bg-background-dark">
-
       {/* ── Subtle gradient atmosphere (uses theme tokens) ── */}
       <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-sakura-pink/5 pointer-events-none" />
 
@@ -55,7 +53,6 @@ export default function NotFoundPage() {
 
       {/* ── Main content ── */}
       <div className="relative z-10 text-center px-6 py-12 w-full max-w-2xl mx-auto">
-
         {/* Vertical Japanese text — left */}
         <span
           className="absolute -left-4 xl:-left-16 top-1/2 -translate-y-1/2 [writing-mode:vertical-rl] hidden lg:block pointer-events-none select-none font-japanese font-bold text-5xl tracking-[0.6em] text-primary/10 dark:text-primary/[0.07]"
@@ -100,8 +97,8 @@ export default function NotFoundPage() {
           className="mt-6 text-slate-600 dark:text-slate-400 text-base leading-relaxed max-w-sm mx-auto animate-fade-in"
           style={{ animationDelay: "0.3s", animationFillMode: "both" }}
         >
-          The spirits have led you astray. This page has wandered beyond the
-          torii gate into the unknown realm.
+          The spirits have led you astray. This page has wandered beyond the torii gate into the
+          unknown realm.
         </p>
 
         {/* CTA buttons */}
@@ -140,5 +137,5 @@ export default function NotFoundPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -6,12 +6,10 @@ function SkeletonCard({ tall }: { tall?: boolean }) {
         tall ? "h-72" : "h-48",
       ].join(" ")}
     />
-  );
+  )
 }
 
-const SKELETON_HEIGHTS: boolean[] = [
-  false, true, false, true, true, false, true, false,
-];
+const SKELETON_HEIGHTS: boolean[] = [false, true, false, true, true, false, true, false]
 
 export default function SkeletonGrid() {
   return (
@@ -20,5 +18,5 @@ export default function SkeletonGrid() {
         <SkeletonCard key={i} tall={tall} />
       ))}
     </div>
-  );
+  )
 }

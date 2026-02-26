@@ -1,7 +1,7 @@
-import ToriiGateIcon from "@lib/decorations/ToriiGateIcon/ToriiGateIcon";
+import ToriiGateIcon from "@lib/decorations/ToriiGateIcon/ToriiGateIcon"
 
 interface GalleryHeaderProps {
-  userName?: string;
+  userName?: string
 }
 
 export default function GalleryHeader({ userName }: GalleryHeaderProps) {
@@ -17,8 +17,7 @@ export default function GalleryHeader({ userName }: GalleryHeaderProps) {
           </h1>
           {userName && (
             <p className="text-slate-600 dark:text-slate-400 pt-1">
-              Your anime creations,{" "}
-              <span className="text-primary font-medium">{userName}</span>
+              Your anime creations, <span className="text-primary font-medium">{userName}</span>
             </p>
           )}
         </div>
@@ -28,5 +27,5 @@ export default function GalleryHeader({ userName }: GalleryHeaderProps) {
         <ToriiGateIcon className="w-24 h-24" />
       </div>
     </div>
-  );
+  )
 }

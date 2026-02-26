@@ -11,10 +11,12 @@ class EnhancedPrompt(BaseModel):
     """Structured output from the prompt enhancement agent."""
 
     enhanced_text: str = Field(
-        ..., description="The enriched, detailed prompt for anime-style image generation"
+        ...,
+        description="The enriched, detailed prompt for anime-style image generation",
     )
     style_tags: list[str] = Field(
-        ..., description="Anime style tags (e.g. 'studio ghibli', 'vibrant colors', 'JOJO Bizarre Adventure style')"
+        ...,
+        description="Anime style tags (e.g. 'studio ghibli', 'vibrant colors', 'JOJO Bizarre Adventure style')",
     )
     negative_prompt: str = Field(
         default="",

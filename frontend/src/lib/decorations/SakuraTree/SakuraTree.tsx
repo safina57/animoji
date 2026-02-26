@@ -1,14 +1,14 @@
-import SakuraTreeIcon from "@/lib/decorations/SakuraTreeIcon/SakuraTreeIcon";
+import SakuraTreeIcon from "@/lib/decorations/SakuraTreeIcon/SakuraTreeIcon"
 
 interface TreeProps {
-  position: "left" | "right";
+  position: "left" | "right"
 }
 
 interface ClusterConfig {
-  x: number;
-  y: number;
-  scale: number;
-  delay: string;
+  x: number
+  y: number
+  scale: number
+  delay: string
 }
 
 const CLUSTERS: ClusterConfig[] = [
@@ -17,10 +17,10 @@ const CLUSTERS: ClusterConfig[] = [
   { x: -20, y: -30, scale: 1.3, delay: "1s" },
   { x: 60, y: -10, scale: 1.3, delay: "1.5s" },
   { x: 20, y: -60, scale: 1.3, delay: "2s" },
-];
+]
 
 export default function SakuraTree({ position }: TreeProps) {
-  const isLeft = position === "left";
+  const isLeft = position === "left"
 
   return (
     <div
@@ -59,5 +59,5 @@ export default function SakuraTree({ position }: TreeProps) {
         ))}
       </div>
     </div>
-  );
+  )
 }

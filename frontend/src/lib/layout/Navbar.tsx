@@ -1,75 +1,68 @@
-import { useState, useEffect } from "react";
-import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
-import { useAppSelector, useAppDispatch } from "@hooks/redux";
-import { logout } from "@store/slices/authSlice";
-import { authService } from "@services/authService";
-import { Button } from "@lib/ui/button";
-import SeigaihaOverlay from "@lib/decorations/SeigaihaOverlay/SeigaihaOverlay";
+import { useState, useEffect } from "react"
+import { Link, NavLink, useNavigate, useLocation } from "react-router-dom"
+import { useAppSelector, useAppDispatch } from "@hooks/redux"
+import { logout } from "@store/slices/authSlice"
+import { authService } from "@services/authService"
+import { Button } from "@lib/ui/button"
+import SeigaihaOverlay from "@lib/decorations/SeigaihaOverlay/SeigaihaOverlay"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@lib/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@lib/ui/avatar";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@lib/ui/sheet";
+} from "@lib/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@lib/ui/avatar"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@lib/ui/sheet"
 
 const NAV_LINKS = [
-  { to: "/",        label: "Community", icon: "group"         },
-  { to: "/create",  label: "Create",    icon: "auto_fix_high" },
-  { to: "/gallery", label: "Gallery",   icon: "photo_library" },
-] as const;
+  { to: "/", label: "Community", icon: "group" },
+  { to: "/create", label: "Create", icon: "auto_fix_high" },
+  { to: "/gallery", label: "Gallery", icon: "photo_library" },
+] as const
 
 export default function Navbar() {
   const [dark, setDark] = useState(() => {
-    const stored = localStorage.getItem("theme");
-    if (stored) return stored === "dark";
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
-  });
-  const [drawerOpen, setDrawerOpen] = useState(false);
+    const stored = localStorage.getItem("theme")
+    if (stored) return stored === "dark"
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+  })
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
-  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth)
+  const dispatch = useAppDispatch()
+  const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", dark);
-    localStorage.setItem("theme", dark ? "dark" : "light");
-  }, [dark]);
+    document.documentElement.classList.toggle("dark", dark)
+    localStorage.setItem("theme", dark ? "dark" : "light")
+  }, [dark])
 
   // Close drawer on route change
   useEffect(() => {
-    setDrawerOpen(false);
-  }, [location.pathname]);
+    setDrawerOpen(false)
+  }, [location.pathname])
 
   const handleLogout = async () => {
     try {
-      await authService.logout();
-      dispatch(logout());
-      navigate("/");
+      await authService.logout()
+      dispatch(logout())
+      navigate("/")
     } catch {
-      dispatch(logout());
-      navigate("/");
+      dispatch(logout())
+      navigate("/")
     }
-  };
+  }
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     isActive
       ? "text-primary"
-      : "hover:text-primary transition-colors text-slate-600 dark:text-slate-400";
+      : "hover:text-primary transition-colors text-slate-600 dark:text-slate-400"
 
   return (
     <nav className="border-b border-primary/10 bg-white/50 dark:bg-black/20 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-
         {/* Left: logo + desktop links */}
         <div className="flex items-center gap-8">
           <Link to="/" className="flex items-center gap-2">
@@ -111,12 +104,17 @@ export default function Navbar() {
                     <Avatar>
                       <AvatarImage src={user.avatar_url} alt={user.name} />
                       <AvatarFallback className="bg-primary/10">
-                        <span className="material-symbols-outlined text-primary text-lg">person</span>
+                        <span className="material-symbols-outlined text-primary text-lg">
+                          person
+                        </span>
                       </AvatarFallback>
                     </Avatar>
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64 p-0 bg-paper-light dark:bg-paper-dark paper-texture bg-cover bg-center border border-primary/10 shadow-xl shadow-primary/5 overflow-hidden rounded-xl">
+                <DropdownMenuContent
+                  align="end"
+                  className="w-64 p-0 bg-paper-light dark:bg-paper-dark paper-texture bg-cover bg-center border border-primary/10 shadow-xl shadow-primary/5 overflow-hidden rounded-xl"
+                >
                   {/* Top accent bar */}
                   <div className="h-0.5 w-full bg-gradient-to-r from-primary/40 via-primary to-primary/40" />
                   {/* Seigaiha overlay */}
@@ -127,11 +125,15 @@ export default function Navbar() {
                       <Avatar size="sm">
                         <AvatarImage src={user.avatar_url} alt={user.name} />
                         <AvatarFallback className="bg-primary/10">
-                          <span className="material-symbols-outlined text-primary text-sm">person</span>
+                          <span className="material-symbols-outlined text-primary text-sm">
+                            person
+                          </span>
                         </AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
-                        <p className="font-display font-semibold text-sm text-slate-900 dark:text-white truncate">{user.name}</p>
+                        <p className="font-display font-semibold text-sm text-slate-900 dark:text-white truncate">
+                          {user.name}
+                        </p>
                         <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                       </div>
                     </div>
@@ -150,7 +152,9 @@ export default function Navbar() {
               </DropdownMenu>
             ) : (
               <Button
-                onClick={() => { if (location.pathname !== "/auth") navigate("/auth"); }}
+                onClick={() => {
+                  if (location.pathname !== "/auth") navigate("/auth")
+                }}
                 variant="outline"
                 className="h-8 px-4 text-sm border-primary/20 hover:border-primary/40 hover:bg-primary/5 text-gray-900 dark:text-white hover:text-primary dark:hover:text-primary"
               >
@@ -170,7 +174,10 @@ export default function Navbar() {
               </button>
             </SheetTrigger>
 
-            <SheetContent side="left" className="w-72 p-0 bg-paper-light dark:bg-paper-dark paper-texture bg-cover bg-center border-r-0 flex flex-col overflow-hidden">
+            <SheetContent
+              side="left"
+              className="w-72 p-0 bg-paper-light dark:bg-paper-dark paper-texture bg-cover bg-center border-r-0 flex flex-col overflow-hidden"
+            >
               {/* Seigaiha pattern overlay — matches ImageDetailDialog panel */}
               <div className="absolute inset-0 pattern-seigaiha opacity-60 dark:opacity-25 pointer-events-none" />
 
@@ -221,11 +228,15 @@ export default function Navbar() {
                       <Avatar size="sm">
                         <AvatarImage src={user.avatar_url} alt={user.name} />
                         <AvatarFallback className="bg-primary/10">
-                          <span className="material-symbols-outlined text-primary text-sm">person</span>
+                          <span className="material-symbols-outlined text-primary text-sm">
+                            person
+                          </span>
                         </AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
-                        <p className="text-sm font-display font-semibold text-slate-900 dark:text-white truncate">{user.name}</p>
+                        <p className="text-sm font-display font-semibold text-slate-900 dark:text-white truncate">
+                          {user.name}
+                        </p>
                         <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                       </div>
                     </div>
@@ -239,7 +250,10 @@ export default function Navbar() {
                   </>
                 ) : (
                   <Button
-                    onClick={() => { navigate("/auth"); setDrawerOpen(false); }}
+                    onClick={() => {
+                      navigate("/auth")
+                      setDrawerOpen(false)
+                    }}
                     variant="outline"
                     className="w-full h-10 text-sm bg-white dark:bg-paper-dark border border-primary/10 text-primary hover:border-primary/30 hover:bg-primary hover:text-white dark:hover:text-white transition-all"
                   >
@@ -252,5 +266,5 @@ export default function Navbar() {
         </div>
       </div>
     </nav>
-  );
+  )
 }
