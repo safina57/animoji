@@ -1,126 +1,123 @@
-import { useEffect, useRef, useState } from "react";
-import { Heart, Download, Share2 } from "lucide-react";
-import { Dialog, DialogContent, DialogTitle } from "@lib/ui/dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@lib/ui/avatar";
-import { imageService } from "@services/imageService";
-import SeigaihaOverlay from "@lib/decorations/SeigaihaOverlay/SeigaihaOverlay";
-import TempleBuilding from "@lib/decorations/TempleBuilding/TempleBuilding";
-import { useAppDispatch, useAppSelector } from "@hooks/redux";
-import { updateLikedStatus } from "@store/slices/feedSlice";
-import type { ImageFeedItem, ImageDetailItem } from "@customTypes/image";
+import { useEffect, useRef, useState } from "react"
+import { Heart, Download, Share2 } from "lucide-react"
+import { Dialog, DialogContent, DialogTitle } from "@lib/ui/dialog"
+import { Avatar, AvatarFallback, AvatarImage } from "@lib/ui/avatar"
+import { imageService } from "@services/imageService"
+import SeigaihaOverlay from "@lib/decorations/SeigaihaOverlay/SeigaihaOverlay"
+import TempleBuilding from "@lib/decorations/TempleBuilding/TempleBuilding"
+import { useAppDispatch, useAppSelector } from "@hooks/redux"
+import { updateLikedStatus } from "@store/slices/feedSlice"
+import type { ImageFeedItem, ImageDetailItem } from "@customTypes/image"
 
 interface ImageDetailDialogProps {
-  item: ImageFeedItem | null;
-  open: boolean;
-  onClose: () => void;
+  item: ImageFeedItem | null
+  open: boolean
+  onClose: () => void
 }
 
-export function ImageDetailDialog({
-  item,
-  open,
-  onClose,
-}: ImageDetailDialogProps) {
-  const dispatch = useAppDispatch();
-  const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated);
+export function ImageDetailDialog({ item, open, onClose }: ImageDetailDialogProps) {
+  const dispatch = useAppDispatch()
+  const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated)
 
-  const [detail, setDetail] = useState<ImageDetailItem | null>(null);
-  const [liked, setLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState(0);
-  const [likeLoading, setLikeLoading] = useState(false);
-  const [copyFeedback, setCopyFeedback] = useState(false);
-  const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [detail, setDetail] = useState<ImageDetailItem | null>(null)
+  const [liked, setLiked] = useState(false)
+  const [likesCount, setLikesCount] = useState(0)
+  const [likeLoading, setLikeLoading] = useState(false)
+  const [copyFeedback, setCopyFeedback] = useState(false)
+  const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // On open: fetch fresh detail (for accurate likes_count)
   useEffect(() => {
-    if (!item || !open) return;
+    if (!item || !open) return
 
-    setDetail(null);
-    setLiked(false);
-    setLikesCount(0);
+    setDetail(null)
+    setLiked(false)
+    setLikesCount(0)
 
     imageService
       .fetchImageDetail(item.id)
       .then((d) => {
-        setDetail(d);
-        setLikesCount(d.likes_count);
+        setDetail(d)
+        setLikesCount(d.likes_count)
       })
-      .catch(() => {});
+      .catch(() => {})
 
     if (item.is_liked_by_user !== undefined) {
-      setLiked(item.is_liked_by_user);
+      setLiked(item.is_liked_by_user)
     } else if (isAuthenticated) {
-      imageService.checkLiked(item.id).then(setLiked).catch(() => {});
+      imageService
+        .checkLiked(item.id)
+        .then(setLiked)
+        .catch(() => {})
     }
-  }, [item?.id, open, isAuthenticated]);
+  }, [item, open, isAuthenticated])
 
-  if (!item) return null;
+  if (!item) return null
 
-  const displayItem = detail ?? item;
-  const lastPrompt = detail ? (detail.prompts[detail.prompts.length - 1] ?? "") : "";
+  const displayItem = detail ?? item
+  const lastPrompt = detail ? (detail.prompts[detail.prompts.length - 1] ?? "") : ""
   const formattedDate = detail
     ? new Date(detail.created_at).toLocaleDateString("en-US", {
         year: "numeric",
         month: "long",
         day: "numeric",
       })
-    : "";
+    : ""
 
   const handleToggleLike = async () => {
     if (!isAuthenticated) {
-      window.location.href = "/auth";
-      return;
+      window.location.href = "/auth"
+      return
     }
-    if (likeLoading) return;
-    setLikeLoading(true);
-    const wasLiked = liked;
-    setLiked(!wasLiked);
-    setLikesCount((c) => (wasLiked ? c - 1 : c + 1));
+    if (likeLoading) return
+    setLikeLoading(true)
+    const wasLiked = liked
+    setLiked(!wasLiked)
+    setLikesCount((c) => (wasLiked ? c - 1 : c + 1))
     try {
       if (wasLiked) {
-        await imageService.unlikeImage(item.id);
+        await imageService.unlikeImage(item.id)
       } else {
-        await imageService.likeImage(item.id);
+        await imageService.likeImage(item.id)
       }
-      dispatch(updateLikedStatus({ imageId: item.id, liked: !wasLiked }));
+      dispatch(updateLikedStatus({ imageId: item.id, liked: !wasLiked }))
     } catch {
-      setLiked(wasLiked);
-      setLikesCount((c) => (wasLiked ? c + 1 : c - 1));
+      setLiked(wasLiked)
+      setLikesCount((c) => (wasLiked ? c + 1 : c - 1))
     } finally {
-      setLikeLoading(false);
+      setLikeLoading(false)
     }
-  };
+  }
 
   const handleShare = async () => {
-    const url = `${window.location.origin}?image=${item.id}`;
-    await navigator.clipboard.writeText(url).catch(() => {});
-    setCopyFeedback(true);
-    if (copyTimer.current) clearTimeout(copyTimer.current);
-    copyTimer.current = setTimeout(() => setCopyFeedback(false), 2000);
-  };
+    const url = `${window.location.origin}?image=${item.id}`
+    await navigator.clipboard.writeText(url).catch(() => {})
+    setCopyFeedback(true)
+    if (copyTimer.current) clearTimeout(copyTimer.current)
+    copyTimer.current = setTimeout(() => setCopyFeedback(false), 2000)
+  }
 
   const handleDownload = async () => {
     try {
-      const res = await fetch(displayItem.generated_url);
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `animoji-${item.id}.png`;
-      a.click();
-      URL.revokeObjectURL(url);
+      const res = await fetch(displayItem.generated_url)
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `animoji-${item.id}.png`
+      a.click()
+      URL.revokeObjectURL(url)
     } catch {
-      window.open(displayItem.generated_url, "_blank");
+      window.open(displayItem.generated_url, "_blank")
     }
-  };
+  }
 
-  const isShortPrompt = detail && lastPrompt.length < 100;
+  const isShortPrompt = detail && lastPrompt.length < 100
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="w-[95vw] max-w-5xl p-0 gap-0 overflow-hidden rounded-2xl border border-slate-200/70 dark:border-slate-700/50 bg-white dark:bg-slate-900 shadow-2xl shadow-black/20 dark:shadow-black/60">
-        <DialogTitle className="sr-only">
-          {lastPrompt || "Image detail"}
-        </DialogTitle>
+        <DialogTitle className="sr-only">{lastPrompt || "Image detail"}</DialogTitle>
 
         <div className="flex flex-col md:flex-row md:max-h-[88vh]">
           {/* Left: image panel */}
@@ -148,12 +145,7 @@ export function ImageDetailDialog({
                     : "bg-white/90 dark:bg-paper-dark/90 text-primary border-primary/10 hover:bg-primary hover:text-white hover:border-transparent",
                 ].join(" ")}
               >
-                <Heart
-                  className={[
-                    "w-4 h-4",
-                    liked ? "fill-white" : "",
-                  ].join(" ")}
-                />
+                <Heart className={["w-4 h-4", liked ? "fill-white" : ""].join(" ")} />
                 <span>{likesCount}</span>
               </button>
 
@@ -196,21 +188,14 @@ export function ImageDetailDialog({
               {/* User info */}
               <div className="flex items-center gap-3">
                 <Avatar size="lg">
-                  <AvatarImage
-                    src={displayItem.user.avatar_url}
-                    alt={displayItem.user.name}
-                  />
-                  <AvatarFallback>
-                    {displayItem.user.name.charAt(0).toUpperCase()}
-                  </AvatarFallback>
+                  <AvatarImage src={displayItem.user.avatar_url} alt={displayItem.user.name} />
+                  <AvatarFallback>{displayItem.user.name.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="min-w-0">
                   <p className="font-display font-semibold text-slate-900 dark:text-white leading-tight truncate">
                     {displayItem.user.name}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {formattedDate}
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{formattedDate}</p>
                 </div>
               </div>
 
@@ -250,5 +235,5 @@ export function ImageDetailDialog({
         </div>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

@@ -1,10 +1,10 @@
-import { configureStore } from "@reduxjs/toolkit";
-import generationReducer from "./slices/generationSlice";
-import authReducer from "./slices/authSlice";
-import feedReducer from "./slices/feedSlice";
-import galleryReducer from "./slices/gallerySlice";
-import emojiReducer from "./slices/emojiSlice";
-import emojiGalleryReducer from "./slices/emojiGallerySlice";
+import { configureStore } from "@reduxjs/toolkit"
+import generationReducer from "./slices/generationSlice"
+import authReducer from "./slices/authSlice"
+import feedReducer from "./slices/feedSlice"
+import galleryReducer from "./slices/gallerySlice"
+import emojiReducer from "./slices/emojiSlice"
+import emojiGalleryReducer from "./slices/emojiGallerySlice"
 
 export const store = configureStore({
   reducer: {
@@ -23,7 +23,7 @@ export const store = configureStore({
         ignoredActions: ["generation/setReferenceImage", "emoji/setEmojiReferenceImage"],
       },
     }),
-});
+})
 
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
+export type RootState = ReturnType<typeof store.getState>
+export type AppDispatch = typeof store.dispatch

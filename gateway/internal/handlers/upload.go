@@ -24,7 +24,7 @@ func ParseImageUpload(w http.ResponseWriter, r *http.Request) (info *imageinfo.I
 		RespondError(w, "No image provided", http.StatusBadRequest)
 		return nil, "", false
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	prompt = r.FormValue("prompt")
 	if prompt == "" {

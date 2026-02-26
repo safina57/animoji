@@ -1,6 +1,6 @@
-import CherryBlossom from "@lib/decorations/CherryBlossom/CherryBlossom";
-import SakuraDecorationIcon from "@assets/icons/sakura-decoration.svg?react";
-import SeigaihaOverlay from "@lib/decorations/SeigaihaOverlay/SeigaihaOverlay";
+import CherryBlossom from "@lib/decorations/CherryBlossom/CherryBlossom"
+import SakuraDecorationIcon from "@assets/icons/sakura-decoration.svg?react"
+import SeigaihaOverlay from "@lib/decorations/SeigaihaOverlay/SeigaihaOverlay"
 
 /**
  * Shared ambient decorations used on Create and Emoji pages.
@@ -30,5 +30,5 @@ export default function PageDecorations() {
       {/* Seigaiha pattern overlay */}
       <SeigaihaOverlay className="fixed opacity-30 dark:opacity-20" />
     </>
-  );
+  )
 }

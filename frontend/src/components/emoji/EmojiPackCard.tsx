@@ -1,27 +1,27 @@
-import { memo, useState } from 'react';
-import { cn } from '@lib/utils';
-import type { EmojiPackGalleryItem } from '@customTypes/emoji';
+import { memo, useState } from "react"
+import { cn } from "@lib/utils"
+import type { EmojiPackGalleryItem } from "@customTypes/emoji"
 
 interface EmojiPackCardProps {
-  pack: EmojiPackGalleryItem;
-  onClick: () => void;
+  pack: EmojiPackGalleryItem
+  onClick: () => void
 }
 
 function formatRelativeDate(iso: string): string {
-  const date = new Date(iso);
-  const now = new Date();
-  const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-  if (diffDays === 0) return 'Today';
-  if (diffDays === 1) return 'Yesterday';
-  if (diffDays < 7) return `${diffDays}d ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
-  if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
-  return `${Math.floor(diffDays / 365)}y ago`;
+  const date = new Date(iso)
+  const now = new Date()
+  const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24))
+  if (diffDays === 0) return "Today"
+  if (diffDays === 1) return "Yesterday"
+  if (diffDays < 7) return `${diffDays}d ago`
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`
+  return `${Math.floor(diffDays / 365)}y ago`
 }
 
 const EmojiPackCard = memo(function EmojiPackCard({ pack, onClick }: EmojiPackCardProps) {
-  const previews = pack.variants.slice(0, 4);
-  const emptySlots = Math.max(0, 4 - previews.length);
+  const previews = pack.variants.slice(0, 4)
+  const emptySlots = Math.max(0, 4 - previews.length)
 
   return (
     <div
@@ -29,9 +29,9 @@ const EmojiPackCard = memo(function EmojiPackCard({ pack, onClick }: EmojiPackCa
       tabIndex={0}
       onClick={onClick}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onClick();
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
+          onClick()
         }
       }}
       className="group relative w-full text-left break-inside-avoid rounded-xl overflow-hidden bg-white dark:bg-slate-900 shadow-md hover:shadow-xl hover:border-primary/20 border border-transparent transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer"
@@ -43,10 +43,7 @@ const EmojiPackCard = memo(function EmojiPackCard({ pack, onClick }: EmojiPackCa
             <EmojiCell key={v.id} url={v.url} emotion={v.emotion} />
           ))}
           {Array.from({ length: emptySlots }).map((_, i) => (
-            <div
-              key={`empty-${i}`}
-              className="aspect-square bg-slate-50 dark:bg-slate-900/80"
-            />
+            <div key={`empty-${i}`} className="aspect-square bg-slate-50 dark:bg-slate-900/80" />
           ))}
         </div>
 
@@ -68,7 +65,7 @@ const EmojiPackCard = memo(function EmojiPackCard({ pack, onClick }: EmojiPackCa
             emoji_emotions
           </span>
           <span className="text-xs font-medium text-slate-600 dark:text-slate-400 truncate">
-            {pack.variants.length} sticker{pack.variants.length !== 1 ? 's' : ''}
+            {pack.variants.length} sticker{pack.variants.length !== 1 ? "s" : ""}
           </span>
         </div>
         <span className="text-[10px] text-slate-400 dark:text-slate-500 tabular-nums shrink-0">
@@ -76,11 +73,11 @@ const EmojiPackCard = memo(function EmojiPackCard({ pack, onClick }: EmojiPackCa
         </span>
       </div>
     </div>
-  );
-});
+  )
+})
 
 function EmojiCell({ url, emotion }: { url: string; emotion: string }) {
-  const [loaded, setLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(false)
   return (
     <div className="aspect-square bg-white dark:bg-slate-900 flex items-center justify-center overflow-hidden relative">
       {!loaded && (
@@ -90,13 +87,13 @@ function EmojiCell({ url, emotion }: { url: string; emotion: string }) {
         src={url}
         alt={emotion}
         className={cn(
-          'w-4/5 h-4/5 object-contain transition-all duration-500 group-hover:scale-105',
-          loaded ? 'opacity-100' : 'opacity-0'
+          "w-4/5 h-4/5 object-contain transition-all duration-500 group-hover:scale-105",
+          loaded ? "opacity-100" : "opacity-0"
         )}
         onLoad={() => setLoaded(true)}
       />
     </div>
-  );
+  )
 }
 
-export default EmojiPackCard;
+export default EmojiPackCard

@@ -1,8 +1,8 @@
-import { Button } from "@lib/ui/button";
+import { Button } from "@lib/ui/button"
 
 interface ReferenceImagePreviewProps {
-  src: string;
-  onRemove: () => void;
+  src: string
+  onRemove: () => void
 }
 
 export default function ReferenceImagePreview({ src, onRemove }: ReferenceImagePreviewProps) {
@@ -23,5 +23,5 @@ export default function ReferenceImagePreview({ src, onRemove }: ReferenceImageP
         <span className="material-symbols-outlined text-xs">close</span>
       </Button>
     </div>
-  );
+  )
 }

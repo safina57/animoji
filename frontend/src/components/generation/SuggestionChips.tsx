@@ -1,7 +1,7 @@
 interface SuggestionChipsProps {
-  label: string;
-  items: readonly string[];
-  onSelect: (s: string) => void;
+  label: string
+  items: readonly string[]
+  onSelect: (s: string) => void
 }
 
 export default function SuggestionChips({ label, items, onSelect }: SuggestionChipsProps) {
@@ -20,5 +20,5 @@ export default function SuggestionChips({ label, items, onSelect }: SuggestionCh
         </button>
       ))}
     </div>
-  );
+  )
 }

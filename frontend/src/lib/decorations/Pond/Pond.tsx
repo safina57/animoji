@@ -1,4 +1,4 @@
-import FloatingPetal from "../FloatingPetal/FloatingPetal";
+import FloatingPetal from "../FloatingPetal/FloatingPetal"
 
 export default function Pond() {
   return (
@@ -77,5 +77,5 @@ export default function Pond() {
         style={{ animationDelay: "2.5s" }}
       ></div>
     </div>
-  );
+  )
 }

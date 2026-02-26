@@ -20,9 +20,12 @@ class ImageJobMessage(BaseJobMessage):
 
     Matches the Go struct NatsJobMessage from gateway/internal/models/job.go.
     """
+
     width: int = Field(..., description="Target image width in pixels")
     height: int = Field(..., description="Target image height in pixels")
-    iteration_num: int = Field(default=0, description="Iteration number for versioned storage")
+    iteration_num: int = Field(
+        default=0, description="Iteration number for versioned storage"
+    )
     previous_response_id: str | None = Field(
         default=None,
         description="OpenAI Responses API ID from prior iteration for conversation continuity",

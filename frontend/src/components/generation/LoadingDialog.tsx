@@ -1,47 +1,47 @@
-import { useEffect, useRef, useState } from "react";
-import gsap from "gsap";
-import SeigaihaOverlay from "@lib/decorations/SeigaihaOverlay/SeigaihaOverlay";
-import ToriiGateLoader from "@lib/decorations/ToriiGateLoader/ToriiGateLoader";
+import { useEffect, useRef, useState } from "react"
+import gsap from "gsap"
+import SeigaihaOverlay from "@lib/decorations/SeigaihaOverlay/SeigaihaOverlay"
+import ToriiGateLoader from "@lib/decorations/ToriiGateLoader/ToriiGateLoader"
 
 const DEFAULT_MESSAGES = [
   "Creating your masterpiece...",
   "Channeling anime energy...",
   "Painting every pixel...",
   "Almost there...",
-];
+]
 
 interface LoadingDialogProps {
-  messages?: string[];
+  messages?: string[]
 }
 
 export default function LoadingDialog({ messages = DEFAULT_MESSAGES }: LoadingDialogProps) {
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLParagraphElement>(null);
-  const dotsRef = useRef<(HTMLSpanElement | null)[]>([null, null, null]);
+  const overlayRef = useRef<HTMLDivElement>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
+  const textRef = useRef<HTMLParagraphElement>(null)
+  const dotsRef = useRef<(HTMLSpanElement | null)[]>([null, null, null])
 
-  const [msgIndex, setMsgIndex] = useState(0);
+  const [msgIndex, setMsgIndex] = useState(0)
 
   useEffect(() => {
     const ctx = gsap.context(() => {
       // Backdrop + card entrance
-      const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
+      const tl = gsap.timeline({ defaults: { ease: "power2.out" } })
       tl.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.4 }).fromTo(
         cardRef.current,
         { opacity: 0, scale: 0.92, y: 20 },
         { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: "back.out(1.4)" },
-        "<0.1",
-      );
+        "<0.1"
+      )
 
       // Text entrance
       gsap.fromTo(
         textRef.current,
         { opacity: 0, y: 10 },
-        { opacity: 1, y: 0, duration: 0.5, delay: 0.55 },
-      );
+        { opacity: 1, y: 0, duration: 0.5, delay: 0.55 }
+      )
 
       // Dots bounce
-      const validDots = dotsRef.current.filter(Boolean);
+      const validDots = dotsRef.current.filter(Boolean)
       gsap.to(validDots, {
         y: -6,
         duration: 0.4,
@@ -50,16 +50,16 @@ export default function LoadingDialog({ messages = DEFAULT_MESSAGES }: LoadingDi
         yoyo: true,
         ease: "power2.inOut",
         delay: 0.7,
-      });
-    });
+      })
+    })
 
-    return () => ctx.revert();
-  }, []);
+    return () => ctx.revert()
+  }, [])
 
   // Message cycling with GSAP crossfade
   useEffect(() => {
-    const msgEl = textRef.current;
-    if (!msgEl) return;
+    const msgEl = textRef.current
+    if (!msgEl) return
 
     const id = setInterval(() => {
       gsap.to(msgEl, {
@@ -68,14 +68,18 @@ export default function LoadingDialog({ messages = DEFAULT_MESSAGES }: LoadingDi
         duration: 0.25,
         ease: "power2.in",
         onComplete: () => {
-          setMsgIndex((prev) => (prev + 1) % messages.length);
-          gsap.fromTo(msgEl, { opacity: 0, y: 7 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" });
+          setMsgIndex((prev) => (prev + 1) % messages.length)
+          gsap.fromTo(
+            msgEl,
+            { opacity: 0, y: 7 },
+            { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }
+          )
         },
-      });
-    }, 3200);
+      })
+    }, 3200)
 
-    return () => clearInterval(id);
-  }, []);
+    return () => clearInterval(id)
+  }, [messages.length])
 
   return (
     <div
@@ -109,7 +113,9 @@ export default function LoadingDialog({ messages = DEFAULT_MESSAGES }: LoadingDi
             {[0, 1, 2].map((i) => (
               <span
                 key={i}
-                ref={(el) => { dotsRef.current[i] = el; }}
+                ref={(el) => {
+                  dotsRef.current[i] = el
+                }}
                 className="inline-block w-1.5 h-1.5 rounded-full bg-primary dark:bg-sakura-pink"
               />
             ))}
@@ -121,5 +127,5 @@ export default function LoadingDialog({ messages = DEFAULT_MESSAGES }: LoadingDi
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -4,20 +4,20 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
   navigationMenuTriggerStyle,
-} from "@lib/ui/navigation-menu";
-import { cn } from "@lib/utils";
-import { GALLERY_SECTION } from "@store/slices/gallerySlice";
-import type { GallerySection } from "@store/slices/gallerySlice";
+} from "@lib/ui/navigation-menu"
+import { cn } from "@lib/utils"
+import { GALLERY_SECTION } from "@store/slices/gallerySlice"
+import type { GallerySection } from "@store/slices/gallerySlice"
 
 const NAV_ITEMS: { value: GallerySection; icon: string; label: string; labelJa: string }[] = [
-  { value: GALLERY_SECTION.PUBLIC,  icon: "public",         label: "Public",   labelJa: "公開" },
-  { value: GALLERY_SECTION.PRIVATE, icon: "lock",           label: "Private",  labelJa: "非公開" },
-  { value: GALLERY_SECTION.EMOJIS,  icon: "emoji_emotions", label: "Stickers", labelJa: "スタンプ" },
-];
+  { value: GALLERY_SECTION.PUBLIC, icon: "public", label: "Public", labelJa: "公開" },
+  { value: GALLERY_SECTION.PRIVATE, icon: "lock", label: "Private", labelJa: "非公開" },
+  { value: GALLERY_SECTION.EMOJIS, icon: "emoji_emotions", label: "Stickers", labelJa: "スタンプ" },
+]
 
 interface GallerySidebarProps {
-  value: GallerySection;
-  onChange: (v: GallerySection) => void;
+  value: GallerySection
+  onChange: (v: GallerySection) => void
 }
 
 export default function GallerySidebar({ value, onChange }: GallerySidebarProps) {
@@ -43,12 +43,14 @@ export default function GallerySidebar({ value, onChange }: GallerySidebarProps)
               >
                 <span className="material-symbols-outlined text-[18px] shrink-0">{icon}</span>
                 <span className="text-xs font-semibold tracking-wide">{label}</span>
-                <span className="text-[10px] font-japanese text-muted-foreground/60 hidden md:block">{labelJa}</span>
+                <span className="text-[10px] font-japanese text-muted-foreground/60 hidden md:block">
+                  {labelJa}
+                </span>
               </NavigationMenuLink>
             </NavigationMenuItem>
           ))}
         </NavigationMenuList>
       </NavigationMenu>
     </aside>
-  );
+  )
 }

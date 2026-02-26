@@ -9,18 +9,18 @@ import (
 
 // Collection represents a user-created gallery/collection
 type Collection struct {
-	ID          uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
-	UserID      uuid.UUID `gorm:"type:uuid;not null;index" json:"user_id"`
-	Name        string    `gorm:"size:255;not null" json:"name"`
-	Description *string   `gorm:"type:text" json:"description,omitempty"`
-	IsPublic    bool      `gorm:"not null;default:false" json:"is_public"`
-	CreatedAt   time.Time `gorm:"not null;default:now()" json:"created_at"`
-	UpdatedAt   time.Time `gorm:"not null;default:now()" json:"updated_at"`
+	ID          uuid.UUID      `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+	UserID      uuid.UUID      `gorm:"type:uuid;not null;index" json:"user_id"`
+	Name        string         `gorm:"size:255;not null" json:"name"`
+	Description *string        `gorm:"type:text" json:"description,omitempty"`
+	IsPublic    bool           `gorm:"not null;default:false" json:"is_public"`
+	CreatedAt   time.Time      `gorm:"not null;default:now()" json:"created_at"`
+	UpdatedAt   time.Time      `gorm:"not null;default:now()" json:"updated_at"`
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
 
 	// Relationships
-	User            User              `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"user,omitempty"`
-	CollectionItems []CollectionItem  `gorm:"foreignKey:CollectionID;constraint:OnDelete:CASCADE" json:"items,omitempty"`
+	User            User             `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"user,omitempty"`
+	CollectionItems []CollectionItem `gorm:"foreignKey:CollectionID;constraint:OnDelete:CASCADE" json:"items,omitempty"`
 }
 
 // TableName specifies the table name for the Collection model

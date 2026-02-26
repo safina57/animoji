@@ -1,6 +1,6 @@
 interface InputHeroProps {
-  title: string;
-  titleJa: string;
+  title: string
+  titleJa: string
 }
 
 export default function InputHero({ title, titleJa }: InputHeroProps) {
@@ -13,5 +13,5 @@ export default function InputHero({ title, titleJa }: InputHeroProps) {
         {titleJa}
       </p>
     </div>
-  );
+  )
 }

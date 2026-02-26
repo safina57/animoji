@@ -5,12 +5,12 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from core.flux_client import get_flux_client
 from core.logger import get_logger
 from core.settings import get_settings
-from core.flux_client import get_flux_client
 from routers import health
-from services.image_consumer import get_image_job_consumer
 from services.emoji_consumer import get_emoji_consumer
+from services.image_consumer import get_image_job_consumer
 
 logger = get_logger()
 settings = get_settings()
@@ -20,7 +20,7 @@ settings = get_settings()
 async def lifespan(app: FastAPI):
     """
     Application lifespan manager - handles startup and shutdown.
-    
+
     Startup: Initialize NATS client and start job consumer
     Shutdown: Clean up connections
     """
@@ -40,7 +40,7 @@ async def lifespan(app: FastAPI):
                                                         ░░██████                                      
                                                          ░░░░░░                                       
                 """)
-    
+
     try:
         # Start the anime NATS consumer
         job_consumer = get_image_job_consumer()

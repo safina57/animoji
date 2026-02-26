@@ -1,0 +1,29 @@
+version: "2"
+
+linters:
+  default: none # opt-in only — know exactly what checks your code passes
+  enable:
+    - govet # same checks as "go vet": printf mismatches, suspicious constructs, etc.
+    - errcheck # every ignored error return value must be explicit (use _ = or handle it)
+    - staticcheck # ~150 checks: nil ptr dereferences, deprecated APIs, unreachable code, etc.
+    - ineffassign # assignments that are immediately overwritten or never read
+    - unused # exported identifiers (functions, types, vars) that are never referenced
+  settings:
+    govet:
+      enable-all: true # includes the shadow analyser (warns on variable shadowing)
+      disable:
+        - fieldalignment # optimization hint only — reordering DB/DTO struct fields
+          # harms readability without affecting correctness or behaviour
+
+# In golangci-lint v2, formatters (gofmt, gofumpt, goimports, gci) are a
+# separate category from linters and live in their own top-level section.
+formatters:
+  enable:
+    - gofmt # canonical Go formatter; CI fails if code needs reformatting
+  settings:
+    gofmt:
+      simplify: true # applies gofmt -s simplifications (e.g., []T{T{}} → []T{{}})
+
+issues:
+  max-issues-per-linter: 0 # default caps at 3 per file; 0 = unlimited
+  max-same-issues: 0 # default caps identical issues at 3; 0 = unlimited

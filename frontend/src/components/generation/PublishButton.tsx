@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAppDispatch } from "@hooks/redux";
-import { resetGeneration, markResultAsPublished } from "@store/slices/generationSlice";
-import { publishImage } from "@services/generationService";
-import { Button } from "@lib/ui/button";
-import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { useAppDispatch } from "@hooks/redux"
+import { resetGeneration, markResultAsPublished } from "@store/slices/generationSlice"
+import { publishImage } from "@services/generationService"
+import { Button } from "@lib/ui/button"
+import * as DialogPrimitive from "@radix-ui/react-dialog"
 import {
   Dialog,
   DialogHeader,
@@ -12,38 +12,40 @@ import {
   DialogDescription,
   DialogFooter,
   DialogClose,
-} from "@lib/ui/dialog";
-import type { GenerationResult } from "@customTypes/generation";
+} from "@lib/ui/dialog"
+import type { GenerationResult } from "@customTypes/generation"
 
 interface PublishButtonProps {
-  jobId: string | null;
-  result: GenerationResult;
+  jobId: string | null
+  result: GenerationResult
 }
 
 export default function PublishButton({ jobId, result }: PublishButtonProps) {
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const [visibility, setVisibility] = useState<"public" | "private">("public");
-  const [isPublishing, setIsPublishing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useAppDispatch()
+  const navigate = useNavigate()
+  const [open, setOpen] = useState(false)
+  const [visibility, setVisibility] = useState<"public" | "private">("public")
+  const [isPublishing, setIsPublishing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const isPublished = !!result.publishedImageId;
+  const isPublished = !!result.publishedImageId
 
   async function handleConfirm() {
-    if (!jobId || isPublishing) return;
-    setIsPublishing(true);
-    setError(null);
+    if (!jobId || isPublishing) return
+    setIsPublishing(true)
+    setError(null)
     try {
-      const response = await publishImage(jobId, visibility);
-      dispatch(markResultAsPublished({ iterationNum: result.iterationNum, imageId: response.image_id }));
-      setOpen(false);
-      dispatch(resetGeneration());
-      navigate(`/?image=${response.image_id}`);
+      const response = await publishImage(jobId, visibility)
+      dispatch(
+        markResultAsPublished({ iterationNum: result.iterationNum, imageId: response.image_id })
+      )
+      setOpen(false)
+      dispatch(resetGeneration())
+      navigate(`/?image=${response.image_id}`)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to publish");
+      setError(err instanceof Error ? err.message : "Failed to publish")
     } finally {
-      setIsPublishing(false);
+      setIsPublishing(false)
     }
   }
 
@@ -53,11 +55,17 @@ export default function PublishButton({ jobId, result }: PublishButtonProps) {
         <span className="material-symbols-outlined text-sm">check_circle</span>
         <span className="text-xs font-semibold">Published</span>
       </div>
-    );
+    )
   }
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setError(null); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v)
+        if (!v) setError(null)
+      }}
+    >
       <Button
         onClick={() => setOpen(true)}
         variant="outline"
@@ -128,7 +136,9 @@ export default function PublishButton({ jobId, result }: PublishButtonProps) {
               >
                 {isPublishing ? (
                   <>
-                    <span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                    <span className="material-symbols-outlined text-sm animate-spin">
+                      progress_activity
+                    </span>
                     Publishing…
                   </>
                 ) : (
@@ -143,18 +153,18 @@ export default function PublishButton({ jobId, result }: PublishButtonProps) {
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </Dialog>
-  );
+  )
 }
 
 /* ── Visibility option card ── */
 
 interface VisibilityOptionProps {
-  value: "public" | "private";
-  selected: boolean;
-  onSelect: () => void;
-  icon: string;
-  label: string;
-  description: string;
+  value: "public" | "private"
+  selected: boolean
+  onSelect: () => void
+  icon: string
+  label: string
+  description: string
 }
 
 function VisibilityOption({ selected, onSelect, icon, label, description }: VisibilityOptionProps) {
@@ -167,13 +177,17 @@ function VisibilityOption({ selected, onSelect, icon, label, description }: Visi
           : "border-slate-200 dark:border-slate-700 hover:border-primary/40"
       }`}
     >
-      <span className={`material-symbols-outlined text-lg ${selected ? "text-primary" : "text-slate-400"}`}>
+      <span
+        className={`material-symbols-outlined text-lg ${selected ? "text-primary" : "text-slate-400"}`}
+      >
         {icon}
       </span>
-      <span className={`text-xs font-semibold ${selected ? "text-primary" : "text-slate-600 dark:text-slate-300"}`}>
+      <span
+        className={`text-xs font-semibold ${selected ? "text-primary" : "text-slate-600 dark:text-slate-300"}`}
+      >
         {label}
       </span>
       <span className="text-[10px] text-slate-400 leading-tight">{description}</span>
     </button>
-  );
+  )
 }

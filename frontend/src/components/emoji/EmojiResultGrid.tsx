@@ -1,14 +1,14 @@
-import { cn } from '@lib/utils';
-import { Button } from '@lib/ui/button';
-import EmojiVariantCard from './EmojiVariantCard';
-import type { EmojiVariant } from '@customTypes/emoji';
+import { cn } from "@lib/utils"
+import { Button } from "@lib/ui/button"
+import EmojiVariantCard from "./EmojiVariantCard"
+import type { EmojiVariant } from "@customTypes/emoji"
 
 interface EmojiResultGridProps {
-  variants: EmojiVariant[];
-  totalVariants: number;
-  isComplete: boolean;
-  onReset: () => void;
-  onPublishVariant: (variantId: string) => Promise<void>;
+  variants: EmojiVariant[]
+  totalVariants: number
+  isComplete: boolean
+  onReset: () => void
+  onPublishVariant: (variantId: string) => Promise<void>
 }
 
 export default function EmojiResultGrid({
@@ -18,22 +18,22 @@ export default function EmojiResultGrid({
   onReset,
   onPublishVariant,
 }: EmojiResultGridProps) {
-  const displayCount = totalVariants > 0 ? totalVariants : 3;
+  const displayCount = totalVariants > 0 ? totalVariants : 3
   const slots = Array.from(
     { length: displayCount },
     (_, i) => variants[i] as EmojiVariant | undefined
-  );
-  const completedCount = variants.filter(v => v.status === 'completed').length;
+  )
+  const completedCount = variants.filter((v) => v.status === "completed").length
 
   return (
     <div className="flex flex-col items-center gap-8 w-full">
       {/* Header */}
       <div className="text-center space-y-3">
         <h2 className="text-3xl md:text-4xl font-display font-bold text-slate-900 dark:text-white">
-          {isComplete ? 'Your Stickers are Ready' : 'Creating Your Stickers'}
+          {isComplete ? "Your Stickers are Ready" : "Creating Your Stickers"}
         </h2>
         <p className="text-sm text-primary/60 dark:text-primary/40 font-japanese uppercase tracking-[0.3em]">
-          {isComplete ? 'ステッカーが完成しました' : 'ステッカーを作成しています'}
+          {isComplete ? "ステッカーが完成しました" : "ステッカーを作成しています"}
         </p>
 
         {/* Progress indicator */}
@@ -44,12 +44,12 @@ export default function EmojiResultGrid({
                 <div
                   key={i}
                   className={cn(
-                    'w-2 h-2 rounded-full transition-all duration-500',
-                    slot?.status === 'completed'
-                      ? 'bg-primary scale-125'
-                      : slot?.status === 'failed'
-                      ? 'bg-red-400 scale-125'
-                      : 'bg-slate-300 dark:bg-slate-600 animate-pulse'
+                    "w-2 h-2 rounded-full transition-all duration-500",
+                    slot?.status === "completed"
+                      ? "bg-primary scale-125"
+                      : slot?.status === "failed"
+                        ? "bg-red-400 scale-125"
+                        : "bg-slate-300 dark:bg-slate-600 animate-pulse"
                   )}
                 />
               ))}
@@ -77,7 +77,9 @@ export default function EmojiResultGrid({
               variant={variant}
               index={i}
               isComplete={isComplete}
-              onPublish={variant?.variantId ? () => onPublishVariant(variant.variantId!) : undefined}
+              onPublish={
+                variant?.variantId ? () => onPublishVariant(variant.variantId!) : undefined
+              }
             />
           </div>
         ))}
@@ -97,5 +99,5 @@ export default function EmojiResultGrid({
         </div>
       )}
     </div>
-  );
+  )
 }

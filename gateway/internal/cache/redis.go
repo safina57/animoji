@@ -19,10 +19,10 @@ import (
 type JobMetadata struct {
 	JobID          string    `json:"job_id"`
 	UserID         uuid.UUID `json:"user_id"`
-	Prompts        []string  `json:"prompts"`                    // Array of prompts (original + refinements)
-	OriginalKey    string    `json:"original_key"`               // tmp/{job_id}/original.{ext}
-	OriginalExt    string    `json:"original_ext"`               // "jpg" or "png" — for publish path reconstruction
-	GeneratedKeys  []string  `json:"generated_keys,omitempty"`   // Array of result keys (versioned)
+	Prompts        []string  `json:"prompts"`                  // Array of prompts (original + refinements)
+	OriginalKey    string    `json:"original_key"`             // tmp/{job_id}/original.{ext}
+	OriginalExt    string    `json:"original_ext"`             // "jpg" or "png" — for publish path reconstruction
+	GeneratedKeys  []string  `json:"generated_keys,omitempty"` // Array of result keys (versioned)
 	Width          int       `json:"width"`
 	Height         int       `json:"height"`
 	IterationNum   int       `json:"iteration_num"`
@@ -236,8 +236,8 @@ func (r *RedisClient) UpdateEmojiJobTotalVariants(ctx context.Context, jobID str
 			}
 
 			var metadata EmojiJobMetadata
-			if err := json.Unmarshal(data, &metadata); err != nil {
-				return fmt.Errorf("failed to unmarshal emoji job metadata: %w", err)
+			if unmarshalErr := json.Unmarshal(data, &metadata); unmarshalErr != nil {
+				return fmt.Errorf("failed to unmarshal emoji job metadata: %w", unmarshalErr)
 			}
 
 			metadata.TotalVariants = total
@@ -282,8 +282,8 @@ func (r *RedisClient) AppendEmojiVariantResult(ctx context.Context, jobID string
 			}
 
 			var metadata EmojiJobMetadata
-			if err := json.Unmarshal(data, &metadata); err != nil {
-				return fmt.Errorf("failed to unmarshal emoji job metadata: %w", err)
+			if unmarshalErr := json.Unmarshal(data, &metadata); unmarshalErr != nil {
+				return fmt.Errorf("failed to unmarshal emoji job metadata: %w", unmarshalErr)
 			}
 
 			metadata.CompletedVariants = append(metadata.CompletedVariants, variant)

@@ -10,6 +10,7 @@ from prompts import AnimeGenerationPrompt, EmojiGenerationPrompt
 
 # ── Shared model factory ───────────────────────────────────────────────────────
 
+
 def _build_azure_model() -> OpenAIResponsesModel:
     settings = get_settings()
     return OpenAIResponsesModel(

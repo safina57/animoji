@@ -87,9 +87,9 @@ const (
 
 // NATS configuration
 const (
-	DefaultNatsURL             = "nats://nats:4222"
-	NatsSubjectGenerate        = "anime.generate"
-	NatsSubjectEmojiGenerate   = "emoji.generate"
+	DefaultNatsURL           = "nats://nats:4222"
+	NatsSubjectGenerate      = "anime.generate"
+	NatsSubjectEmojiGenerate = "emoji.generate"
 )
 
 // Emoji storage prefixes
@@ -100,9 +100,9 @@ const (
 
 // CORS configuration
 const (
-	CORSAllowMethods  = "GET, POST, PUT, DELETE, OPTIONS"
-	CORSAllowHeaders  = "Content-Type, Authorization, Cache-Control"
-	CORSExposeHeaders = "Content-Type, Cache-Control, Connection"
+	CORSAllowMethods     = "GET, POST, PUT, DELETE, OPTIONS"
+	CORSAllowHeaders     = "Content-Type, Authorization, Cache-Control"
+	CORSExposeHeaders    = "Content-Type, Cache-Control, Connection"
 	CORSAllowCredentials = "true"
 )
 

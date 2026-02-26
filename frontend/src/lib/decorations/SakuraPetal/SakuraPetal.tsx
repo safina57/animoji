@@ -1,23 +1,18 @@
-import SakuraPetalIcon from "@assets/icons/sakura-petal.svg?react";
+import SakuraPetalIcon from "@assets/icons/sakura-petal.svg?react"
 
 export interface PetalProps {
-  delay: string;
-  left: string;
-  size: "small" | "medium" | "large";
-  duration: string;
+  delay: string
+  left: string
+  size: "small" | "medium" | "large"
+  duration: string
 }
 
-export default function SakuraPetal({
-  delay,
-  left,
-  size,
-  duration,
-}: PetalProps) {
+export default function SakuraPetal({ delay, left, size, duration }: PetalProps) {
   const sizeClasses = {
     small: "w-2 h-2",
     medium: "w-3 h-3",
     large: "w-4 h-4",
-  };
+  }
 
   return (
     <div
@@ -30,5 +25,5 @@ export default function SakuraPetal({
     >
       <SakuraPetalIcon className="w-full h-full fill-[var(--color-sakura-pink)] drop-shadow-sm" />
     </div>
-  );
+  )
 }

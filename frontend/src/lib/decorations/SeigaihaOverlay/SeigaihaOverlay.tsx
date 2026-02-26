@@ -1,5 +1,5 @@
 interface SeigaihaOverlayProps {
-  className?: string;
+  className?: string
 }
 
 /**
@@ -12,8 +12,8 @@ interface SeigaihaOverlayProps {
  *   absolute opacity-60 dark:opacity-25 → modal / card headers
  *   absolute opacity-20 dark:opacity-10 → subtle page overlay (404)
  */
-export default function SeigaihaOverlay({ className = "absolute opacity-30 dark:opacity-20" }: SeigaihaOverlayProps) {
-  return (
-    <div className={`inset-0 pattern-seigaiha pointer-events-none ${className}`} />
-  );
+export default function SeigaihaOverlay({
+  className = "absolute opacity-30 dark:opacity-20",
+}: SeigaihaOverlayProps) {
+  return <div className={`inset-0 pattern-seigaiha pointer-events-none ${className}`} />
 }

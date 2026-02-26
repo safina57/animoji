@@ -1,10 +1,11 @@
 """Structured logging configuration."""
 
+import json
 import logging
 import sys
-from typing import Any
-import json
 from datetime import datetime
+from typing import Any
+
 from core.settings import get_settings
 
 
@@ -13,7 +14,6 @@ class JSONFormatter(logging.Formatter):
 
     def format(self, record: logging.LogRecord) -> str:
         """Format log record as JSON."""
-        
 
         log_data: dict[str, Any] = {
             "timestamp": datetime.now().isoformat() + "Z",
@@ -25,10 +25,27 @@ class JSONFormatter(logging.Formatter):
         # Include extra fields from logging calls
         for key, value in record.__dict__.items():
             if key not in [
-                "name", "msg", "args", "created", "filename", "funcName",
-                "levelname", "levelno", "lineno", "module", "msecs",
-                "message", "pathname", "process", "processName", "relativeCreated",
-                "thread", "threadName", "exc_info", "exc_text", "stack_info",
+                "name",
+                "msg",
+                "args",
+                "created",
+                "filename",
+                "funcName",
+                "levelname",
+                "levelno",
+                "lineno",
+                "module",
+                "msecs",
+                "message",
+                "pathname",
+                "process",
+                "processName",
+                "relativeCreated",
+                "thread",
+                "threadName",
+                "exc_info",
+                "exc_text",
+                "stack_info",
             ]:
                 log_data[key] = value
 

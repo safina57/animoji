@@ -50,10 +50,10 @@ def _remove_white_background(
     fill_thresh = 255 - threshold
 
     border_pixels = (
-        [(x, 0) for x in range(0, w, edge_sample_step)] +
-        [(x, h - 1) for x in range(0, w, edge_sample_step)] +
-        [(0, y) for y in range(0, h, edge_sample_step)] +
-        [(w - 1, y) for y in range(0, h, edge_sample_step)]
+        [(x, 0) for x in range(0, w, edge_sample_step)]
+        + [(x, h - 1) for x in range(0, w, edge_sample_step)]
+        + [(0, y) for y in range(0, h, edge_sample_step)]
+        + [(w - 1, y) for y in range(0, h, edge_sample_step)]
     )
     for pt in border_pixels:
         pixel = work.getpixel(pt)
@@ -152,8 +152,10 @@ class EmojiConsumer:
             subject=self.settings.emoji_nats_subject,
             callback=self._handle_message,
         )
-        self.logger.info("Emoji consumer started", extra={"subject": self.settings.emoji_nats_subject})
-
+        self.logger.info(
+            "Emoji consumer started",
+            extra={"subject": self.settings.emoji_nats_subject},
+        )
 
     async def _handle_message(self, msg: Msg) -> None:
         """Process a single emoji job"""
@@ -200,13 +202,17 @@ class EmojiConsumer:
             )
 
             # Notify the gateway of the actual variant count before any FLUX calls start.
-            await self._publish_status(job_id, "started", total_variants=len(active_emotions))
+            await self._publish_status(
+                job_id, "started", total_variants=len(active_emotions)
+            )
 
             # Step 3: Generate all emotion variants in parallel
             input_image_b64 = base64.b64encode(image_data).decode("utf-8")
             await asyncio.gather(
                 *[
-                    self._generate_variant(job_id, variant_index, emotion, base_style, input_image_b64)
+                    self._generate_variant(
+                        job_id, variant_index, emotion, base_style, input_image_b64
+                    )
                     for variant_index, emotion in active_emotions
                 ]
             )
@@ -255,7 +261,11 @@ class EmojiConsumer:
 
             self.logger.info(
                 "FLUX image generated",
-                extra={"job_id": job_id, "emotion": emotion, "output_size": len(image_bytes)},
+                extra={
+                    "job_id": job_id,
+                    "emotion": emotion,
+                    "output_size": len(image_bytes),
+                },
             )
 
             # Open once, pipe through both steps, serialize once.
@@ -269,7 +279,9 @@ class EmojiConsumer:
             output_key = f"tmp/{job_id}/emoji_{emotion}.png"
             await self.minio_client.upload_file(output_key, out.getvalue(), "image/png")
 
-            await self._publish_status(job_id, "completed", emotion, variant_index, output_key)
+            await self._publish_status(
+                job_id, "completed", emotion, variant_index, output_key
+            )
 
             self.logger.info(
                 "Emoji variant completed",

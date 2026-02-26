@@ -1,4 +1,4 @@
-import ToriiGateIcon from "@lib/decorations/ToriiGateIcon/ToriiGateIcon";
+import ToriiGateIcon from "@lib/decorations/ToriiGateIcon/ToriiGateIcon"
 
 export default function CommunityHeader() {
   return (
@@ -19,5 +19,5 @@ export default function CommunityHeader() {
         <ToriiGateIcon className="w-24 h-24" />
       </div>
     </div>
-  );
+  )
 }

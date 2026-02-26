@@ -4,41 +4,41 @@
 /* ─── Theme Tokens ─── */
 @theme {
   /* Primary - Vermillion (Torii Gate Red) */
-  --color-primary: #E63946;
+  --color-primary: #e63946;
 
   /* Backgrounds - Washi Paper & Night Sky */
-  --color-background-light: #FAF7F2;
-  --color-background-dark: #0F111A;
-  --color-paper-light: #FFFBF5;
-  --color-paper-dark: #1A1D29;
+  --color-background-light: #faf7f2;
+  --color-background-dark: #0f111a;
+  --color-paper-light: #fffbf5;
+  --color-paper-dark: #1a1d29;
 
   /* Japan Traditional Palette */
-  --color-sakura-pink: #FFB5C2;
-  --color-fuji-blue: #5B7C99;
-  --color-matcha-green: #7D9E53;
-  --color-indigo-deep: #2B3A67;
-  --color-gold-accent: #D4AF37;
-  --color-water-blue: #A8D5DE;
-  --color-wood-dark: #5D4037;
-  --color-torii-red: #E63946;
-  --color-stone-gray: #BDBDBD;
-  --color-ink-black: #1A1A1A;
+  --color-sakura-pink: #ffb5c2;
+  --color-fuji-blue: #5b7c99;
+  --color-matcha-green: #7d9e53;
+  --color-indigo-deep: #2b3a67;
+  --color-gold-accent: #d4af37;
+  --color-water-blue: #a8d5de;
+  --color-wood-dark: #5d4037;
+  --color-torii-red: #e63946;
+  --color-stone-gray: #bdbdbd;
+  --color-ink-black: #1a1a1a;
 
   /* Anime Vibrant Accents */
-  --color-neon-pink: #FF6B9D;
-  --color-neon-blue: #4ECDC4;
-  --color-neon-yellow: #FFE66D;
-  --color-neon-purple: #A8E6CF;
+  --color-neon-pink: #ff6b9d;
+  --color-neon-blue: #4ecdc4;
+  --color-neon-yellow: #ffe66d;
+  --color-neon-purple: #a8e6cf;
 
   /* shadcn/ui CSS Variables */
-  --color-popover: #FFFFFF;
+  --color-popover: #ffffff;
   --color-popover-foreground: #1e293b;
   --color-muted: #f1f5f9;
   --color-muted-foreground: #64748b;
   --color-accent: #f1f5f9;
   --color-accent-foreground: #1e293b;
   --color-destructive: #ef4444;
-  --color-destructive-foreground: #FFFFFF;
+  --color-destructive-foreground: #ffffff;
 
   /* Typography - Japanese Aesthetic */
   --font-display: "Cormorant Garamond", serif;
@@ -50,14 +50,14 @@
 
 @theme dark {
   /* shadcn/ui Dark Mode Variables */
-  --color-popover: #1A1D29;
+  --color-popover: #1a1d29;
   --color-popover-foreground: #e2e8f0;
   --color-muted: #1e293b;
   --color-muted-foreground: #94a3b8;
   --color-accent: #1e293b;
   --color-accent-foreground: #e2e8f0;
   --color-destructive: #dc2626;
-  --color-destructive-foreground: #FFFFFF;
+  --color-destructive-foreground: #ffffff;
 }
 
 /* ─── Base ─── */
@@ -70,7 +70,9 @@ body {
   min-height: 100vh;
   background-color: var(--color-background-light);
   color: #1e293b;
-  transition: background-color 0.3s, color 0.3s;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
 }
 
 .dark body {
@@ -80,7 +82,11 @@ body {
 
 /* ─── Material Icons tuning ─── */
 .material-symbols-outlined {
-  font-variation-settings: "FILL" 0, "wght" 300, "GRAD" 0, "opsz" 24;
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 300,
+    "GRAD" 0,
+    "opsz" 24;
 }
 
 /* ─── Japanese Frame ─── */
@@ -113,7 +119,8 @@ body {
 
 /* Seigaiha (Wave pattern) */
 .pattern-seigaiha {
-  background-image: radial-gradient(
+  background-image:
+    radial-gradient(
       circle at 100% 150%,
       transparent 24%,
       rgba(230, 57, 70, 0.05) 25%,
@@ -138,19 +145,70 @@ body {
       transparent
     );
   background-size: 40px 40px;
-  background-position: 0 0, 20px 20px;
+  background-position:
+    0 0,
+    20px 20px;
 }
 
 /* Asanoha (Hemp leaf pattern) */
 .pattern-asanoha {
-  background-image: linear-gradient(30deg, rgba(230, 57, 70, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(230, 57, 70, 0.03) 87.5%, rgba(230, 57, 70, 0.03)),
-    linear-gradient(150deg, rgba(230, 57, 70, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(230, 57, 70, 0.03) 87.5%, rgba(230, 57, 70, 0.03)),
-    linear-gradient(30deg, rgba(230, 57, 70, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(230, 57, 70, 0.03) 87.5%, rgba(230, 57, 70, 0.03)),
-    linear-gradient(150deg, rgba(230, 57, 70, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(230, 57, 70, 0.03) 87.5%, rgba(230, 57, 70, 0.03)),
-    linear-gradient(60deg, rgba(230, 57, 70, 0.05) 25%, transparent 25.5%, transparent 75%, rgba(230, 57, 70, 0.05) 75%, rgba(230, 57, 70, 0.05)),
-    linear-gradient(60deg, rgba(230, 57, 70, 0.05) 25%, transparent 25.5%, transparent 75%, rgba(230, 57, 70, 0.05) 75%, rgba(230, 57, 70, 0.05));
+  background-image:
+    linear-gradient(
+      30deg,
+      rgba(230, 57, 70, 0.03) 12%,
+      transparent 12.5%,
+      transparent 87%,
+      rgba(230, 57, 70, 0.03) 87.5%,
+      rgba(230, 57, 70, 0.03)
+    ),
+    linear-gradient(
+      150deg,
+      rgba(230, 57, 70, 0.03) 12%,
+      transparent 12.5%,
+      transparent 87%,
+      rgba(230, 57, 70, 0.03) 87.5%,
+      rgba(230, 57, 70, 0.03)
+    ),
+    linear-gradient(
+      30deg,
+      rgba(230, 57, 70, 0.03) 12%,
+      transparent 12.5%,
+      transparent 87%,
+      rgba(230, 57, 70, 0.03) 87.5%,
+      rgba(230, 57, 70, 0.03)
+    ),
+    linear-gradient(
+      150deg,
+      rgba(230, 57, 70, 0.03) 12%,
+      transparent 12.5%,
+      transparent 87%,
+      rgba(230, 57, 70, 0.03) 87.5%,
+      rgba(230, 57, 70, 0.03)
+    ),
+    linear-gradient(
+      60deg,
+      rgba(230, 57, 70, 0.05) 25%,
+      transparent 25.5%,
+      transparent 75%,
+      rgba(230, 57, 70, 0.05) 75%,
+      rgba(230, 57, 70, 0.05)
+    ),
+    linear-gradient(
+      60deg,
+      rgba(230, 57, 70, 0.05) 25%,
+      transparent 25.5%,
+      transparent 75%,
+      rgba(230, 57, 70, 0.05) 75%,
+      rgba(230, 57, 70, 0.05)
+    );
   background-size: 80px 140px;
-  background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;
+  background-position:
+    0 0,
+    0 0,
+    40px 70px,
+    40px 70px,
+    0 0,
+    40px 70px;
 }
 
 /* ─── Custom scrollbar ─── */
@@ -220,7 +278,6 @@ body {
 .animate-gentle-bob {
   animation: gentle-bob 3s ease-in-out infinite;
 }
-
 
 /* ─── Slide transitions ─── */
 @keyframes slide-up {
@@ -357,7 +414,8 @@ body {
 
 /* Star blink */
 @keyframes twinkle {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.1;
     transform: scale(0.8);
   }
@@ -369,7 +427,8 @@ body {
 
 /* Torii gate glow pulse */
 @keyframes torii-glow {
-  0%, 100% {
+  0%,
+  100% {
     filter: drop-shadow(0 0 6px rgba(230, 57, 70, 0.15));
   }
   50% {

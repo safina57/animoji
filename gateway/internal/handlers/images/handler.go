@@ -70,7 +70,7 @@ func (h *ImageHandler) HandleRefineJob(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Prompt string `json:"prompt"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.Prompt == "" {
+	if decodeErr := json.NewDecoder(r.Body).Decode(&req); decodeErr != nil || req.Prompt == "" {
 		handlers.RespondError(w, "Refinement prompt is required", http.StatusBadRequest)
 		return
 	}

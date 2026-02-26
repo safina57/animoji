@@ -1,26 +1,26 @@
 export interface ImageUser {
-  id: string;
-  name: string;
-  avatar_url: string;
+  id: string
+  name: string
+  avatar_url: string
 }
 
 export interface ImageFeedItem {
-  id: string;
-  thumbnail_url: string;
-  generated_url: string;
-  user: ImageUser;
-  is_liked_by_user?: boolean; // populated by API when authenticated, updated locally via Redux
+  id: string
+  thumbnail_url: string
+  generated_url: string
+  user: ImageUser
+  is_liked_by_user?: boolean // populated by API when authenticated, updated locally via Redux
 }
 
 export interface ImageDetailItem extends ImageFeedItem {
-  prompts: string[];
-  created_at: string;
-  likes_count: number;
+  prompts: string[]
+  created_at: string
+  likes_count: number
 }
 
 export interface PublicImagesResponse {
-  images: ImageFeedItem[];
-  has_more: boolean;
-  offset: number;
-  limit: number;
+  images: ImageFeedItem[]
+  has_more: boolean
+  offset: number
+  limit: number
 }

@@ -1,5 +1,5 @@
 interface ToriiGateIconProps {
-  className?: string;
+  className?: string
 }
 
 export default function ToriiGateIcon({ className }: ToriiGateIconProps) {
@@ -18,5 +18,5 @@ export default function ToriiGateIcon({ className }: ToriiGateIconProps) {
       <rect x="10" y="12" width="14" height="8" rx="3" fill="currentColor" />
       <rect x="96" y="12" width="14" height="8" rx="3" fill="currentColor" />
     </svg>
-  );
+  )
 }
