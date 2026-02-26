@@ -79,7 +79,7 @@ export default function LoadingDialog({ messages = DEFAULT_MESSAGES }: LoadingDi
     }, 3200)
 
     return () => clearInterval(id)
-  }, [])
+  }, [messages.length])
 
   return (
     <div

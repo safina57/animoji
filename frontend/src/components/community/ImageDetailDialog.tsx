@@ -50,7 +50,7 @@ export function ImageDetailDialog({ item, open, onClose }: ImageDetailDialogProp
         .then(setLiked)
         .catch(() => {})
     }
-  }, [item?.id, open, isAuthenticated])
+  }, [item, open, isAuthenticated])
 
   if (!item) return null
 

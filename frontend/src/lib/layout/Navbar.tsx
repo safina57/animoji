@@ -39,11 +39,6 @@ export default function Navbar() {
     localStorage.setItem("theme", dark ? "dark" : "light")
   }, [dark])
 
-  // Close drawer on route change
-  useEffect(() => {
-    setDrawerOpen(false)
-  }, [location.pathname])
-
   const handleLogout = async () => {
     try {
       await authService.logout()
@@ -205,6 +200,7 @@ export default function Navbar() {
                     key={to}
                     to={to}
                     end={to === "/"}
+                    onClick={() => setDrawerOpen(false)}
                     className={({ isActive }) =>
                       [
                         "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all border",

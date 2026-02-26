@@ -99,7 +99,11 @@ export default function UnifiedInput({ mode, onModeToggle }: UnifiedInputProps) 
 
   /* ── Dispatch helpers ── */
   function handleSetPrompt(value: string) {
-    isAnime ? dispatch(setPrompt(value)) : dispatch(setEmojiPrompt(value))
+    if (isAnime) {
+      dispatch(setPrompt(value))
+    } else {
+      dispatch(setEmojiPrompt(value))
+    }
   }
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
@@ -107,14 +111,20 @@ export default function UnifiedInput({ mode, onModeToggle }: UnifiedInputProps) 
     if (!file) return
     if (referencePreviewUrl) URL.revokeObjectURL(referencePreviewUrl)
     const previewUrl = URL.createObjectURL(file)
-    isAnime
-      ? dispatch(setReferenceImage({ file, previewUrl }))
-      : dispatch(setEmojiReferenceImage({ file, previewUrl }))
+    if (isAnime) {
+      dispatch(setReferenceImage({ file, previewUrl }))
+    } else {
+      dispatch(setEmojiReferenceImage({ file, previewUrl }))
+    }
   }
 
   function removeImage() {
     if (referencePreviewUrl) URL.revokeObjectURL(referencePreviewUrl)
-    isAnime ? dispatch(setReferenceImage(null)) : dispatch(setEmojiReferenceImage(null))
+    if (isAnime) {
+      dispatch(setReferenceImage(null))
+    } else {
+      dispatch(setEmojiReferenceImage(null))
+    }
     if (fileInputRef.current) fileInputRef.current.value = ""
   }
 

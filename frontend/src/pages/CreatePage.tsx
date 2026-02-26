@@ -100,7 +100,11 @@ export default function CreatePage() {
   }
 
   function dismissError() {
-    isAnime ? dispatch(failGeneration(null)) : dispatch(failEmojiGeneration(null))
+    if (isAnime) {
+      dispatch(failGeneration(null))
+    } else {
+      dispatch(failEmojiGeneration(null))
+    }
   }
 
   function handleEmojiReset() {

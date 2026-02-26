@@ -1,24 +1,26 @@
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useLayoutEffect, useCallback, useRef } from "react"
 
-export interface UseSSEOptions {
+export interface UseSSEOptions<T = unknown> {
   onOpen?: () => void
   onError?: (error: string) => void
-  onMessage?: (data: any) => void
+  onMessage?: (data: T) => void
 }
 
-export function useSSE(url: string | null, options: UseSSEOptions = {}) {
+export function useSSE<T = unknown>(url: string | null, options: UseSSEOptions<T> = {}) {
   // Use refs for callbacks to avoid re-triggering the connection effect
   const onOpenRef = useRef(options.onOpen)
   const onErrorRef = useRef(options.onError)
   const onMessageRef = useRef(options.onMessage)
 
   // Keep refs in sync with latest callbacks
-  onOpenRef.current = options.onOpen
-  onErrorRef.current = options.onError
-  onMessageRef.current = options.onMessage
+  useLayoutEffect(() => {
+    onOpenRef.current = options.onOpen
+    onErrorRef.current = options.onError
+    onMessageRef.current = options.onMessage
+  })
 
   // Store latest received data
-  const [data, setData] = useState<any>(null)
+  const [data, setData] = useState<T | null>(null)
 
   // Store error state
   const [error, setError] = useState<string | null>(null)
@@ -62,10 +64,10 @@ export function useSSE(url: string | null, options: UseSSEOptions = {}) {
     // Handle incoming messages
     eventSource.onmessage = (event) => {
       try {
-        const parsedData = JSON.parse(event.data)
+        const parsedData = JSON.parse(event.data) as T
         setData(parsedData)
         onMessageRef.current?.(parsedData)
-      } catch (parseError) {
+      } catch {
         const errorMsg = "Failed to parse event data"
         setError(errorMsg)
         onErrorRef.current?.(errorMsg)
