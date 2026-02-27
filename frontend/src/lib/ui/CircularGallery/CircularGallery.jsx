@@ -165,7 +165,7 @@ class Media {
           vec4 color = texture2D(tMap, uv);
           float d = roundedBoxSDF(vUv - 0.5, vec2(0.5 - uBorderRadius), uBorderRadius);
           float shapeMask = 1.0 - smoothstep(-0.002, 0.002, d);
-          gl_FragColor = vec4(color.rgb, shapeMask * uAlpha);
+          gl_FragColor = vec4(color.rgb, color.a * shapeMask * uAlpha);
         }
       `,
       uniforms: {

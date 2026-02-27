@@ -4,15 +4,11 @@ import { useGSAP } from "@gsap/react"
 import gsap from "gsap"
 import CircularGallery from "@lib/ui/CircularGallery/CircularGallery"
 
-const ANIME_ITEMS = [
-  { image: "/anime/image1.png", text: "" },
-  { image: "/anime/image2.png", text: "" },
-  { image: "/anime/image3.png", text: "" },
-  { image: "/anime/image4.png", text: "" },
-  { image: "/anime/image5.png", text: "" },
-  { image: "/anime/image6.png", text: "" },
-  { image: "/anime/image7.png", text: "" },
-]
+const animeGlob = import.meta.glob("/src/assets/anime/*.png", { eager: true })
+const ANIME_ITEMS = Object.values(animeGlob).map((mod) => ({
+  image: (mod as { default: string }).default,
+  text: "",
+}))
 
 export default function LandingAboutAnime() {
   const panelRef = useRef<HTMLDivElement>(null)
