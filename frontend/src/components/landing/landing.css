@@ -489,6 +489,256 @@
   56% { transform: scale(1); }
 }
 
+/* ─── About Section ───────────────────────────────────────────────────── */
+.about-section {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #0f111a;
+}
+
+/* Torii gate silhouette — centred, bottom-anchored */
+.about-torii-bg {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 55%;
+  max-width: 520px;
+  opacity: 0.05;
+  color: #e63946;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Vertical Japanese text (right edge) */
+.about-vertical-text {
+  position: absolute;
+  right: -2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.4s ease;
+}
+
+.about-vertical-p {
+  writing-mode: vertical-rl;
+  font-family: "Noto Serif JP", serif;
+  color: rgba(230, 57, 70, 0.2);
+  font-size: 1.5rem;
+  letter-spacing: 0.5em;
+  font-weight: 700;
+}
+
+/* Panels wrapper */
+.about-panels-wrap {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  z-index: 2;
+}
+
+/* Individual panel */
+.about-panel {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: 7rem 5rem 4rem;
+  gap: 3rem;
+  min-height: 100vh;
+}
+
+.about-panel-emoji {
+  opacity: 0;
+}
+
+/* Text column */
+.about-text-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  max-width: 480px;
+}
+
+.about-text-col-right {
+  justify-self: end;
+}
+
+/* Gallery column */
+.about-gallery-col {
+  position: relative;
+  height: 520px;
+}
+
+/* Section tag */
+.about-tag {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #e63946;
+}
+
+.about-tag-gold {
+  color: #d4af37;
+}
+
+/* Heading */
+.about-heading {
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(2.6rem, 4.5vw, 4.2rem);
+  font-weight: 700;
+  line-height: 1.05;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.about-heading em {
+  font-style: italic;
+  color: #e63946;
+  display: block;
+}
+
+.about-heading-gold em {
+  color: #d4af37;
+}
+
+/* Body text */
+.about-body {
+  font-family: "DM Sans", sans-serif;
+  font-size: clamp(0.88rem, 1.1vw, 1rem);
+  line-height: 1.85;
+  color: rgba(255, 255, 255, 0.45);
+  max-width: 38ch;
+}
+
+/* Stats row */
+.about-stats {
+  display: flex;
+  gap: 2.5rem;
+  padding-top: 0.25rem;
+}
+
+.about-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.about-stat-num {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.about-stat-label {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.28);
+}
+
+/* CTA link */
+.about-cta-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #e63946;
+  text-decoration: none;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid rgba(230, 57, 70, 0.35);
+  transition: color 0.3s, border-color 0.3s;
+  width: fit-content;
+}
+
+.about-cta-link:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.about-cta-link-gold {
+  color: #d4af37;
+  border-bottom-color: rgba(212, 175, 55, 0.35);
+}
+
+.about-cta-link-gold:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.about-cta-arrow {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  transition: transform 0.3s;
+}
+
+.about-cta-link:hover .about-cta-arrow {
+  transform: translateX(4px);
+}
+
+/* Thin red rule accent below tag */
+.about-rule {
+  width: 2.5rem;
+  height: 1px;
+  background: #e63946;
+  opacity: 0.5;
+}
+
+.about-rule-gold {
+  background: #d4af37;
+}
+
+/* Scroll progress indicator */
+.about-progress {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  z-index: 4;
+}
+
+.about-progress-label {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.18);
+}
+
+.about-progress-track {
+  width: 80px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.about-progress-fill {
+  position: absolute;
+  inset: 0;
+  background: #e63946;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
 /* ─── Responsive ──────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .hero-title {
@@ -501,5 +751,32 @@
 
   .marquee-item {
     padding: 0 0.75rem;
+  }
+
+  .about-panel {
+    grid-template-columns: 1fr;
+    padding: 5rem 1.5rem 2rem;
+    gap: 2rem;
+    overflow-y: auto;
+    min-height: 100vh;
+  }
+
+  .about-text-col-right {
+    justify-self: start;
+    order: -1;
+  }
+
+  .about-gallery-col {
+    height: 300px;
+  }
+
+  .about-vertical-text {
+    display: none;
+  }
+}
+
+@media (max-width: 1279px) {
+  .about-vertical-text {
+    display: none;
   }
 }
