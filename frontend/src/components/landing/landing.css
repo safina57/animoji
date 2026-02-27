@@ -900,28 +900,62 @@
   letter-spacing: 0.03em;
   padding-bottom: 0.5rem;
   transform: translateY(0.75rem);
-  background-image: linear-gradient(
-    180deg,
-    #ff6672 0%,
-    #e63946 30%,
-    #c62a47 58%,
-    #7a0e22 80%,
-    rgba(20, 3, 8, 0.2) 100%
-  );
+  position: relative;
+
+  /* Clean outline: stroke first, opaque fill covers interior overlap artifacts */
+  paint-order: stroke fill;
+  -webkit-text-stroke: 4px rgba(230, 57, 70, 0.85);
+  -webkit-text-fill-color: #0f111a;
+  color: #0f111a;
+}
+
+/* Seigaiha pattern inside the letterforms — layered on top via screen blend */
+.footer-banner-text::after {
+  content: "ANIMOJI";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(
+      circle at 100% 150%,
+      transparent 24%,
+      rgba(230, 57, 70, 0.25) 25%,
+      rgba(230, 57, 70, 0.25) 26%,
+      transparent 27%,
+      transparent 74%,
+      rgba(230, 57, 70, 0.25) 75%,
+      rgba(230, 57, 70, 0.25) 76%,
+      transparent 77%,
+      transparent
+    ),
+    radial-gradient(
+      circle at 0% 150%,
+      transparent 24%,
+      rgba(230, 57, 70, 0.25) 25%,
+      rgba(230, 57, 70, 0.25) 26%,
+      transparent 27%,
+      transparent 74%,
+      rgba(230, 57, 70, 0.25) 75%,
+      rgba(230, 57, 70, 0.25) 76%,
+      transparent 77%,
+      transparent
+    );
+  background-size: 40px 40px;
+  background-position: 0 0, 20px 20px;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  color: transparent;
-  opacity: 0.88;
-  filter: drop-shadow(0 10px 28px rgba(230, 57, 70, 0.32));
+  -webkit-text-stroke: 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
 }
 
 .footer-banner-fade {
   position: absolute;
-  inset-x: 0;
+  left: 0;
+  right: 0;
   bottom: 0;
-  height: 55%;
-  background: linear-gradient(to top, #0f111a 30%, rgba(15, 17, 26, 0.6) 70%, transparent);
+  height: 35%;
+  background: linear-gradient(to top, #0f111a 30%, rgba(15, 17, 26, 0.4) 70%, transparent);
 }
 
 /* ─── About Section ───────────────────────────────────────────────────── */
