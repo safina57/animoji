@@ -56,7 +56,11 @@ export default function LandingStripBanners() {
       })
 
       BANNERS.forEach(({ cls, from }, i) => {
-        tl.from(`.${cls}`, { xPercent: from, duration: 1, ease: "power2.out" }, i === 0 ? 0 : "+=0.15")
+        tl.from(
+          `.${cls}`,
+          { xPercent: from, duration: 1, ease: "power2.out" },
+          i === 0 ? 0 : "+=0.15"
+        )
       })
     },
     { scope: sectionRef }
@@ -69,11 +73,7 @@ export default function LandingStripBanners() {
     >
       <div className="w-full space-y-4 md:space-y-7">
         {BANNERS.map(({ cls, text, style }) => (
-          <div
-            key={cls}
-            className={`strip-banner ${cls} py-5 md:py-7 px-8`}
-            style={style}
-          >
+          <div key={cls} className={`strip-banner ${cls} py-5 md:py-7 px-8`} style={style}>
             <p
               className="relative z-10 font-display font-bold tracking-tight w-full text-center"
               style={{ fontSize: "clamp(2rem, 5vw, 5.5rem)", color: "inherit" }}

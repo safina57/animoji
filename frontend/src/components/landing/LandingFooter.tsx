@@ -10,13 +10,13 @@ gsap.registerPlugin(ScrollTrigger)
 
 const NAV_LINKS = [
   { to: "/community", label: "Community" },
-  { to: "/create",    label: "Create"    },
-  { to: "/auth",      label: "Sign In"   },
+  { to: "/create", label: "Create" },
+  { to: "/auth", label: "Sign In" },
 ]
 
 const SOCIAL = [
-  { label: "GitHub",   href: "https://github.com/safina57",                          Icon: Github   },
-  { label: "LinkedIn", href: "https://www.linkedin.com/in/mohamed-amin-haouas/",     Icon: Linkedin },
+  { label: "GitHub", href: "https://github.com/safina57", Icon: Github },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/mohamed-amin-haouas/", Icon: Linkedin },
 ]
 
 export default function LandingFooter() {
@@ -26,11 +26,17 @@ export default function LandingFooter() {
     () => {
       gsap.from(".footer-content", {
         scrollTrigger: { trigger: footerRef.current, start: "top 88%" },
-        y: 35, opacity: 0, duration: 0.9, ease: "power2.out",
+        y: 35,
+        opacity: 0,
+        duration: 0.9,
+        ease: "power2.out",
       })
       gsap.from(".footer-banner-text", {
         scrollTrigger: { trigger: ".footer-banner-wrap", start: "top 92%" },
-        y: 60, opacity: 0, duration: 1.2, ease: "power3.out",
+        y: 60,
+        opacity: 0,
+        duration: 1.2,
+        ease: "power3.out",
       })
     },
     { scope: footerRef }
@@ -38,13 +44,11 @@ export default function LandingFooter() {
 
   return (
     <footer id="contact" ref={footerRef} className="landing-footer">
-
       {/* Seigaiha background pattern */}
       <SeigaihaOverlay className="absolute opacity-80 pointer-events-none" />
 
       {/* Main content */}
       <div className="footer-content">
-
         {/* Made with love */}
         <p className="footer-made-with">
           Made with <span className="footer-heart">&hearts;</span> and a lot of anime
@@ -74,10 +78,11 @@ export default function LandingFooter() {
         {/* Nav links */}
         <nav className="footer-nav">
           {NAV_LINKS.map(({ to, label }) => (
-            <Link key={to} to={to} className="footer-nav-link">{label}</Link>
+            <Link key={to} to={to} className="footer-nav-link">
+              {label}
+            </Link>
           ))}
         </nav>
-
       </div>
 
       {/* Giant ANIMOJI banner */}
@@ -85,7 +90,6 @@ export default function LandingFooter() {
         <h2 className="footer-banner-text">ANIMOJI</h2>
         <div className="footer-banner-fade" />
       </div>
-
     </footer>
   )
 }

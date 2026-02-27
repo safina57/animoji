@@ -33,9 +33,8 @@ export default function LandingAboutEmoji() {
           <em>In one click</em>
         </h2>
         <p className="about-body">
-          Generate a full set of expressive sticker emojis from a single portrait.
-          Distinct emotions rendered as transparent stickers — instantly
-          ready to drop anywhere you chat
+          Generate a full set of expressive sticker emojis from a single portrait. Distinct emotions
+          rendered as transparent stickers — instantly ready to drop anywhere you chat
         </p>
         <div className="about-stats">
           <div className="about-stat">

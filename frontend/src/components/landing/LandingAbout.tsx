@@ -32,11 +32,7 @@ export default function LandingAbout() {
       })
 
       /* Anime panel fades up and out */
-      tl.to(
-        ".about-panel-anime",
-        { opacity: 0, y: -36, ease: "none", duration: 0.45 },
-        0.25
-      )
+      tl.to(".about-panel-anime", { opacity: 0, y: -36, ease: "none", duration: 0.45 }, 0.25)
 
       /* Emoji panel fades up into view */
       tl.fromTo(
@@ -48,19 +44,14 @@ export default function LandingAbout() {
 
       /* Vertical text crossfade: anime text → emoji text */
       tl.to(".about-vertical-anime", { opacity: 0, duration: 0.35 }, 0.2)
-      tl.fromTo(
-        ".about-vertical-emoji",
-        { opacity: 0 },
-        { opacity: 0.2, duration: 0.35 },
-        0.45
-      )
+      tl.fromTo(".about-vertical-emoji", { opacity: 0 }, { opacity: 0.2, duration: 0.35 }, 0.45)
     },
     { scope: sectionRef }
   )
 
   return (
     <section id="about" ref={sectionRef} className="about-section">
-        <div className="divider-rule-l" />
+      <div className="divider-rule-l" />
       {/* ── Seigaiha wave pattern ── */}
       <SeigaihaOverlay className="absolute opacity-15 pointer-events-none" />
 

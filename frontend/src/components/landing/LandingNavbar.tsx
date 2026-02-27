@@ -8,10 +8,10 @@ import catLottieUrl from "@assets/8-bit Cat.lottie?url"
 gsap.registerPlugin()
 
 const NAV_LINKS = [
-  { href: "#hero",     label: "Home"     },
-  { href: "#about",    label: "About"    },
+  { href: "#hero", label: "Home" },
+  { href: "#about", label: "About" },
   { href: "#showcase", label: "Features" },
-  { href: "#contact",  label: "Contact"  },
+  { href: "#contact", label: "Contact" },
 ]
 
 export default function LandingNavbar() {
@@ -79,12 +79,7 @@ export default function LandingNavbar() {
 
       {/* Cat sign-in button */}
       <Link to="/auth" className="nav-cat-btn hidden md:flex" aria-label="Sign In">
-        <DotLottieReact
-          src={catLottieUrl}
-          autoplay
-          loop
-          style={{ width: 56, height: 56 }}
-        />
+        <DotLottieReact src={catLottieUrl} autoplay loop style={{ width: 56, height: 56 }} />
       </Link>
 
       {/* Mobile hamburger */}
@@ -93,9 +88,15 @@ export default function LandingNavbar() {
         onClick={() => setMenuOpen((v) => !v)}
         aria-label="Toggle menu"
       >
-        <span className={`w-6 h-px bg-white/60 transition-all duration-300 ${menuOpen ? "rotate-45 translate-y-2" : ""}`} />
-        <span className={`w-6 h-px bg-white/60 transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`} />
-        <span className={`w-6 h-px bg-white/60 transition-all duration-300 ${menuOpen ? "-rotate-45 -translate-y-2" : ""}`} />
+        <span
+          className={`w-6 h-px bg-white/60 transition-all duration-300 ${menuOpen ? "rotate-45 translate-y-2" : ""}`}
+        />
+        <span
+          className={`w-6 h-px bg-white/60 transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`}
+        />
+        <span
+          className={`w-6 h-px bg-white/60 transition-all duration-300 ${menuOpen ? "-rotate-45 -translate-y-2" : ""}`}
+        />
       </button>
 
       {/* Mobile drawer */}
@@ -111,11 +112,7 @@ export default function LandingNavbar() {
               {label}
             </a>
           ))}
-          <Link
-            to="/auth"
-            onClick={() => setMenuOpen(false)}
-            className="nav-drawer-cta"
-          >
+          <Link to="/auth" onClick={() => setMenuOpen(false)} className="nav-drawer-cta">
             Sign In
           </Link>
         </div>

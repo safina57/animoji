@@ -1,4 +1,4 @@
-import { CSSProperties, ReactNode, MouseEvent } from 'react'
+import { CSSProperties, ReactNode, MouseEvent } from "react"
 
 export interface CardProps {
   customClass?: string
@@ -21,7 +21,7 @@ export interface CardSwapProps {
   pauseOnHover?: boolean
   onCardClick?: (index: number) => void
   skewAmount?: number
-  easing?: 'elastic' | 'power1'
+  easing?: "elastic" | "power1"
   children?: ReactNode
 }
 

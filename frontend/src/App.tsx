@@ -1,12 +1,6 @@
 import { lazy, Suspense } from "react"
 import { Provider } from "react-redux"
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate,
-  useLocation,
-} from "react-router-dom"
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom"
 import { store } from "@store/store"
 import Navbar from "@lib/layout/Navbar"
 import { ProtectedRoute } from "@components/auth/ProtectedRoute"

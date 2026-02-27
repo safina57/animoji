@@ -40,10 +40,7 @@ export default function LandingMarquee({
     { scope: sectionRef }
   )
 
-  const sectionClass = [
-    "marquee-section py-5",
-    className ?? "bg-[#0f111a]",
-  ].join(" ")
+  const sectionClass = ["marquee-section py-5", className ?? "bg-[#0f111a]"].join(" ")
 
   return (
     <section ref={sectionRef} className={sectionClass}>

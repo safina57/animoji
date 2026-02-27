@@ -46,13 +46,19 @@ export default function CherryBlossomFlower({ className = "" }) {
       <g filter="url(#softShadow)" transform="translate(50, 50)">
         {/* Back petals — deeper pink, offset for depth */}
         <ellipse
-          cx="0" cy="-18" rx="11" ry="19"
+          cx="0"
+          cy="-18"
+          rx="11"
+          ry="19"
           fill="url(#petalBack)"
           transform="rotate(-22)"
           opacity="0.65"
         />
         <ellipse
-          cx="0" cy="-18" rx="11" ry="19"
+          cx="0"
+          cy="-18"
+          rx="11"
+          ry="19"
           fill="url(#petalBack)"
           transform="rotate(22)"
           opacity="0.65"
@@ -62,7 +68,10 @@ export default function CherryBlossomFlower({ className = "" }) {
         {[0, 72, 144, 216, 288].map((angle) => (
           <ellipse
             key={angle}
-            cx="0" cy="-19" rx="12.5" ry="20"
+            cx="0"
+            cy="-19"
+            rx="12.5"
+            ry="20"
             fill="url(#petalGrad)"
             transform={`rotate(${angle})`}
           />
@@ -72,7 +81,10 @@ export default function CherryBlossomFlower({ className = "" }) {
         {[0, 72, 144, 216, 288].map((angle) => (
           <line
             key={`v${angle}`}
-            x1="0" y1="-4" x2="0" y2="-28"
+            x1="0"
+            y1="-4"
+            x2="0"
+            y2="-28"
             stroke="#E8879A"
             strokeWidth="0.4"
             opacity="0.25"
@@ -87,19 +99,18 @@ export default function CherryBlossomFlower({ className = "" }) {
         {[0, 36, 72, 108, 144, 180, 216, 252, 288, 324].map((angle) => (
           <g key={`s${angle}`} transform={`rotate(${angle})`}>
             <line
-              x1="0" y1="-6.5" x2="0" y2="-13.5"
+              x1="0"
+              y1="-6.5"
+              x2="0"
+              y2="-13.5"
               stroke="#E8607A"
               strokeWidth="0.6"
               opacity="0.55"
             />
-            <circle
-              cx="0" cy="-14.2" r="1.2"
-              fill="url(#stamenTip)"
-              opacity="0.85"
-            />
+            <circle cx="0" cy="-14.2" r="1.2" fill="url(#stamenTip)" opacity="0.85" />
           </g>
         ))}
       </g>
     </svg>
-  );
+  )
 }

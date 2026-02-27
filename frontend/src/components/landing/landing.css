@@ -91,7 +91,9 @@
   font-size: 0.875rem;
   font-weight: 500;
   letter-spacing: 0.05em;
-  transition: background 0.3s, color 0.3s;
+  transition:
+    background 0.3s,
+    color 0.3s;
 }
 
 .nav-cta:hover {
@@ -141,7 +143,7 @@
 .hero-bg-photo {
   position: absolute;
   inset: 0;
-  background-image: url('/mountain-bg.jpg');
+  background-image: url("/mountain-bg.jpg");
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
@@ -241,9 +243,8 @@
   color: rgba(230, 57, 70, 0.4);
   font-size: 0.78rem;
   letter-spacing: 0.38em;
-  text-align: center; 
+  text-align: center;
 }
-
 
 /* ── Corner-bracket CTA buttons ── */
 /*
@@ -287,8 +288,16 @@
   inset: 0;
   background-repeat: no-repeat;
   /* top-left vertical, top-left horizontal, bottom-right vertical, bottom-right horizontal */
-  background-size: 1px 14px, 14px 1px, 1px 14px, 14px 1px;
-  background-position: 0 0, 0 0, 100% 100%, 100% 100%;
+  background-size:
+    1px 14px,
+    14px 1px,
+    1px 14px,
+    14px 1px;
+  background-position:
+    0 0,
+    0 0,
+    100% 100%,
+    100% 100%;
   transition: background-size 0.42s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1;
   pointer-events: none;
@@ -311,10 +320,8 @@
 
 .hero-btn-primary::after {
   background-image:
-    linear-gradient(#e63946, #e63946),
-    linear-gradient(#e63946, #e63946),
-    linear-gradient(#e63946, #e63946),
-    linear-gradient(#e63946, #e63946);
+    linear-gradient(#e63946, #e63946), linear-gradient(#e63946, #e63946),
+    linear-gradient(#e63946, #e63946), linear-gradient(#e63946, #e63946);
 }
 
 .hero-btn-primary:hover {
@@ -326,7 +333,11 @@
 }
 
 .hero-btn-primary:hover::after {
-  background-size: 1px 100%, 100% 1px, 1px 100%, 100% 1px;
+  background-size:
+    1px 100%,
+    100% 1px,
+    1px 100%,
+    100% 1px;
 }
 
 /* ── Ghost: muted brackets → subtle fill, text brightens on hover ── */
@@ -355,7 +366,11 @@
 }
 
 .hero-btn-ghost:hover::after {
-  background-size: 1px 100%, 100% 1px, 1px 100%, 100% 1px;
+  background-size:
+    1px 100%,
+    100% 1px,
+    1px 100%,
+    100% 1px;
 }
 
 /* ─── Marquee ─────────────────────────────────────────────────────────── */
@@ -374,13 +389,21 @@
 }
 
 @keyframes marquee-scroll-left {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 @keyframes marquee-scroll-right {
-  0% { transform: translateX(-50%); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
 .marquee-item {
@@ -451,7 +474,6 @@
   transform: rotate(-0.8deg);
   color: #d4af37;
 }
-
 
 /* ─── Showcase (CardSwap redesign) ────────────────────────────────────── */
 
@@ -551,8 +573,13 @@
 }
 
 @keyframes sc-glow-pulse {
-  0%, 100% { opacity: 0.55; }
-  50%       { opacity: 1;    }
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 /* Footer accent (vertical rule + JP text) */
@@ -792,11 +819,22 @@
 }
 
 @keyframes heartbeat {
-  0%, 100% { transform: scale(1);     }
-  14%       { transform: scale(1.2);  }
-  28%       { transform: scale(1);    }
-  42%       { transform: scale(1.15); }
-  56%       { transform: scale(1);    }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.2);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.15);
+  }
+  56% {
+    transform: scale(1);
+  }
 }
 
 .footer-made-jp {
@@ -827,7 +865,11 @@
   background: #1a1d29;
   border: 1px solid rgba(230, 57, 70, 0.18);
   border-radius: 0;
-  transition: background 0.25s, border-color 0.25s, color 0.25s, box-shadow 0.25s;
+  transition:
+    background 0.25s,
+    border-color 0.25s,
+    color 0.25s,
+    box-shadow 0.25s;
 }
 
 .footer-social-link:hover {
@@ -940,7 +982,9 @@
       transparent
     );
   background-size: 40px 40px;
-  background-position: 0 0, 20px 20px;
+  background-position:
+    0 0,
+    20px 20px;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1137,7 +1181,9 @@
   text-decoration: none;
   padding-bottom: 0.45rem;
   border-bottom: 1px solid rgba(230, 57, 70, 0.35);
-  transition: color 0.3s, border-color 0.3s;
+  transition:
+    color 0.3s,
+    border-color 0.3s;
   width: fit-content;
 }
 

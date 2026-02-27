@@ -13,20 +13,20 @@ gsap.registerPlugin(ScrollTrigger)
 /* ─── Data ─────────────────────────────────────────────────────────────── */
 
 const JP_WORDS = [
-  { text: "アニメ", x: "4%",  y: "8%",  size: "5rem",   rotate: "-12deg", opacity: 0.04  },
-  { text: "魔法",   x: "88%", y: "5%",  size: "7rem",   rotate: "8deg",   opacity: 0.035 },
-  { text: "変換",   x: "72%", y: "68%", size: "5.5rem", rotate: "-6deg",  opacity: 0.04  },
-  { text: "美",     x: "1%",  y: "55%", size: "9rem",   rotate: "15deg",  opacity: 0.045 },
-  { text: "夢",     x: "91%", y: "42%", size: "6rem",   rotate: "-10deg", opacity: 0.038 },
-  { text: "創造",   x: "18%", y: "78%", size: "4.5rem", rotate: "5deg",   opacity: 0.035 },
-  { text: "絵",     x: "55%", y: "4%",  size: "6.5rem", rotate: "-4deg",  opacity: 0.04  },
-  { text: "光",     x: "82%", y: "82%", size: "8rem",   rotate: "12deg",  opacity: 0.04  },
-  { text: "星",     x: "38%", y: "88%", size: "4rem",   rotate: "-8deg",  opacity: 0.033 },
-  { text: "風",     x: "6%",  y: "30%", size: "5rem",   rotate: "20deg",  opacity: 0.035 },
+  { text: "アニメ", x: "4%", y: "8%", size: "5rem", rotate: "-12deg", opacity: 0.04 },
+  { text: "魔法", x: "88%", y: "5%", size: "7rem", rotate: "8deg", opacity: 0.035 },
+  { text: "変換", x: "72%", y: "68%", size: "5.5rem", rotate: "-6deg", opacity: 0.04 },
+  { text: "美", x: "1%", y: "55%", size: "9rem", rotate: "15deg", opacity: 0.045 },
+  { text: "夢", x: "91%", y: "42%", size: "6rem", rotate: "-10deg", opacity: 0.038 },
+  { text: "創造", x: "18%", y: "78%", size: "4.5rem", rotate: "5deg", opacity: 0.035 },
+  { text: "絵", x: "55%", y: "4%", size: "6.5rem", rotate: "-4deg", opacity: 0.04 },
+  { text: "光", x: "82%", y: "82%", size: "8rem", rotate: "12deg", opacity: 0.04 },
+  { text: "星", x: "38%", y: "88%", size: "4rem", rotate: "-8deg", opacity: 0.033 },
+  { text: "風", x: "6%", y: "30%", size: "5rem", rotate: "20deg", opacity: 0.035 },
 ]
 
 const GLOW_LINES = [
-  { color: "#e63946", width: "72%", delay: "0s"   },
+  { color: "#e63946", width: "72%", delay: "0s" },
   { color: "#4ecdc4", width: "50%", delay: "0.4s" },
   { color: "#d4af37", width: "32%", delay: "0.8s" },
   { color: "#ff6b9d", width: "18%", delay: "1.2s" },
@@ -34,8 +34,8 @@ const GLOW_LINES = [
 
 const CARDS = [
   { src: page1, label: "Community", url: "animoji.app/community", dot: "#e63946" },
-  { src: page2, label: "Create",    url: "animoji.app/create",    dot: "#4ecdc4" },
-  { src: page3, label: "Results",   url: "animoji.app/results",   dot: "#d4af37" },
+  { src: page2, label: "Create", url: "animoji.app/create", dot: "#4ecdc4" },
+  { src: page3, label: "Results", url: "animoji.app/results", dot: "#d4af37" },
 ]
 
 const TRAFFIC_DOTS = ["#e63946", "#d4af37", "#4ecdc4"]
@@ -67,7 +67,10 @@ export default function LandingShowcase() {
     () => {
       gsap.from(".sc-text-block", {
         scrollTrigger: { trigger: ".sc-text-block", start: "top 82%" },
-        x: -60, opacity: 0, duration: 1, ease: "power3.out",
+        x: -60,
+        opacity: 0,
+        duration: 1,
+        ease: "power3.out",
       })
 
       gsap.utils.toArray<HTMLElement>(".sc-jp-word").forEach((el, i) => {
@@ -86,7 +89,6 @@ export default function LandingShowcase() {
 
   return (
     <section id="showcase" ref={sectionRef} className="relative overflow-hidden py-28 md:py-44">
-
       {/* Seigaiha wave pattern */}
       <SeigaihaOverlay className="absolute opacity-15 pointer-events-none" />
 
@@ -98,7 +100,13 @@ export default function LandingShowcase() {
         <div
           key={i}
           className="sc-jp-word"
-          style={{ left: x, top: y, fontSize: size, transform: `rotate(${rotate})`, color: `rgba(230,57,70,${opacity})` }}
+          style={{
+            left: x,
+            top: y,
+            fontSize: size,
+            transform: `rotate(${rotate})`,
+            color: `rgba(230,57,70,${opacity})`,
+          }}
         >
           {text}
         </div>
@@ -106,10 +114,8 @@ export default function LandingShowcase() {
 
       {/* Content */}
       <div className="relative max-w-7xl mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center gap-16 lg:gap-8">
-
         {/* ── Left: headline ── */}
         <div className="sc-text-block">
-
           <div className="sc-eyebrow">
             <div className="sc-eyebrow-line" />
             <p className="sc-eyebrow-text">体験する</p>
@@ -123,8 +129,8 @@ export default function LandingShowcase() {
           <div className="sc-rule" />
 
           <p className="sc-body">
-            From community feeds to real-time AI generation and instant results —
-            every screen is crafted to make the magic feel effortless.
+            From community feeds to real-time AI generation and instant results — every screen is
+            crafted to make the magic feel effortless.
           </p>
 
           {/* Glowing accent lines */}
@@ -147,12 +153,10 @@ export default function LandingShowcase() {
             <div className="sc-footer-rule" />
             <p className="sc-footer-text">魔法の世界へ</p>
           </div>
-
         </div>
 
         {/* ── Right: CardSwap ── */}
         <div className="sc-card-col">
-
           <div className="sc-card-glow" />
           <div className="sc-corner-kanji sc-corner-kanji-1">界</div>
           <div className="sc-corner-kanji sc-corner-kanji-2">夢</div>
@@ -175,7 +179,6 @@ export default function LandingShowcase() {
               ))}
             </CardSwap>
           </div>
-
         </div>
       </div>
 

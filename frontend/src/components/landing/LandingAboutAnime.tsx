@@ -42,9 +42,9 @@ export default function LandingAboutAnime() {
           <em>anime-fied</em>
         </h2>
         <p className="about-body">
-          Upload any portrait and watch our AI reimagine it through the lens of
-          Japanese animation. From Studio Ghibli softness to shonen intensity
-          every transformation is entirely one-of-a-kind
+          Upload any portrait and watch our AI reimagine it through the lens of Japanese animation.
+          From Studio Ghibli softness to shonen intensity every transformation is entirely
+          one-of-a-kind
         </p>
         <div className="about-stats">
           <div className="about-stat">
