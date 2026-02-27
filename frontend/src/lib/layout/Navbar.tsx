@@ -16,7 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@lib/ui/avatar"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@lib/ui/sheet"
 
 const NAV_LINKS = [
-  { to: "/", label: "Community", icon: "group" },
+  { to: "/community", label: "Community", icon: "group" },
   { to: "/create", label: "Create", icon: "auto_fix_high" },
   { to: "/gallery", label: "Gallery", icon: "photo_library" },
 ] as const
@@ -68,7 +68,7 @@ export default function Navbar() {
 
           <div className="hidden md:flex items-center gap-6 text-sm font-medium tracking-wide uppercase">
             {NAV_LINKS.map(({ to, label }) => (
-              <NavLink key={to} to={to} end={to === "/"} className={navLinkClass}>
+              <NavLink key={to} to={to} end={to === "/community"} className={navLinkClass}>
                 {label}
               </NavLink>
             ))}
@@ -199,7 +199,7 @@ export default function Navbar() {
                   <NavLink
                     key={to}
                     to={to}
-                    end={to === "/"}
+                    end={to === "/community"}
                     onClick={() => setDrawerOpen(false)}
                     className={({ isActive }) =>
                       [

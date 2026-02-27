@@ -17,6 +17,30 @@
   background: linear-gradient(to bottom, rgba(15, 17, 26, 0.95) 0%, rgba(15, 17, 26, 0) 100%);
 }
 
+.landing-nav-scrolled {
+  background: rgba(15, 17, 26, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(230, 57, 70, 0.08);
+}
+
+/* Lottie cat sign-in button */
+.nav-cat-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 42px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.nav-cat-btn:hover {
+  transform: scale(1.1);
+}
+
 .nav-logo-text {
   font-family: "Cormorant Garamond", serif;
   font-size: clamp(1.3rem, 2.5vw, 1.7rem);
@@ -721,8 +745,44 @@
 }
 
 /* ─── Footer ──────────────────────────────────────────────────────────── */
+
 .landing-footer {
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid rgba(230, 57, 70, 0.08);
+  background: #0f111a;
+}
+
+/* Torii gate — centred, bottom-anchored, behind content */
+.footer-torii {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 52%;
+  max-width: 480px;
+  opacity: 0.05;
+  color: #e63946;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Content wrapper */
+.footer-content {
+  position: relative;
+  z-index: 1;
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: 5rem 1.5rem 2.5rem;
+  text-align: center;
+}
+
+/* Made with love */
+.footer-made-with {
+  font-family: "DM Sans", sans-serif;
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .footer-heart {
@@ -732,11 +792,136 @@
 }
 
 @keyframes heartbeat {
-  0%, 100% { transform: scale(1); }
-  14% { transform: scale(1.2); }
-  28% { transform: scale(1); }
-  42% { transform: scale(1.15); }
-  56% { transform: scale(1); }
+  0%, 100% { transform: scale(1);     }
+  14%       { transform: scale(1.2);  }
+  28%       { transform: scale(1);    }
+  42%       { transform: scale(1.15); }
+  56%       { transform: scale(1);    }
+}
+
+.footer-made-jp {
+  font-family: "Noto Serif JP", serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.3em;
+  color: rgba(255, 255, 255, 0.2);
+  margin-top: 0.4rem;
+}
+
+/* Social row */
+.footer-social-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* Social buttons — primary-outlined, fills on hover */
+.footer-social-link {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: #e63946;
+  text-decoration: none;
+  padding: 0.6rem 1.4rem;
+  background: #1a1d29;
+  border: 1px solid rgba(230, 57, 70, 0.18);
+  border-radius: 0;
+  transition: background 0.25s, border-color 0.25s, color 0.25s, box-shadow 0.25s;
+}
+
+.footer-social-link:hover {
+  background: #e63946;
+  border-color: rgba(230, 57, 70, 0.5);
+  color: #fff;
+  box-shadow: 0 6px 22px rgba(230, 57, 70, 0.32);
+}
+
+.footer-social-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex-shrink: 0;
+}
+
+.footer-social-label {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Divider */
+.footer-divider {
+  width: 3rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(230, 57, 70, 0.3), transparent);
+  margin: 2rem auto;
+}
+
+/* Nav links */
+.footer-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.footer-nav-link {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-nav-link:hover {
+  color: #e63946;
+}
+
+/* Giant ANIMOJI banner */
+.footer-banner-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  margin-top: -0.5rem;
+}
+
+.footer-banner-text {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 900;
+  font-size: clamp(7rem, 21vw, 26rem);
+  line-height: 0.85;
+  letter-spacing: 0.03em;
+  padding-bottom: 0.5rem;
+  transform: translateY(0.75rem);
+  background-image: linear-gradient(
+    180deg,
+    #ff6672 0%,
+    #e63946 30%,
+    #c62a47 58%,
+    #7a0e22 80%,
+    rgba(20, 3, 8, 0.2) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  opacity: 0.88;
+  filter: drop-shadow(0 10px 28px rgba(230, 57, 70, 0.32));
+}
+
+.footer-banner-fade {
+  position: absolute;
+  inset-x: 0;
+  bottom: 0;
+  height: 55%;
+  background: linear-gradient(to top, #0f111a 30%, rgba(15, 17, 26, 0.6) 70%, transparent);
 }
 
 /* ─── About Section ───────────────────────────────────────────────────── */

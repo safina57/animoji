@@ -140,7 +140,7 @@ export default function LandingHero() {
           <Link to="/create" className="hero-btn hero-btn-primary">
             <span>Start Creating</span>
           </Link>
-          <Link to="/" className="hero-btn hero-btn-ghost">
+          <Link to="/community" className="hero-btn hero-btn-ghost">
             <span>Gallery</span>
           </Link>
         </div>

@@ -11,6 +11,9 @@ importers:
       '@gsap/react':
         specifier: ^2.1.2
         version: 2.1.2(gsap@3.14.2)(react@19.2.4)
+      '@lottiefiles/dotlottie-react':
+        specifier: ^0.18.3
+        version: 0.18.3(react@19.2.4)
       '@radix-ui/react-avatar':
         specifier: ^1.1.11
         version: 1.1.11(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -447,6 +450,14 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@lottiefiles/dotlottie-react@0.18.3':
+    resolution: {integrity: sha512-/6iVC4y9KCyPKS2gDUFp+omYndo3KPombAsZXB0h5sSyEO/+ydVppd5fIoHg2ogGAPOCPK97Y5Eos65JnyTjww==}
+    peerDependencies:
+      react: ^17 || ^18 || ^19
+
+  '@lottiefiles/dotlottie-web@0.65.0':
+    resolution: {integrity: sha512-D5ALEwZerjy+MkOv9mMjY7bxRfe7rQPWMtDl8hlNYLnrDKj4AzTaRztZ2u5hBHHiSfSc7TnA4MJgq+ktNZPpIg==}
 
   '@radix-ui/number@1.1.1':
     resolution: {integrity: sha512-MkKCwxlXTgz6CFoJx3pCwn07GKp36+aZyu/u2Ln2VrA5DcdyCZkASEDBTd8x5whTQQL5CiYf4prXKLcgQdv29g==}
@@ -2673,6 +2684,13 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@lottiefiles/dotlottie-react@0.18.3(react@19.2.4)':
+    dependencies:
+      '@lottiefiles/dotlottie-web': 0.65.0
+      react: 19.2.4
+
+  '@lottiefiles/dotlottie-web@0.65.0': {}
 
   '@radix-ui/number@1.1.1': {}
 

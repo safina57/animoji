@@ -1,19 +1,29 @@
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Link } from "react-router-dom"
 import { useGSAP } from "@gsap/react"
 import gsap from "gsap"
+import { DotLottieReact } from "@lottiefiles/dotlottie-react"
+import catLottieUrl from "@assets/8-bit Cat.lottie?url"
 
 gsap.registerPlugin()
 
 const NAV_LINKS = [
-  { href: "#hero", label: "Home" },
+  { href: "#hero",     label: "Home"     },
+  { href: "#about",    label: "About"    },
   { href: "#showcase", label: "Features" },
-  { href: "#contact", label: "Contact" },
+  { href: "#contact",  label: "Contact"  },
 ]
 
 export default function LandingNavbar() {
   const navRef = useRef<HTMLElement>(null)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40)
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
 
   /* Entrance animation */
   useGSAP(
@@ -47,10 +57,10 @@ export default function LandingNavbar() {
   return (
     <nav
       ref={navRef}
-      className="landing-nav fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 py-5"
+      className={`landing-nav fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 py-5 transition-all duration-300 ${scrolled ? "landing-nav-scrolled" : ""}`}
     >
       {/* Logo */}
-      <Link to="/landing" className="nav-logo flex items-center gap-2">
+      <Link to="/" className="nav-logo flex items-center gap-2">
         <span className="nav-logo-text">Animoji</span>
         <span className="nav-logo-ja hidden sm:block">アニメ化</span>
       </Link>
@@ -67,12 +77,14 @@ export default function LandingNavbar() {
         ))}
       </ul>
 
-      {/* CTA */}
-      <Link to="/auth" className="nav-cta hidden md:inline-flex">
-        Sign In
-        <svg className="w-3.5 h-3.5" viewBox="0 0 14 14" fill="currentColor">
-          <path d="M1 7h12M8 3l5 4-5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-        </svg>
+      {/* Cat sign-in button */}
+      <Link to="/auth" className="nav-cat-btn hidden md:flex" aria-label="Sign In">
+        <DotLottieReact
+          src={catLottieUrl}
+          autoplay
+          loop
+          style={{ width: 56, height: 56 }}
+        />
       </Link>
 
       {/* Mobile hamburger */}
