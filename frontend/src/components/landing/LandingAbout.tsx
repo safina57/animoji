@@ -19,7 +19,7 @@ export default function LandingAbout() {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
-          end: "+=200%",
+          end: "+=100%",
           scrub: 1.4,
           pin: true,
           onUpdate: (self) => {

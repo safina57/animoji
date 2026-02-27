@@ -429,45 +429,295 @@
 }
 
 
-/* ─── 3D Showcase ─────────────────────────────────────────────────────── */
-.showcase-perspective {
-  perspective: 1200px;
+/* ─── Showcase (CardSwap redesign) ────────────────────────────────────── */
+
+/* Background radial colour wash */
+.sc-bg-wash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 75% 55% at 65% 60%, rgba(230, 57, 70, 0.05), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 15% 40%, rgba(43, 58, 103, 0.08), transparent 60%);
 }
 
-.showcase-card {
-  transform-style: preserve-3d;
-  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-  will-change: transform;
+/* Japanese word art — position/size/rotation stay inline (per-element data) */
+.sc-jp-word {
+  position: absolute;
+  font-family: "Noto Serif JP", serif;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  user-select: none;
+  pointer-events: none;
+  will-change: opacity, transform;
 }
 
-.showcase-card:hover {
-  transform: translateY(-12px) rotateX(2deg) rotateY(0deg) scale(1.02) !important;
+/* Left text block */
+.sc-text-block {
+  flex: 1;
+  max-width: 32rem;
+  z-index: 10;
 }
 
-.showcase-screen {
-  background: #1a1d29;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
+/* Eyebrow row */
+.sc-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.sc-eyebrow-line {
+  width: 1.5rem;
+  height: 1px;
+  background: #e63946;
+}
+
+.sc-eyebrow-text {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: #e63946;
+}
+
+/* Main heading */
+.sc-heading {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 700;
+  line-height: 1.05;
+  font-size: clamp(2.6rem, 5vw, 4.2rem);
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: -0.02em;
+  margin-bottom: 1.5rem;
+}
+
+.sc-heading-accent {
+  display: block;
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 700;
+  font-style: italic;
+  color: #e63946;
+}
+
+/* Thin gradient rule */
+.sc-rule {
+  width: 3rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e63946, transparent);
+  margin-bottom: 1.5rem;
+}
+
+/* Body paragraph */
+.sc-body {
+  font-family: "DM Sans", sans-serif;
+  font-size: clamp(0.87rem, 1.1vw, 1rem);
+  line-height: 1.9;
+  color: rgba(255, 255, 255, 0.38);
+  max-width: 38ch;
+  margin-bottom: 2rem;
+}
+
+/* Glowing accent lines — width/color/shadow/delay stay inline (per-line data) */
+.sc-glow-line {
+  height: 1px;
+  border-radius: 1px;
+  animation: sc-glow-pulse 3s ease-in-out infinite;
+}
+
+@keyframes sc-glow-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%       { opacity: 1;    }
+}
+
+/* Footer accent (vertical rule + JP text) */
+.sc-footer-accent {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+.sc-footer-rule {
+  width: 1px;
+  height: 3.5rem;
+  background: rgba(230, 57, 70, 0.15);
+}
+
+.sc-footer-text {
+  font-family: "Noto Serif JP", serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.5em;
+  color: rgba(230, 57, 70, 0.2);
+}
+
+/* Right card column */
+.sc-card-col {
+  flex: 1;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 520px;
+}
+
+/* Glow orb behind cards */
+.sc-card-glow {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(230, 57, 70, 0.08) 0%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* Corner kanji decorations */
+.sc-corner-kanji {
+  position: absolute;
+  font-family: "Noto Serif JP", serif;
+  font-weight: 700;
+  pointer-events: none;
+  user-select: none;
+}
+
+.sc-corner-kanji-1 {
+  top: 2%;
+  left: 5%;
+  font-size: 3.5rem;
+  color: rgba(230, 57, 70, 0.06);
+  transform: rotate(-8deg);
+}
+
+.sc-corner-kanji-2 {
+  bottom: 3%;
+  right: 6%;
+  font-size: 3rem;
+  color: rgba(212, 175, 55, 0.05);
+  transform: rotate(10deg);
+}
+
+/* CardSwap wrapper */
+.sc-cardswap-wrap {
+  position: relative;
+  width: 100%;
+  height: 560px;
+}
+
+/* Individual card shell */
+.sc-card {
+  background: #13151f;
+  border: none !important;
+  border-radius: 14px;
   overflow: hidden;
   box-shadow:
-    0 25px 80px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(255, 255, 255, 0.03),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    0 32px 80px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
 }
 
-.showcase-screen-bar {
+/* Chrome / title bar */
+.sc-chrome-bar {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 10px 14px;
-  background: rgba(255, 255, 255, 0.03);
+  padding: 9px 14px;
+  background: #0d0f18;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
 }
 
-.showcase-screen-dot {
+/* Traffic-light dots row */
+.sc-traffic-lights {
+  display: flex;
+  gap: 5px;
+  margin-right: 6px;
+}
+
+.sc-traffic-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
+  opacity: 0.7;
+}
+
+/* URL pill */
+.sc-url-pill {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 5px;
+  padding: 3px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sc-url-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.sc-url-text {
+  font-family: "DM Sans", sans-serif;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Screenshot image */
+.sc-card-img {
+  width: 100%;
+  flex: 1;
+  object-fit: cover;
+  object-position: top;
+  display: block;
+  min-height: 0;
+}
+
+/* Bottom edge fade */
+.sc-bottom-fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 6rem;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, #0f111a);
+}
+
+/* Override CardSwap container — center it instead of default bottom-right */
+.card-swap-container {
+  position: relative !important;
+  bottom: auto !important;
+  right: auto !important;
+  transform: none !important;
+  margin: auto;
+}
+
+@media (max-width: 768px) {
+  .card-swap-container {
+    transform: scale(0.8) !important;
+    transform-origin: center top !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-swap-container {
+    transform: scale(0.65) !important;
+    transform-origin: center top !important;
+  }
 }
 
 /* ─── Footer ──────────────────────────────────────────────────────────── */
