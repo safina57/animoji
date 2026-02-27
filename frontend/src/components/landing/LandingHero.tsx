@@ -130,7 +130,7 @@ export default function LandingHero() {
         <div className="hero-slash" />
 
         {/* English slogan */}
-        <p className="hero-slogan mt-5">See yourself in anime.</p>
+        <p className="hero-slogan mt-5">See yourself in anime</p>
 
         {/* Japanese label */}
         <p className="hero-jp mt-3 !text-white">写真をアニメに変換する</p>

@@ -73,16 +73,18 @@ class Title {
       fragment: `
         precision highp float;
         uniform sampler2D tMap;
+        uniform float uAlpha;
         varying vec2 vUv;
         void main() {
           vec4 color = texture2D(tMap, vUv);
           if (color.a < 0.1) discard;
-          gl_FragColor = color;
+          gl_FragColor = vec4(color.rgb, color.a * uAlpha);
         }
       `,
-      uniforms: { tMap: { value: texture } },
+      uniforms: { tMap: { value: texture }, uAlpha: { value: 1.0 } },
       transparent: true
     });
+    this.program = program;
     this.mesh = new Mesh(this.gl, { geometry, program });
     const aspect = width / height;
     const textHeight = this.plane.scale.y * 0.15;
@@ -150,6 +152,7 @@ class Media {
           vec2 d = abs(p) - b;
           return length(max(d, vec2(0.0))) + min(max(d.x, d.y), 0.0) - r;
         }
+        uniform float uAlpha;
         void main() {
           vec2 ratio = vec2(
             min((uPlaneSizes.x / uPlaneSizes.y) / (uImageSizes.x / uImageSizes.y), 1.0),
@@ -161,8 +164,8 @@ class Media {
           );
           vec4 color = texture2D(tMap, uv);
           float d = roundedBoxSDF(vUv - 0.5, vec2(0.5 - uBorderRadius), uBorderRadius);
-          float alpha = 1.0 - smoothstep(-0.002, 0.002, d);
-          gl_FragColor = vec4(color.rgb, alpha);
+          float shapeMask = 1.0 - smoothstep(-0.002, 0.002, d);
+          gl_FragColor = vec4(color.rgb, shapeMask * uAlpha);
         }
       `,
       uniforms: {
@@ -171,7 +174,8 @@ class Media {
         uImageSizes: { value: [0, 0] },
         uSpeed: { value: 0 },
         uTime: { value: 100 * Math.random() },
-        uBorderRadius: { value: this.borderRadius }
+        uBorderRadius: { value: this.borderRadius },
+        uAlpha: { value: 1.0 }
       },
       transparent: true
     });
@@ -216,6 +220,23 @@ class Media {
     this.speed = scroll.current - scroll.last;
     this.program.uniforms.uTime.value += 0.04;
     this.program.uniforms.uSpeed.value = this.speed;
+
+    /* ── Edge-fade: images dissolve as they approach the viewport boundary ── */
+    const fadeZone = this.plane.scale.x * 1.1; // fade over ~1 image width
+    const distFromEdge = H - Math.abs(x);
+    let targetAlpha;
+    if (distFromEdge <= 0) {
+      targetAlpha = 0;
+    } else if (distFromEdge < fadeZone) {
+      const t = distFromEdge / fadeZone;
+      targetAlpha = t * t * (3.0 - 2.0 * t); // smoothstep
+    } else {
+      targetAlpha = 1;
+    }
+    if (this._alpha === undefined) this._alpha = targetAlpha;
+    this._alpha = lerp(this._alpha, targetAlpha, 0.055);
+    this.program.uniforms.uAlpha.value = this._alpha;
+    if (this.title?.program) this.title.program.uniforms.uAlpha.value = this._alpha;
     const planeOffset = this.plane.scale.x / 2;
     const viewportOffset = this.viewport.width / 2;
     this.isBefore = this.plane.position.x + planeOffset < -viewportOffset;
