@@ -1,0 +1,505 @@
+/* ─── Landing Page Styles ─────────────────────────────────────────────── */
+/* All landing section styles co-located with the components.             */
+
+/* ── Grain overlay ── */
+.landing-grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+}
+
+/* ─── Navbar ──────────────────────────────────────────────────────────── */
+.landing-nav {
+  background: linear-gradient(to bottom, rgba(15, 17, 26, 0.95) 0%, rgba(15, 17, 26, 0) 100%);
+}
+
+.nav-logo-text {
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+  font-weight: 700;
+  color: #e63946;
+  letter-spacing: 0.04em;
+}
+
+.nav-logo-ja {
+  font-family: "Noto Serif JP", serif;
+  font-size: 0.75rem;
+  color: rgba(255, 181, 194, 0.4);
+  letter-spacing: 0.2em;
+}
+
+.nav-link {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.05em;
+  transition: color 0.2s;
+}
+
+.nav-link:hover {
+  color: #fff;
+}
+
+.nav-link-line {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: #e63946;
+  transition: width 0.3s;
+}
+
+.nav-link:hover .nav-link-line {
+  width: 100%;
+}
+
+.nav-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  border: 1px solid rgba(230, 57, 70, 0.6);
+  color: #e63946;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  transition: background 0.3s, color 0.3s;
+}
+
+.nav-cta:hover {
+  background: #e63946;
+  color: #fff;
+}
+
+.nav-drawer {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(15, 17, 26, 0.98);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.nav-drawer-link {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.05em;
+  transition: color 0.2s;
+}
+
+.nav-drawer-link:hover {
+  color: #fff;
+}
+
+.nav-drawer-cta {
+  margin-top: 0.5rem;
+  width: 100%;
+  text-align: center;
+  padding: 0.625rem;
+  border: 1px solid rgba(230, 57, 70, 0.6);
+  color: #e63946;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+/* ─── Hero ───────────────────────────────────────────────────────────── */
+
+/* Background layers */
+.hero-bg-photo {
+  position: absolute;
+  inset: 0;
+  background-image: url('/mountain-bg.jpg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  opacity: 0.22;
+  filter: brightness(0.55) saturate(1.6) hue-rotate(340deg);
+  mix-blend-mode: screen;
+}
+
+/* Inner overlays: vignette + top/bottom edge fades */
+.hero-bg-overlays {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, #0f111a 0%, transparent 20%),
+    linear-gradient(to top, #0f111a 0%, transparent 20%),
+    radial-gradient(ellipse 70% 55% at 50% 50%, rgba(230, 57, 70, 0.04), rgba(15, 17, 26, 0.65));
+}
+
+/* Outer overlays: ambient colour washes + bottom seam */
+.hero-overlays {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to top, #0f111a 0%, rgba(15, 17, 26, 0.8) 25%, transparent 50%),
+    radial-gradient(ellipse 80% 60% at 50% 20%, rgba(230, 57, 70, 0.07), transparent),
+    radial-gradient(ellipse 60% 50% at 85% 75%, rgba(43, 58, 103, 0.1), transparent);
+}
+
+/* Cherry blossom "i" dot */
+.hero-blossom-wrap {
+  position: absolute;
+  pointer-events: none;
+  width: clamp(28px, 3vw, 40px);
+  height: clamp(28px, 3vw, 40px);
+  top: 0.18em;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  overflow: hidden;
+}
+
+/* Title — "Animoji" letter group */
+.hero-title {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 700;
+  color: #e63946;
+  font-size: clamp(3.5rem, 11vw, 10rem);
+  line-height: 1.1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hl {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+
+.hl-clip {
+  overflow: hidden;
+  display: inline-block;
+  /* prevents descenders (j) from being clipped */
+  padding-bottom: 0.18em;
+  margin-bottom: -0.18em;
+}
+
+.hl-inner {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* Slash accent */
+.hero-slash {
+  width: clamp(200px, 50vw, 600px);
+  height: 2px;
+  margin: 0.75rem auto 0;
+  background: linear-gradient(90deg, transparent 0%, #e63946 30%, #ff6b9d 70%, transparent 100%);
+  transform-origin: left center;
+}
+
+/* English slogan — italic display, below the slash */
+.hero-slogan {
+  font-family: "Cormorant Garamond", serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.1rem, 2.2vw, 1.65rem);
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.03em;
+  text-align: center;
+}
+
+/* Japanese subtitle */
+.hero-jp {
+  font-family: "Noto Serif JP", serif;
+  color: rgba(230, 57, 70, 0.4);
+  font-size: 0.78rem;
+  letter-spacing: 0.38em;
+  text-align: center; 
+}
+
+
+/* ── Corner-bracket CTA buttons ── */
+/*
+ * On idle: only the four corner marks are drawn (14px stubs via gradient).
+ * On hover: stubs expand to a full border + fill sweeps in from the left.
+ */
+.hero-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.3rem 3.5rem;
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  overflow: hidden;
+  background: transparent;
+  border: none;
+  transition: color 0.38s ease;
+}
+
+/* Left-to-right fill sweep */
+.hero-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0;
+}
+
+/* Four corner bracket marks drawn as CSS gradients */
+.hero-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  /* top-left vertical, top-left horizontal, bottom-right vertical, bottom-right horizontal */
+  background-size: 1px 14px, 14px 1px, 1px 14px, 14px 1px;
+  background-position: 0 0, 0 0, 100% 100%, 100% 100%;
+  transition: background-size 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Text sits above fill and brackets */
+.hero-btn > span {
+  position: relative;
+  z-index: 2;
+}
+
+/* ── Primary: red brackets → red fill, white text on hover ── */
+.hero-btn-primary {
+  color: #e63946;
+}
+
+.hero-btn-primary::before {
+  background: #e63946;
+}
+
+.hero-btn-primary::after {
+  background-image:
+    linear-gradient(#e63946, #e63946),
+    linear-gradient(#e63946, #e63946),
+    linear-gradient(#e63946, #e63946),
+    linear-gradient(#e63946, #e63946);
+}
+
+.hero-btn-primary:hover {
+  color: #fff;
+}
+
+.hero-btn-primary:hover::before {
+  transform: scaleX(1);
+}
+
+.hero-btn-primary:hover::after {
+  background-size: 1px 100%, 100% 1px, 1px 100%, 100% 1px;
+}
+
+/* ── Ghost: muted brackets → subtle fill, text brightens on hover ── */
+.hero-btn-ghost {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.hero-btn-ghost::before {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.hero-btn-ghost::after {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.22)),
+    linear-gradient(rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.22)),
+    linear-gradient(rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.22)),
+    linear-gradient(rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.22));
+}
+
+.hero-btn-ghost:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.hero-btn-ghost:hover::before {
+  transform: scaleX(1);
+}
+
+.hero-btn-ghost:hover::after {
+  background-size: 1px 100%, 100% 1px, 1px 100%, 100% 1px;
+}
+
+/* ─── Marquee ─────────────────────────────────────────────────────────── */
+.marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.marquee-left .marquee-track {
+  animation: marquee-scroll-left 25s linear infinite;
+}
+
+.marquee-right .marquee-track {
+  animation: marquee-scroll-right 25s linear infinite;
+}
+
+@keyframes marquee-scroll-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-scroll-right {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+.marquee-item {
+  white-space: nowrap;
+  padding: 0 1.5rem;
+}
+
+.marquee-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  margin: 0 1.5rem;
+  vertical-align: middle;
+  opacity: 0.6;
+}
+
+.marquee-text-red {
+  color: rgba(230, 57, 70, 0.5);
+}
+
+.marquee-text-sakura {
+  color: rgba(255, 181, 194, 0.38);
+}
+
+/* ─── Strip Banners (standalone section) ─────────────────────────────── */
+.strip-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.strip-banner {
+  display: flex;
+  align-items: center;
+  padding: 1.2rem 3rem;
+  white-space: nowrap;
+  will-change: transform;
+  position: relative;
+}
+
+.strip-banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 128px 128px;
+  mix-blend-mode: multiply;
+}
+
+.strip-banner-1 {
+  background: #e63946;
+  transform: rotate(-1.5deg);
+  color: #fff;
+}
+
+.strip-banner-2 {
+  background: linear-gradient(135deg, #1a1d29 0%, #2b3a67 100%);
+  border: 1px solid rgba(230, 57, 70, 0.25);
+  transform: rotate(1.2deg);
+  color: #ffb5c2;
+}
+
+.strip-banner-3 {
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  transform: rotate(-0.8deg);
+  color: #d4af37;
+}
+
+
+/* ─── 3D Showcase ─────────────────────────────────────────────────────── */
+.showcase-perspective {
+  perspective: 1200px;
+}
+
+.showcase-card {
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  will-change: transform;
+}
+
+.showcase-card:hover {
+  transform: translateY(-12px) rotateX(2deg) rotateY(0deg) scale(1.02) !important;
+}
+
+.showcase-screen {
+  background: #1a1d29;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow:
+    0 25px 80px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.showcase-screen-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.showcase-screen-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* ─── Footer ──────────────────────────────────────────────────────────── */
+.landing-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.footer-heart {
+  display: inline-block;
+  color: #e63946;
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  14% { transform: scale(1.2); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.15); }
+  56% { transform: scale(1); }
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 14vw !important;
+  }
+
+  .strip-banner {
+    padding: 0.8rem 1.5rem;
+  }
+
+  .marquee-item {
+    padding: 0 0.75rem;
+  }
+}
