@@ -1,0 +1,1319 @@
+/* ─── Landing Page Styles ─────────────────────────────────────────────── */
+/* All landing section styles co-located with the components.             */
+
+/* ── Grain overlay ── */
+.landing-grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+}
+
+/* ─── Navbar ──────────────────────────────────────────────────────────── */
+.landing-nav {
+  background: linear-gradient(to bottom, rgba(15, 17, 26, 0.95) 0%, rgba(15, 17, 26, 0) 100%);
+}
+
+.landing-nav-scrolled {
+  background: rgba(15, 17, 26, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(230, 57, 70, 0.08);
+}
+
+/* Lottie cat sign-in button */
+.nav-cat-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 42px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.nav-cat-btn:hover {
+  transform: scale(1.1);
+}
+
+.nav-logo-text {
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+  font-weight: 700;
+  color: #e63946;
+  letter-spacing: 0.04em;
+}
+
+.nav-logo-ja {
+  font-family: "Noto Serif JP", serif;
+  font-size: 0.75rem;
+  color: rgba(255, 181, 194, 0.4);
+  letter-spacing: 0.2em;
+}
+
+.nav-link {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.05em;
+  transition: color 0.2s;
+}
+
+.nav-link:hover {
+  color: #fff;
+}
+
+.nav-link-line {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: #e63946;
+  transition: width 0.3s;
+}
+
+.nav-link:hover .nav-link-line {
+  width: 100%;
+}
+
+.nav-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  border: 1px solid rgba(230, 57, 70, 0.6);
+  color: #e63946;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  transition:
+    background 0.3s,
+    color 0.3s;
+}
+
+.nav-cta:hover {
+  background: #e63946;
+  color: #fff;
+}
+
+.nav-drawer {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(15, 17, 26, 0.98);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.nav-drawer-link {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.05em;
+  transition: color 0.2s;
+}
+
+.nav-drawer-link:hover {
+  color: #fff;
+}
+
+.nav-drawer-cta {
+  margin-top: 0.5rem;
+  width: 100%;
+  text-align: center;
+  padding: 0.625rem;
+  border: 1px solid rgba(230, 57, 70, 0.6);
+  color: #e63946;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+/* ─── Hero ───────────────────────────────────────────────────────────── */
+
+/* Background layers */
+.hero-bg-photo {
+  position: absolute;
+  inset: 0;
+  background-image: url("/mountain-bg.jpg");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  opacity: 0.22;
+  filter: brightness(0.55) saturate(1.6) hue-rotate(340deg);
+  mix-blend-mode: screen;
+}
+
+/* Inner overlays: vignette + top/bottom edge fades */
+.hero-bg-overlays {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, #0f111a 0%, transparent 20%),
+    linear-gradient(to top, #0f111a 0%, transparent 20%),
+    radial-gradient(ellipse 70% 55% at 50% 50%, rgba(230, 57, 70, 0.04), rgba(15, 17, 26, 0.65));
+}
+
+/* Outer overlays: ambient colour washes + bottom seam */
+.hero-overlays {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to top, #0f111a 0%, rgba(15, 17, 26, 0.8) 25%, transparent 50%),
+    radial-gradient(ellipse 80% 60% at 50% 20%, rgba(230, 57, 70, 0.07), transparent),
+    radial-gradient(ellipse 60% 50% at 85% 75%, rgba(43, 58, 103, 0.1), transparent);
+}
+
+/* Cherry blossom "i" dot */
+.hero-blossom-wrap {
+  position: absolute;
+  pointer-events: none;
+  width: clamp(28px, 3vw, 40px);
+  height: clamp(28px, 3vw, 40px);
+  top: 0.18em;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  overflow: hidden;
+}
+
+/* Title — "Animoji" letter group */
+.hero-title {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 700;
+  color: #e63946;
+  font-size: clamp(3.5rem, 11vw, 10rem);
+  line-height: 1.1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hl {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+
+.hl-clip {
+  overflow: hidden;
+  display: inline-block;
+  /* prevents descenders (j) from being clipped */
+  padding-bottom: 0.18em;
+  margin-bottom: -0.18em;
+}
+
+.hl-inner {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* Slash accent */
+.hero-slash {
+  width: clamp(200px, 50vw, 600px);
+  height: 2px;
+  margin: 0.75rem auto 0;
+  background: linear-gradient(90deg, transparent 0%, #e63946 30%, #ff6b9d 70%, transparent 100%);
+  transform-origin: left center;
+}
+
+/* English slogan — italic display, below the slash */
+.hero-slogan {
+  font-family: "Cormorant Garamond", serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.1rem, 2.2vw, 1.65rem);
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.03em;
+  text-align: center;
+}
+
+/* Japanese subtitle */
+.hero-jp {
+  font-family: "Noto Serif JP", serif;
+  color: rgba(230, 57, 70, 0.4);
+  font-size: 0.78rem;
+  letter-spacing: 0.38em;
+  text-align: center;
+}
+
+/* ── Corner-bracket CTA buttons ── */
+/*
+ * On idle: only the four corner marks are drawn (14px stubs via gradient).
+ * On hover: stubs expand to a full border + fill sweeps in from the left.
+ */
+.hero-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.3rem 3.5rem;
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  overflow: hidden;
+  background: transparent;
+  border: none;
+  transition: color 0.38s ease;
+}
+
+/* Left-to-right fill sweep */
+.hero-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0;
+}
+
+/* Four corner bracket marks drawn as CSS gradients */
+.hero-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  /* top-left vertical, top-left horizontal, bottom-right vertical, bottom-right horizontal */
+  background-size:
+    1px 14px,
+    14px 1px,
+    1px 14px,
+    14px 1px;
+  background-position:
+    0 0,
+    0 0,
+    100% 100%,
+    100% 100%;
+  transition: background-size 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Text sits above fill and brackets */
+.hero-btn > span {
+  position: relative;
+  z-index: 2;
+}
+
+/* ── Primary: red brackets → red fill, white text on hover ── */
+.hero-btn-primary {
+  color: #e63946;
+}
+
+.hero-btn-primary::before {
+  background: #e63946;
+}
+
+.hero-btn-primary::after {
+  background-image:
+    linear-gradient(#e63946, #e63946), linear-gradient(#e63946, #e63946),
+    linear-gradient(#e63946, #e63946), linear-gradient(#e63946, #e63946);
+}
+
+.hero-btn-primary:hover {
+  color: #fff;
+}
+
+.hero-btn-primary:hover::before {
+  transform: scaleX(1);
+}
+
+.hero-btn-primary:hover::after {
+  background-size:
+    1px 100%,
+    100% 1px,
+    1px 100%,
+    100% 1px;
+}
+
+/* ── Ghost: muted brackets → subtle fill, text brightens on hover ── */
+.hero-btn-ghost {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.hero-btn-ghost::before {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.hero-btn-ghost::after {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.22)),
+    linear-gradient(rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.22)),
+    linear-gradient(rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.22)),
+    linear-gradient(rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.22));
+}
+
+.hero-btn-ghost:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.hero-btn-ghost:hover::before {
+  transform: scaleX(1);
+}
+
+.hero-btn-ghost:hover::after {
+  background-size:
+    1px 100%,
+    100% 1px,
+    1px 100%,
+    100% 1px;
+}
+
+/* ─── Marquee ─────────────────────────────────────────────────────────── */
+.marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.marquee-left .marquee-track {
+  animation: marquee-scroll-left 25s linear infinite;
+}
+
+.marquee-right .marquee-track {
+  animation: marquee-scroll-right 25s linear infinite;
+}
+
+@keyframes marquee-scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee-scroll-right {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.marquee-item {
+  white-space: nowrap;
+  padding: 0 1.5rem;
+}
+
+.marquee-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  margin: 0 1.5rem;
+  vertical-align: middle;
+  opacity: 0.6;
+}
+
+.marquee-text-red {
+  color: rgba(230, 57, 70, 0.5);
+}
+
+.marquee-text-sakura {
+  color: rgba(255, 181, 194, 0.38);
+}
+
+/* ─── Strip Banners (standalone section) ─────────────────────────────── */
+.strip-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.strip-banner {
+  display: flex;
+  align-items: center;
+  padding: 1.2rem 3rem;
+  white-space: nowrap;
+  will-change: transform;
+  position: relative;
+}
+
+.strip-banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 128px 128px;
+  mix-blend-mode: multiply;
+}
+
+.strip-banner-1 {
+  background: #e63946;
+  transform: rotate(-1.5deg);
+  color: #fff;
+}
+
+.strip-banner-2 {
+  background: linear-gradient(135deg, #1a1d29 0%, #2b3a67 100%);
+  border: 1px solid rgba(230, 57, 70, 0.25);
+  transform: rotate(1.2deg);
+  color: #ffb5c2;
+}
+
+.strip-banner-3 {
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  transform: rotate(-0.8deg);
+  color: #d4af37;
+}
+
+/* ─── Showcase (CardSwap redesign) ────────────────────────────────────── */
+
+/* Background radial colour wash */
+.sc-bg-wash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 75% 55% at 65% 60%, rgba(230, 57, 70, 0.05), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 15% 40%, rgba(43, 58, 103, 0.08), transparent 60%);
+}
+
+/* Japanese word art — position/size/rotation stay inline (per-element data) */
+.sc-jp-word {
+  position: absolute;
+  font-family: "Noto Serif JP", serif;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  user-select: none;
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+
+/* Left text block */
+.sc-text-block {
+  flex: 1;
+  max-width: 32rem;
+  z-index: 10;
+}
+
+/* Eyebrow row */
+.sc-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.sc-eyebrow-line {
+  width: 1.5rem;
+  height: 1px;
+  background: #e63946;
+}
+
+.sc-eyebrow-text {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: #e63946;
+}
+
+/* Main heading */
+.sc-heading {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 700;
+  line-height: 1.05;
+  font-size: clamp(2.6rem, 5vw, 4.2rem);
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: -0.02em;
+  margin-bottom: 1.5rem;
+}
+
+.sc-heading-accent {
+  display: block;
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 700;
+  font-style: italic;
+  color: #e63946;
+}
+
+/* Thin gradient rule */
+.sc-rule {
+  width: 3rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e63946, transparent);
+  margin-bottom: 1.5rem;
+}
+
+/* Body paragraph */
+.sc-body {
+  font-family: "DM Sans", sans-serif;
+  font-size: clamp(0.87rem, 1.1vw, 1rem);
+  line-height: 1.9;
+  color: rgba(255, 255, 255, 0.38);
+  max-width: 38ch;
+  margin-bottom: 2rem;
+}
+
+/* Glowing accent lines — width/color/shadow/delay stay inline (per-line data) */
+.sc-glow-line {
+  height: 1px;
+  border-radius: 1px;
+  animation: sc-glow-pulse 3s ease-in-out infinite;
+}
+
+@keyframes sc-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Footer accent (vertical rule + JP text) */
+.sc-footer-accent {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+.sc-footer-rule {
+  width: 1px;
+  height: 3.5rem;
+  background: rgba(230, 57, 70, 0.15);
+}
+
+.sc-footer-text {
+  font-family: "Noto Serif JP", serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.5em;
+  color: rgba(230, 57, 70, 0.2);
+}
+
+/* Right card column */
+.sc-card-col {
+  flex: 1;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 520px;
+}
+
+/* Glow orb behind cards */
+.sc-card-glow {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(230, 57, 70, 0.08) 0%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* Corner kanji decorations */
+.sc-corner-kanji {
+  position: absolute;
+  font-family: "Noto Serif JP", serif;
+  font-weight: 700;
+  pointer-events: none;
+  user-select: none;
+}
+
+.sc-corner-kanji-1 {
+  top: 2%;
+  left: 5%;
+  font-size: 3.5rem;
+  color: rgba(230, 57, 70, 0.06);
+  transform: rotate(-8deg);
+}
+
+.sc-corner-kanji-2 {
+  bottom: 3%;
+  right: 6%;
+  font-size: 3rem;
+  color: rgba(212, 175, 55, 0.05);
+  transform: rotate(10deg);
+}
+
+/* CardSwap wrapper */
+.sc-cardswap-wrap {
+  position: relative;
+  width: 100%;
+  height: 560px;
+}
+
+/* Individual card shell */
+.sc-card {
+  background: #13151f;
+  border: none !important;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Chrome / title bar */
+.sc-chrome-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  background: #0d0f18;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+}
+
+/* Traffic-light dots row */
+.sc-traffic-lights {
+  display: flex;
+  gap: 5px;
+  margin-right: 6px;
+}
+
+.sc-traffic-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+/* URL pill */
+.sc-url-pill {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 5px;
+  padding: 3px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sc-url-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.sc-url-text {
+  font-family: "DM Sans", sans-serif;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Screenshot image */
+.sc-card-img {
+  width: 100%;
+  flex: 1;
+  object-fit: cover;
+  object-position: top;
+  display: block;
+  min-height: 0;
+}
+
+/* Bottom edge fade */
+.sc-bottom-fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 6rem;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, #0f111a);
+}
+
+/* Override CardSwap container — center it instead of default bottom-right */
+.card-swap-container {
+  position: relative !important;
+  bottom: auto !important;
+  right: auto !important;
+  transform: none !important;
+  margin: auto;
+}
+
+@media (max-width: 768px) {
+  .card-swap-container {
+    transform: scale(0.8) !important;
+    transform-origin: center top !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-swap-container {
+    transform: scale(0.65) !important;
+    transform-origin: center top !important;
+  }
+}
+
+/* ─── Footer ──────────────────────────────────────────────────────────── */
+
+.landing-footer {
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid rgba(230, 57, 70, 0.08);
+  background: #0f111a;
+}
+
+/* Torii gate — centred, bottom-anchored, behind content */
+.footer-torii {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 52%;
+  max-width: 480px;
+  opacity: 0.05;
+  color: #e63946;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Content wrapper */
+.footer-content {
+  position: relative;
+  z-index: 1;
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: 5rem 1.5rem 2.5rem;
+  text-align: center;
+}
+
+/* Made with love */
+.footer-made-with {
+  font-family: "DM Sans", sans-serif;
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.footer-heart {
+  display: inline-block;
+  color: #e63946;
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.2);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.15);
+  }
+  56% {
+    transform: scale(1);
+  }
+}
+
+.footer-made-jp {
+  font-family: "Noto Serif JP", serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.3em;
+  color: rgba(255, 255, 255, 0.2);
+  margin-top: 0.4rem;
+}
+
+/* Social row */
+.footer-social-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* Social buttons — primary-outlined, fills on hover */
+.footer-social-link {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: #e63946;
+  text-decoration: none;
+  padding: 0.6rem 1.4rem;
+  background: #1a1d29;
+  border: 1px solid rgba(230, 57, 70, 0.18);
+  border-radius: 0;
+  transition:
+    background 0.25s,
+    border-color 0.25s,
+    color 0.25s,
+    box-shadow 0.25s;
+}
+
+.footer-social-link:hover {
+  background: #e63946;
+  border-color: rgba(230, 57, 70, 0.5);
+  color: #fff;
+  box-shadow: 0 6px 22px rgba(230, 57, 70, 0.32);
+}
+
+.footer-social-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex-shrink: 0;
+}
+
+.footer-social-label {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Divider */
+.footer-divider {
+  width: 3rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(230, 57, 70, 0.3), transparent);
+  margin: 2rem auto;
+}
+
+/* Nav links */
+.footer-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.footer-nav-link {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-nav-link:hover {
+  color: #e63946;
+}
+
+/* Giant ANIMOJI banner */
+.footer-banner-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  margin-top: -0.5rem;
+}
+
+.footer-banner-text {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 900;
+  font-size: clamp(7rem, 21vw, 26rem);
+  line-height: 0.85;
+  letter-spacing: 0.03em;
+  padding-bottom: 0.5rem;
+  transform: translateY(0.75rem);
+  position: relative;
+
+  /* Clean outline: stroke first, opaque fill covers interior overlap artifacts */
+  paint-order: stroke fill;
+  -webkit-text-stroke: 4px rgba(230, 57, 70, 0.85);
+  -webkit-text-fill-color: #0f111a;
+  color: #0f111a;
+}
+
+/* Seigaiha pattern inside the letterforms — layered on top via screen blend */
+.footer-banner-text::after {
+  content: "ANIMOJI";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(
+      circle at 100% 150%,
+      transparent 24%,
+      rgba(230, 57, 70, 0.25) 25%,
+      rgba(230, 57, 70, 0.25) 26%,
+      transparent 27%,
+      transparent 74%,
+      rgba(230, 57, 70, 0.25) 75%,
+      rgba(230, 57, 70, 0.25) 76%,
+      transparent 77%,
+      transparent
+    ),
+    radial-gradient(
+      circle at 0% 150%,
+      transparent 24%,
+      rgba(230, 57, 70, 0.25) 25%,
+      rgba(230, 57, 70, 0.25) 26%,
+      transparent 27%,
+      transparent 74%,
+      rgba(230, 57, 70, 0.25) 75%,
+      rgba(230, 57, 70, 0.25) 76%,
+      transparent 77%,
+      transparent
+    );
+  background-size: 40px 40px;
+  background-position:
+    0 0,
+    20px 20px;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.footer-banner-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 35%;
+  background: linear-gradient(to top, #0f111a 30%, rgba(15, 17, 26, 0.4) 70%, transparent);
+}
+
+/* ─── About Section ───────────────────────────────────────────────────── */
+.about-section {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #0f111a;
+}
+
+/* Torii gate silhouette — centred, bottom-anchored */
+.about-torii-bg {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 55%;
+  max-width: 520px;
+  opacity: 0.05;
+  color: #e63946;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Vertical Japanese text (right edge) */
+.about-vertical-text {
+  position: absolute;
+  right: -2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.4s ease;
+}
+
+.about-vertical-p {
+  writing-mode: vertical-rl;
+  font-family: "Noto Serif JP", serif;
+  color: rgba(230, 57, 70, 0.2);
+  font-size: 1.5rem;
+  letter-spacing: 0.5em;
+  font-weight: 700;
+}
+
+/* Panels wrapper */
+.about-panels-wrap {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  z-index: 2;
+}
+
+/* Individual panel */
+.about-panel {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: 7rem 5rem 4rem;
+  gap: 3rem;
+  min-height: 100vh;
+}
+
+.about-panel-emoji {
+  opacity: 0;
+}
+
+/* Text column */
+.about-text-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  max-width: 480px;
+}
+
+.about-text-col-right {
+  justify-self: end;
+}
+
+/* Gallery column */
+.about-gallery-col {
+  position: relative;
+  height: 520px;
+}
+
+/* Section tag */
+.about-tag {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #e63946;
+}
+
+.about-tag-gold {
+  color: #d4af37;
+}
+
+.about-tag-rose {
+  color: #c62a47;
+}
+
+/* Heading */
+.about-heading {
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(2.6rem, 4.5vw, 4.2rem);
+  font-weight: 700;
+  line-height: 1.05;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.about-heading em {
+  font-style: italic;
+  color: #e63946;
+  display: block;
+}
+
+.about-heading-gold em {
+  color: #d4af37;
+}
+
+.about-heading-rose em {
+  color: #c62a47;
+}
+
+/* Body text */
+.about-body {
+  font-family: "DM Sans", sans-serif;
+  font-size: clamp(0.88rem, 1.1vw, 1rem);
+  line-height: 1.85;
+  color: rgba(255, 255, 255, 0.45);
+  max-width: 38ch;
+}
+
+/* Stats row */
+.about-stats {
+  display: flex;
+  gap: 2.5rem;
+  padding-top: 0.25rem;
+}
+
+.about-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.about-stat-num {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.about-stat-label {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.28);
+}
+
+/* CTA link */
+.about-cta-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #e63946;
+  text-decoration: none;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid rgba(230, 57, 70, 0.35);
+  transition:
+    color 0.3s,
+    border-color 0.3s;
+  width: fit-content;
+}
+
+.about-cta-link:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.about-cta-link-gold {
+  color: #d4af37;
+  border-bottom-color: rgba(212, 175, 55, 0.35);
+}
+
+.about-cta-link-gold:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.about-cta-link-rose {
+  color: #c62a47;
+  border-bottom-color: rgba(198, 42, 71, 0.35);
+}
+
+.about-cta-link-rose:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.about-cta-arrow {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  transition: transform 0.3s;
+}
+
+.about-cta-link:hover .about-cta-arrow {
+  transform: translateX(4px);
+}
+
+/* Thin red rule accent below tag */
+.about-rule {
+  width: 2.5rem;
+  height: 1px;
+  background: #e63946;
+  opacity: 0.5;
+}
+
+.about-rule-gold {
+  background: #d4af37;
+}
+
+.about-rule-rose {
+  background: #c62a47;
+}
+
+/* Scroll progress indicator */
+.about-progress {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  z-index: 4;
+}
+
+.about-progress-label {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.18);
+}
+
+.about-progress-track {
+  width: 80px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.about-progress-fill {
+  position: absolute;
+  inset: 0;
+  background: #e63946;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 14vw !important;
+  }
+
+  .strip-banner {
+    padding: 0.8rem 1.5rem;
+  }
+
+  .marquee-item {
+    padding: 0 0.75rem;
+  }
+
+  .about-panel {
+    grid-template-columns: 1fr;
+    padding: 5rem 1.5rem 2rem;
+    gap: 2rem;
+    overflow-y: auto;
+    min-height: 100vh;
+  }
+
+  .about-text-col-right {
+    justify-self: start;
+    order: -1;
+  }
+
+  .about-gallery-col {
+    height: 300px;
+  }
+
+  .about-vertical-text {
+    display: none;
+  }
+}
+
+@media (max-width: 1279px) {
+  .about-vertical-text {
+    display: none;
+  }
+}

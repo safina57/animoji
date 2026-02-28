@@ -10,11 +10,14 @@
     "cssVariables": true,
     "prefix": ""
   },
+  "iconLibrary": "lucide",
   "aliases": {
-    "utils": "@lib/utils",
     "components": "src/components",
+    "utils": "@lib/utils",
     "ui": "src/lib/ui",
     "hooks": "src/hooks"
   },
-  "iconLibrary": "lucide"
+  "registries": {
+    "@react-bits": "https://reactbits.dev/r/{name}.json"
+  }
 }
