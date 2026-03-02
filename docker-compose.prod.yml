@@ -2,7 +2,7 @@ services:
 
   # ─── Frontend ────────────────────────────────
   frontend:
-    image: ghcr.io/YOUR_GITHUB_USERNAME/animoji-frontend:latest
+    image: ghcr.io/safina57/animoji-frontend:latest
     ports:
       - "127.0.0.1:3000:80"
     restart: unless-stopped
@@ -64,7 +64,7 @@ services:
 
   # ─── API Gateway ─────────────────────────────────────────────────────
   gateway:
-    image: ghcr.io/YOUR_GITHUB_USERNAME/animoji-gateway:latest
+    image: ghcr.io/safina57/animoji-gateway:latest
     ports:
       - "127.0.0.1:8080:8080"
     env_file:
@@ -162,7 +162,7 @@ services:
 
   # ─── AI Worker ───────────────────────────────────────────
   ai-worker:
-    image: ghcr.io/YOUR_GITHUB_USERNAME/animoji-ai-worker:latest
+    image: ghcr.io/safina57/animoji-ai-worker:latest
     env_file:
       - .env
     depends_on:

@@ -11,9 +11,8 @@ postgres_password: ""
 redis_password: ""          
 
 # MinIO
-minio_root_password: ""     
-minio_access_key: ""        
-minio_secret_key: ""        
+minio_root_user: ""
+minio_root_password: ""
 
 # Google OAuth
 google_client_id: ""
