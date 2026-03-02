@@ -1,0 +1,107 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Build & Push — Animoji
+#
+# What this workflow does:
+#   1. Builds three Docker images (gateway, ai-worker, frontend) from source.
+#   2. Pushes them to GitHub Container Registry (ghcr.io).
+#
+# Deployment is handled automatically by Watchtower running on the VM.
+# Watchtower polls GHCR every 60s and restarts containers when new images appear.
+# No SSH access to the VM is needed.
+#
+# Trigger conditions:
+#   - Every push to the `main` branch
+#   - Manual run from the GitHub Actions UI (workflow_dispatch)
+#
+# Required GitHub Variables (non-sensitive, visible in logs):
+#   DOMAIN_NAME       — Your production domain (e.g., yourdomain.com)
+#                       Used to bake VITE_API_URL into the frontend image.
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: Build & Push Images
+
+on:
+  push:
+    branches:
+      - main         
+
+  workflow_dispatch:  
+    inputs:
+      reason:
+        description: "Why are you triggering a manual deploy?"
+        required: false
+        default: "manual redeploy"
+
+env:
+  REGISTRY: ghcr.io
+  REPO_OWNER: ${{ github.repository_owner }}
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
+jobs:
+  build-and-push:
+    name: Build & Push Images
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v5
+
+      - name: Compute short git SHA
+        id: sha
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Gateway (Go API)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./gateway
+          file: ./gateway/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/animoji-gateway:latest
+            ${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/animoji-gateway:sha-${{ steps.sha.outputs.sha_short }}
+          cache-from: type=gha,scope=gateway
+          cache-to:   type=gha,mode=max,scope=gateway
+
+      - name: Build and push AI Worker (Python)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./ai-worker
+          file: ./ai-worker/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/animoji-ai-worker:latest
+            ${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/animoji-ai-worker:sha-${{ steps.sha.outputs.sha_short }}
+          cache-from: type=gha,scope=ai-worker
+          cache-to:   type=gha,mode=max,scope=ai-worker
+
+      - name: Build and push Frontend (React)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          build-args: |
+            VITE_API_URL=https://api.${{ vars.DOMAIN_NAME }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/animoji-frontend:latest
+            ${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/animoji-frontend:sha-${{ steps.sha.outputs.sha_short }}
+          cache-from: type=gha,scope=frontend
+          cache-to:   type=gha,mode=max,scope=frontend
+
