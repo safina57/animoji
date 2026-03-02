@@ -44,3 +44,6 @@ example/
 
 CLAUDE.md
 skills/
+
+ansible/vault.yml
+ansible/inventory.ini

@@ -1,0 +1,320 @@
+---
+# =============================================================================
+# Animoji — VM Configuration Playbook
+#
+# Full run:
+#   ansible-playbook -i inventory.ini playbook.yml --ask-vault-pass
+#
+# Run only specific sections using tags:
+#   ansible-playbook -i inventory.ini playbook.yml --ask-vault-pass --tags system
+#   ansible-playbook -i inventory.ini playbook.yml --ask-vault-pass --tags docker
+#   ansible-playbook -i inventory.ini playbook.yml --ask-vault-pass --tags security
+#   ansible-playbook -i inventory.ini playbook.yml --ask-vault-pass --tags nginx
+#   ansible-playbook -i inventory.ini playbook.yml --ask-vault-pass --tags tls
+#   ansible-playbook -i inventory.ini playbook.yml --ask-vault-pass --tags app
+#   ansible-playbook -i inventory.ini playbook.yml --ask-vault-pass --tags deploy
+# =============================================================================
+
+- name: Configure Animoji Azure VM
+  hosts: vm
+  become: true
+  vars_files:
+    - vars.yml
+    - vault.yml
+
+  handlers:
+    - name: Restart sshd
+      ansible.builtin.systemd:
+        name: ssh
+        state: restarted
+
+    - name: Reload nginx
+      ansible.builtin.systemd:
+        name: nginx
+        state: reloaded
+
+    - name: Restart fail2ban
+      ansible.builtin.systemd:
+        name: fail2ban
+        state: restarted
+
+  tasks:
+
+    # =========================================================================
+    # SYSTEM — Update packages and install dependencies
+    # =========================================================================
+
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+      tags: [system]
+
+    - name: Upgrade all packages
+      ansible.builtin.apt:
+        upgrade: dist
+      tags: [system]
+
+    - name: Install required system packages
+      ansible.builtin.apt:
+        name:
+          - curl
+          - htop
+          - unzip
+          - ufw
+          - nginx
+          - certbot
+          - python3-certbot-nginx
+          - fail2ban
+          - unattended-upgrades
+        state: present
+      tags: [system]
+
+    # =========================================================================
+    # DOCKER — Install Docker Engine and add user to docker group
+    # =========================================================================
+
+    - name: Check if Docker is already installed
+      ansible.builtin.stat:
+        path: /usr/bin/docker
+      register: docker_binary
+      tags: [docker]
+
+    - name: Download Docker convenience install script
+      ansible.builtin.get_url:
+        url: https://get.docker.com
+        dest: /tmp/get-docker.sh
+        mode: "0755"
+      when: not docker_binary.stat.exists
+      tags: [docker]
+
+    - name: Run Docker install script
+      ansible.builtin.shell: /tmp/get-docker.sh
+      when: not docker_binary.stat.exists
+      tags: [docker]
+
+    - name: Remove Docker install script
+      ansible.builtin.file:
+        path: /tmp/get-docker.sh
+        state: absent
+      tags: [docker]
+
+    - name: Enable and start Docker service
+      ansible.builtin.systemd:
+        name: docker
+        enabled: true
+        state: started
+      tags: [docker]
+
+    - name: Add {{ vm_user }} to docker group
+      ansible.builtin.user:
+        name: "{{ vm_user }}"
+        groups: docker
+        append: true
+      tags: [docker]
+
+    # =========================================================================
+    # SECURITY — SSH hardening, UFW firewall, fail2ban, auto-updates
+    # =========================================================================
+
+    - name: Harden SSH configuration
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+        backup: true
+      loop:
+        - { regexp: '^#?PermitRootLogin', line: 'PermitRootLogin no' }
+        - { regexp: '^#?PasswordAuthentication', line: 'PasswordAuthentication no' }
+        - { regexp: '^#?X11Forwarding', line: 'X11Forwarding no' }
+        - { regexp: '^#?AllowAgentForwarding', line: 'AllowAgentForwarding no' }
+      notify: Restart sshd
+      tags: [security]
+
+    - name: Configure UFW — set default policies and open ports
+      ansible.builtin.shell: |
+        ufw --force reset
+        ufw default deny incoming
+        ufw default allow outgoing
+        ufw allow ssh
+        ufw allow 80/tcp
+        ufw allow 443/tcp
+        ufw --force enable
+      args:
+        executable: /bin/bash
+      tags: [security]
+
+    - name: Configure fail2ban jail
+      ansible.builtin.copy:
+        dest: /etc/fail2ban/jail.local
+        mode: "0644"
+        content: |
+          [DEFAULT]
+          bantime  = 3600
+          findtime = 600
+          maxretry = 5
+
+          [sshd]
+          enabled = true
+          port    = ssh
+          logpath = %(sshd_log)s
+          backend = %(syslog_backend)s
+      notify: Restart fail2ban
+      tags: [security]
+
+    - name: Enable automatic security updates
+      ansible.builtin.debconf:
+        name: unattended-upgrades
+        question: unattended-upgrades/enable_auto_updates
+        value: "true"
+        vtype: boolean
+      tags: [security]
+
+    # =========================================================================
+    # NGINX — Deploy and enable host nginx config
+    # =========================================================================
+
+    - name: Copy nginx site config
+      ansible.builtin.copy:
+        src: ../nginx/prod-vm.conf
+        dest: /etc/nginx/sites-available/animoji
+        mode: "0644"
+      tags: [nginx]
+
+    - name: Replace YOUR_DOMAIN placeholder in nginx config
+      ansible.builtin.replace:
+        path: /etc/nginx/sites-available/animoji
+        regexp: 'YOUR_DOMAIN'
+        replace: "{{ domain }}"
+      tags: [nginx]
+
+    - name: Enable animoji nginx site
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/animoji
+        dest: /etc/nginx/sites-enabled/animoji
+        state: link
+      notify: Reload nginx
+      tags: [nginx]
+
+    - name: Remove default nginx site
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: Reload nginx
+      tags: [nginx]
+
+    - name: Test nginx configuration
+      ansible.builtin.command: nginx -t
+      changed_when: false
+      tags: [nginx]
+
+    - name: Flush handlers (reload nginx before certbot)
+      ansible.builtin.meta: flush_handlers
+      tags: [nginx]
+
+    # =========================================================================
+    # TLS — Obtain Let's Encrypt certificate via certbot
+    #
+    # Requires DNS A records for all 4 subdomains to be pointing to this VM
+    # before running this task. Run with --tags tls separately once DNS is set.
+    # =========================================================================
+
+    - name: Check if TLS certificate already exists
+      ansible.builtin.stat:
+        path: /etc/letsencrypt/live/{{ domain }}/fullchain.pem
+      register: cert_exists
+      tags: [tls]
+
+    - name: Obtain Let's Encrypt certificate
+      ansible.builtin.command: >
+        certbot --nginx
+        -d {{ domain }}
+        -d www.{{ domain }}
+        -d api.{{ domain }}
+        -d media.{{ domain }}
+        --email {{ certbot_email }}
+        --agree-tos
+        --non-interactive
+      when: not cert_exists.stat.exists
+      notify: Reload nginx
+      tags: [tls]
+
+    - name: Enable SSL in nginx listen directives
+      ansible.builtin.replace:
+        path: /etc/nginx/sites-available/animoji
+        regexp: 'listen 443;'
+        replace: 'listen 443 ssl;'
+      tags: [tls]
+
+    - name: Uncomment ssl_certificate lines
+      ansible.builtin.replace:
+        path: /etc/nginx/sites-available/animoji
+        regexp: '#\s(ssl_certificate.+)'
+        replace: '\1'
+      notify: Reload nginx
+      tags: [tls]
+
+    # =========================================================================
+    # APP — Create app directory and deploy config files
+    # =========================================================================
+
+    - name: Create app directory
+      ansible.builtin.file:
+        path: /home/{{ vm_user }}/animoji
+        state: directory
+        owner: "{{ vm_user }}"
+        group: "{{ vm_user }}"
+        mode: "0755"
+      tags: [app]
+
+    - name: Copy docker-compose.prod.yml
+      ansible.builtin.copy:
+        src: ../docker-compose.prod.yml
+        dest: /home/{{ vm_user }}/animoji/docker-compose.prod.yml
+        owner: "{{ vm_user }}"
+        group: "{{ vm_user }}"
+        mode: "0644"
+      tags: [app]
+
+    - name: Template .env file from vault secrets
+      ansible.builtin.template:
+        src: templates/env.j2
+        dest: /home/{{ vm_user }}/animoji/.env
+        owner: "{{ vm_user }}"
+        group: "{{ vm_user }}"
+        mode: "0600"   # owner-read/write only — secrets are never world-readable
+      tags: [app]
+
+    # =========================================================================
+    # DEPLOY — Log into GHCR and start the stack for the first time
+    # =========================================================================
+
+
+    - name: Pull all Docker images from GHCR
+      ansible.builtin.shell: |
+        docker compose -f /home/{{ vm_user }}/animoji/docker-compose.prod.yml pull
+      become_user: "{{ vm_user }}"
+      tags: [deploy]
+
+    - name: Start the stack
+      ansible.builtin.shell: |
+        docker compose -f /home/{{ vm_user }}/animoji/docker-compose.prod.yml up \
+          --detach \
+          --remove-orphans \
+          --no-build
+      become_user: "{{ vm_user }}"
+      tags: [deploy]
+
+    - name: Show container status
+      ansible.builtin.shell: |
+        docker compose -f /home/{{ vm_user }}/animoji/docker-compose.prod.yml ps
+      become_user: "{{ vm_user }}"
+      register: compose_ps
+      changed_when: false
+      tags: [deploy]
+
+    - name: Print container status
+      ansible.builtin.debug:
+        msg: "{{ compose_ps.stdout_lines }}"
+      tags: [deploy]

@@ -1,0 +1,5 @@
+# Non-sensitive configuration — safe to commit
+domain: tryanimoji.app
+github_username: safina57
+jwt_expiry_hours: 48
+redis_job_ttl: 86400

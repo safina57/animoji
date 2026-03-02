@@ -1,0 +1,31 @@
+# VM username (set during Azure VM creation)
+vm_user: ""
+
+# Certbot / Let's Encrypt expiry notifications
+certbot_email: ""
+
+# PostgreSQL
+postgres_password: ""       
+
+# Redis
+redis_password: ""          
+
+# MinIO
+minio_root_user: ""
+minio_root_password: ""
+
+# Google OAuth
+google_client_id: ""
+google_client_secret: ""
+
+# JWT RSA key pair
+jwt_private_key: ""
+jwt_public_key: ""
+
+# Azure OpenAI
+azure_openai_endpoint: ""
+azure_openai_api_key: ""
+
+# Azure FLUX
+azure_flux_endpoint: ""
+azure_flux_api_key: ""
