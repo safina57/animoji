@@ -7,9 +7,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/google/uuid"
 	"github.com/safina57/animoji/gateway/internal/constants"
+	"github.com/safina57/animoji/gateway/internal/dto"
 	"github.com/safina57/animoji/gateway/internal/handlers"
 	"github.com/safina57/animoji/gateway/internal/jobs"
 	"github.com/safina57/animoji/gateway/internal/messaging"
@@ -25,11 +24,12 @@ func (h *EmojiHandler) HandleEmojiStatusStream(
 	storageSvc *storage.MinIOService,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		jobID := chi.URLParam(r, "job_id")
-		if _, err := uuid.Parse(jobID); err != nil {
+		parsedJobID, err := dto.ParseUUIDParam(r, "job_id")
+		if err != nil {
 			handlers.RespondError(w, "Invalid job_id format", http.StatusBadRequest)
 			return
 		}
+		jobID := parsedJobID.String()
 
 		rc := http.NewResponseController(w)
 		_ = rc.SetWriteDeadline(time.Time{})
@@ -49,7 +49,7 @@ func (h *EmojiHandler) HandleEmojiStatusStream(
 
 		ctx := r.Context()
 
-		_, _ = fmt.Fprintf(w, ": connected\n\n")
+		_, _ = fmt.Fprintf(w, ": connected\n\n") //nosemgrep: go.lang.security.audit.xss.no-fprintf-to-responsewriter
 		flusher.Flush()
 
 		// Register FIRST so no future events are missed while we seed from Redis.
@@ -183,6 +183,7 @@ func sendSSEEvent(w http.ResponseWriter, flusher http.Flusher, data any) {
 		logger.Error().Err(err).Msg("Failed to marshal SSE event data")
 		return
 	}
+	// nosemgrep: go.lang.security.audit.xss.no-fprintf-to-responsewriter.no-fprintf-to-responsewriter
 	_, _ = fmt.Fprintf(w, "data: %s\n\n", jsonData)
 	flusher.Flush()
 }

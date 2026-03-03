@@ -3,7 +3,6 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 
 from core.flux_client import get_flux_client
 from core.logger import get_logger
@@ -68,15 +67,6 @@ app = FastAPI(
     description="Anime image generation worker that processes jobs from NATS queue",
     version="1.0.0",
     lifespan=lifespan,
-)
-
-# Configure CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
 )
 
 # Include routers

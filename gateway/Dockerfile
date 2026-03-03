@@ -25,10 +25,18 @@ FROM alpine:latest
 # Install ca-certificates for HTTPS
 RUN apk --no-cache add ca-certificates
 
-WORKDIR /root/
+# Create non-root user to run the binary
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+WORKDIR /app
 
 # Copy the binary from builder
 COPY --from=builder /app/gateway .
+
+# Give ownership to non-root user
+RUN chown appuser:appgroup /app/gateway
+
+USER appuser
 
 # Expose port
 EXPOSE 8080

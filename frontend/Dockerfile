@@ -35,4 +35,7 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 
 # Start nginx
+# nginx:alpine requires root for the master process to bind port 80;
+# worker processes automatically drop to the built-in 'nginx' user.
+# nosemgrep: dockerfile.security.missing-user.missing-user
 CMD ["nginx", "-g", "daemon off;"]
