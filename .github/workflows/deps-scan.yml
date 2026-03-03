@@ -11,18 +11,18 @@ on:
     - cron: "0 9 * * 1"
 
 jobs:
-  # dependency-review:
-  #   name: Dependency Review
-  #   if: github.event_name == 'pull_request'
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     contents: read
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v5
+  dependency-review:
+    name: Dependency Review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
 
-  #     - name: Dependency Review
-  #       uses: actions/dependency-review-action@v4
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
   frontend-audit:
     name: Frontend Dependency Audit
     runs-on: ubuntu-latest
