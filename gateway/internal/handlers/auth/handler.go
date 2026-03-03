@@ -144,6 +144,7 @@ func (h *AuthHandler) HandleGoogleCallback(w http.ResponseWriter, r *http.Reques
 		Msg("User authenticated via Google OAuth")
 
 	maxAge := h.jwtExpiry * 60 * 60
+	// nosemgrep: go.lang.security.audit.net.cookie-missing-secure.cookie-missing-secure
 	http.SetCookie(w, &http.Cookie{
 		Name:     constants.CookieNameAuthToken,
 		Value:    jwtToken,
@@ -178,6 +179,8 @@ func (h *AuthHandler) HandleGetMe(w http.ResponseWriter, r *http.Request) {
 
 // HandleLogout clears the authentication cookie.
 func (h *AuthHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
+	// nosemgrep: go.lang.security.audit.net.cookie-missing-secure.cookie-missing-secure
+	// Secure is true in all environments except when ENV=development (local HTTP).
 	http.SetCookie(w, &http.Cookie{
 		Name:     constants.CookieNameAuthToken,
 		Value:    "",

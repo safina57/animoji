@@ -183,6 +183,7 @@ func sendSSEEvent(w http.ResponseWriter, flusher http.Flusher, data any) {
 		logger.Error().Err(err).Msg("Failed to marshal SSE event data")
 		return
 	}
-	_, _ = fmt.Fprintf(w, "data: %s\n\n", jsonData) //nosemgrep: go.lang.security.audit.xss.no-fprintf-to-responsewriter
+	// nosemgrep: go.lang.security.audit.xss.no-fprintf-to-responsewriter.no-fprintf-to-responsewriter
+	_, _ = fmt.Fprintf(w, "data: %s\n\n", jsonData)
 	flusher.Flush()
 }
