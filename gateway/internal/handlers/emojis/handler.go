@@ -4,8 +4,6 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/google/uuid"
 	internalAuth "github.com/safina57/animoji/gateway/internal/auth"
 	"github.com/safina57/animoji/gateway/internal/cache"
 	"github.com/safina57/animoji/gateway/internal/dto"
@@ -58,17 +56,19 @@ func (h *EmojiHandler) HandlePublishEmojiVariant(w http.ResponseWriter, r *http.
 		return
 	}
 
-	jobID := chi.URLParam(r, "job_id")
-	if _, parseErr := uuid.Parse(jobID); parseErr != nil {
+	parsedJobID, err := dto.ParseUUIDParam(r, "job_id")
+	if err != nil {
 		handlers.RespondError(w, "invalid job_id format", http.StatusBadRequest)
 		return
 	}
+	jobID := parsedJobID.String()
 
-	variantID := chi.URLParam(r, "variant_id")
-	if _, parseErr := uuid.Parse(variantID); parseErr != nil {
+	parsedVariantID, err := dto.ParseUUIDParam(r, "variant_id")
+	if err != nil {
 		handlers.RespondError(w, "invalid variant_id format", http.StatusBadRequest)
 		return
 	}
+	variantID := parsedVariantID.String()
 
 	result, err := h.svc.PublishEmojiVariant(r.Context(), claims.UserID, jobID, variantID)
 	if err != nil {

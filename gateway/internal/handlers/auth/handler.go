@@ -150,7 +150,7 @@ func (h *AuthHandler) HandleGoogleCallback(w http.ResponseWriter, r *http.Reques
 		Path:     "/",
 		MaxAge:   maxAge,
 		HttpOnly: true,
-		Secure:   os.Getenv("ENV") == "production",
+		Secure:   os.Getenv("ENV") != "development",
 		SameSite: http.SameSiteLaxMode,
 	})
 
@@ -184,7 +184,7 @@ func (h *AuthHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		MaxAge:   -1,
 		HttpOnly: true,
-		Secure:   os.Getenv("ENV") == "production",
+		Secure:   os.Getenv("ENV") != "development",
 		SameSite: http.SameSiteLaxMode,
 	})
 

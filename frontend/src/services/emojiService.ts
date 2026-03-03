@@ -1,3 +1,5 @@
+import { validate as isUUID } from "uuid"
+
 import type {
   SubmitEmojiJobResponse,
   PublishEmojiVariantResponse,
@@ -8,7 +10,12 @@ export const EMOJI_GALLERY_PAGE_SIZE = 20
 
 const API_URL = import.meta.env.VITE_API_URL
 
+function assertValidId(id: string, name = "id"): void {
+  if (!isUUID(id)) throw new Error(`Invalid ${name} format`)
+}
+
 export function getEmojiStatusStreamUrl(jobId: string): string {
+  assertValidId(jobId, "job_id")
   return `${API_URL}/emojis/jobs/${jobId}/stream`
 }
 
@@ -48,6 +55,8 @@ export async function publishEmojiVariant(
   jobId: string,
   variantId: string
 ): Promise<PublishEmojiVariantResponse> {
+  assertValidId(jobId, "job_id")
+  assertValidId(variantId, "variant_id")
   const response = await fetch(`${API_URL}/emojis/jobs/${jobId}/variants/${variantId}/publish`, {
     method: "POST",
     credentials: "include",

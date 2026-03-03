@@ -21,6 +21,16 @@ RUN uv sync --frozen --no-dev
 # Copy application code
 COPY . .
 
+# Create non-root user and give ownership of the app directory
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser \
+    && chown -R appuser:appgroup /app
+
+USER appuser
+
+# Disable uv cache — system users have no home directory (/nonexistent),
+# so uv cannot create its default cache path at runtime.
+ENV UV_NO_CACHE=1
+
 # Expose port
 EXPOSE 8000
 

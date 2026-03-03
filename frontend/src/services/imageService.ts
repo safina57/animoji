@@ -1,6 +1,12 @@
+import { validate as isUUID } from "uuid"
+
 import type { ImageDetailItem, PublicImagesResponse } from "@customTypes/image"
 
 const API_URL = import.meta.env.VITE_API_URL
+
+function assertValidId(id: string, name = "id"): void {
+  if (!isUUID(id)) throw new Error(`Invalid ${name} format`)
+}
 
 export const FEED_PAGE_SIZE = 20
 export const GALLERY_PAGE_SIZE = 20
@@ -32,6 +38,7 @@ export const imageService = {
   },
 
   async fetchImageDetail(imageId: string): Promise<ImageDetailItem> {
+    assertValidId(imageId, "image_id")
     const response = await fetch(`${API_URL}/images/${imageId}`, {
       credentials: "include",
     })
@@ -42,6 +49,7 @@ export const imageService = {
   },
 
   async likeImage(imageId: string): Promise<void> {
+    assertValidId(imageId, "image_id")
     const response = await fetch(`${API_URL}/images/${imageId}/like`, {
       method: "POST",
       credentials: "include",
@@ -52,6 +60,7 @@ export const imageService = {
   },
 
   async unlikeImage(imageId: string): Promise<void> {
+    assertValidId(imageId, "image_id")
     const response = await fetch(`${API_URL}/images/${imageId}/like`, {
       method: "DELETE",
       credentials: "include",
@@ -62,6 +71,7 @@ export const imageService = {
   },
 
   async checkLiked(imageId: string): Promise<boolean> {
+    assertValidId(imageId, "image_id")
     const response = await fetch(`${API_URL}/images/${imageId}/liked`, {
       credentials: "include",
     })

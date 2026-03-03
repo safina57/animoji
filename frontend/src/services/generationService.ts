@@ -1,8 +1,15 @@
+import { validate as isUUID } from "uuid"
+
 import type { SubmitJobResponse, PublishImageResponse } from "@customTypes/generation"
 
 const API_URL = import.meta.env.VITE_API_URL
 
+function assertValidId(id: string, name = "id"): void {
+  if (!isUUID(id)) throw new Error(`Invalid ${name} format`)
+}
+
 export function getJobStatusStreamUrl(jobId: string): string {
+  assertValidId(jobId, "job_id")
   return `${API_URL}/images/jobs/${jobId}/stream`
 }
 
@@ -29,6 +36,7 @@ export async function submitRefinement(
   jobId: string,
   refinementPrompt: string
 ): Promise<SubmitJobResponse> {
+  assertValidId(jobId, "job_id")
   const response = await fetch(`${API_URL}/images/jobs/${jobId}/refine`, {
     method: "POST",
     credentials: "include",
@@ -51,6 +59,7 @@ export async function publishImage(
   jobId: string,
   visibility: "public" | "private"
 ): Promise<PublishImageResponse> {
+  assertValidId(jobId, "job_id")
   const response = await fetch(`${API_URL}/images/jobs/${jobId}/publish?visibility=${visibility}`, {
     method: "POST",
     credentials: "include",

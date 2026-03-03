@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	internalAuth "github.com/safina57/animoji/gateway/internal/auth"
 	"github.com/safina57/animoji/gateway/internal/cache"
@@ -61,11 +60,12 @@ func (h *ImageHandler) HandleRefineJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jobID := chi.URLParam(r, "job_id")
-	if jobID == "" {
-		handlers.RespondError(w, "job_id is required", http.StatusBadRequest)
+	parsedJobID, err := dto.ParseUUIDParam(r, "job_id")
+	if err != nil {
+		handlers.RespondError(w, "invalid job_id format", http.StatusBadRequest)
 		return
 	}
+	jobID := parsedJobID.String()
 
 	var req struct {
 		Prompt string `json:"prompt"`
@@ -104,11 +104,12 @@ func (h *ImageHandler) HandlePublishImage(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	jobID := chi.URLParam(r, "job_id")
-	if jobID == "" {
-		handlers.RespondError(w, "job_id is required", http.StatusBadRequest)
+	parsedJobID, err := dto.ParseUUIDParam(r, "job_id")
+	if err != nil {
+		handlers.RespondError(w, "invalid job_id format", http.StatusBadRequest)
 		return
 	}
+	jobID := parsedJobID.String()
 
 	visibility := r.URL.Query().Get("visibility")
 	if visibility == "" {
@@ -166,7 +167,7 @@ func (h *ImageHandler) HandleGetPublicImages(w http.ResponseWriter, r *http.Requ
 
 // HandleGetImageDetail handles GET /images/{image_id}
 func (h *ImageHandler) HandleGetImageDetail(w http.ResponseWriter, r *http.Request) {
-	imageID, err := uuid.Parse(chi.URLParam(r, "image_id"))
+	imageID, err := dto.ParseUUIDParam(r, "image_id")
 	if err != nil {
 		handlers.RespondError(w, "invalid image_id", http.StatusBadRequest)
 		return
@@ -222,7 +223,7 @@ func (h *ImageHandler) HandleLikeImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	imageID, err := uuid.Parse(chi.URLParam(r, "image_id"))
+	imageID, err := dto.ParseUUIDParam(r, "image_id")
 	if err != nil {
 		handlers.RespondError(w, "invalid image_id", http.StatusBadRequest)
 		return
@@ -251,7 +252,7 @@ func (h *ImageHandler) HandleUnlikeImage(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	imageID, err := uuid.Parse(chi.URLParam(r, "image_id"))
+	imageID, err := dto.ParseUUIDParam(r, "image_id")
 	if err != nil {
 		handlers.RespondError(w, "invalid image_id", http.StatusBadRequest)
 		return
@@ -277,7 +278,7 @@ func (h *ImageHandler) HandleCheckLiked(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	imageID, err := uuid.Parse(chi.URLParam(r, "image_id"))
+	imageID, err := dto.ParseUUIDParam(r, "image_id")
 	if err != nil {
 		handlers.RespondError(w, "invalid image_id", http.StatusBadRequest)
 		return
