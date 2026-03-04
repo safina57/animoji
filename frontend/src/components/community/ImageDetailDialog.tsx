@@ -66,7 +66,7 @@ export function ImageDetailDialog({ item, open, onClose }: ImageDetailDialogProp
 
   const handleToggleLike = async () => {
     if (!isAuthenticated) {
-      window.location.href = "/auth"
+      window.location.href = "/login"
       return
     }
     if (likeLoading) return
@@ -90,7 +90,7 @@ export function ImageDetailDialog({ item, open, onClose }: ImageDetailDialogProp
   }
 
   const handleShare = async () => {
-    const url = `${window.location.origin}?image=${item.id}`
+    const url = `${window.location.origin}/community?image=${item.id}`
     await navigator.clipboard.writeText(url).catch(() => {})
     setCopyFeedback(true)
     if (copyTimer.current) clearTimeout(copyTimer.current)

@@ -11,7 +11,7 @@ gsap.registerPlugin(ScrollTrigger)
 const NAV_LINKS = [
   { to: "/community", label: "Community" },
   { to: "/create", label: "Create" },
-  { to: "/auth", label: "Sign In" },
+  { to: "/login", label: "Sign In" },
 ]
 
 const SOCIAL = [
