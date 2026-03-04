@@ -152,6 +152,13 @@ const emojiSlice = createSlice({
       state.error = action.payload
     },
 
+    // Abort an in-flight generation without surfacing an error to the UI.
+    // Used when the caller handles the error itself (e.g. rate-limit modal).
+    cancelEmojiGeneration(state) {
+      state.stage = EMOJI_STAGE.INPUT
+      state.error = null
+    },
+
     // Stamps a permanent URL onto a single variant after it is published.
     variantPublished(state, action: PayloadAction<{ emotion: string; url: string }>) {
       const variant = state.variants.find((v) => v.emotion === action.payload.emotion)
@@ -177,6 +184,7 @@ export const {
   variantFailed,
   allVariantsComplete,
   failEmojiGeneration,
+  cancelEmojiGeneration,
   variantPublished,
   resetEmoji,
 } = emojiSlice.actions

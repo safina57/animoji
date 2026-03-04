@@ -323,6 +323,29 @@ func (r *RedisClient) DeleteEmojiJobMetadata(ctx context.Context, jobID string) 
 	return nil
 }
 
+var incrAndExpireScript = redis.NewScript(`
+local count = redis.call('INCR', KEYS[1])
+if redis.call('TTL', KEYS[1]) == -1 then
+  redis.call('EXPIREAT', KEYS[1], ARGV[1])
+end
+return count
+`)
+
+// IncrDailyCounter atomically increments a per-user daily counter and returns
+// the new count. The counter key is rate:{prefix}:{userID}:{YYYY-MM-DD} (UTC).
+func (r *RedisClient) IncrDailyCounter(ctx context.Context, prefix string, userID uuid.UUID) (int64, error) {
+	now := time.Now().UTC()
+	key := fmt.Sprintf("rate:%s:%s:%s", prefix, userID, now.Format("2006-01-02"))
+	tomorrow := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, time.UTC)
+
+	count, err := incrAndExpireScript.Run(ctx, r.client, []string{key}, tomorrow.Unix()).Int64()
+	if err != nil {
+		return 0, fmt.Errorf("failed to increment daily counter: %w", err)
+	}
+
+	return count, nil
+}
+
 // Close closes the Redis connection
 func (r *RedisClient) Close() error {
 	return r.client.Close()
