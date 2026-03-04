@@ -1,4 +1,4 @@
-import { useRef, type ChangeEvent, type KeyboardEvent } from "react"
+import { useRef, useState, type ChangeEvent, type KeyboardEvent } from "react"
 import { Send } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@hooks/redux"
 import {
@@ -17,6 +17,8 @@ import {
 } from "@store/slices/emojiSlice"
 import { submitJob, submitRefinement } from "@services/generationService"
 import { submitEmojiJob } from "@services/emojiService"
+import { RateLimitError } from "@services/errors"
+import RateLimitModal from "@components/generation/RateLimitModal"
 import { Button } from "@lib/ui/button"
 import {
   DropdownMenu,
@@ -65,9 +67,16 @@ interface UnifiedInputProps {
   onModeToggle: () => void
 }
 
+interface RateLimitInfo {
+  limit: number
+  resetAt: string
+  mode: CreateMode
+}
+
 export default function UnifiedInput({ mode, onModeToggle }: UnifiedInputProps) {
   const dispatch = useAppDispatch()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [rateLimitInfo, setRateLimitInfo] = useState<RateLimitInfo | null>(null)
 
   const {
     prompt: animePrompt,
@@ -142,9 +151,15 @@ export default function UnifiedInput({ mode, onModeToggle }: UnifiedInputProps) 
         try {
           await submitRefinement(animeJobId, prompt)
         } catch (err) {
-          dispatch(
-            failGeneration(err instanceof Error ? err.message : "Failed to submit refinement")
-          )
+          if (err instanceof RateLimitError) {
+            dispatch(failGeneration("__rl__"))
+            dispatch(failGeneration(null))
+            setRateLimitInfo({ limit: err.limit, resetAt: err.resetAt, mode: "anime" })
+          } else {
+            dispatch(
+              failGeneration(err instanceof Error ? err.message : "Failed to submit refinement")
+            )
+          }
         }
       } else {
         if (!referenceImage) {
@@ -156,11 +171,17 @@ export default function UnifiedInput({ mode, onModeToggle }: UnifiedInputProps) 
           const res = await submitJob(referenceImage, prompt)
           dispatch(setJobId(res.job_id))
         } catch (err) {
-          dispatch(
-            failGeneration(
-              err instanceof Error ? err.message : "Something went wrong. Please try again."
+          if (err instanceof RateLimitError) {
+            dispatch(failGeneration("__rl__"))
+            dispatch(failGeneration(null))
+            setRateLimitInfo({ limit: err.limit, resetAt: err.resetAt, mode: "anime" })
+          } else {
+            dispatch(
+              failGeneration(
+                err instanceof Error ? err.message : "Something went wrong. Please try again."
+              )
             )
-          )
+          }
         }
       }
     } else {
@@ -173,11 +194,17 @@ export default function UnifiedInput({ mode, onModeToggle }: UnifiedInputProps) 
         const res = await submitEmojiJob(referenceImage, prompt)
         dispatch(setEmojiJobId(res.job_id))
       } catch (err) {
-        dispatch(
-          failEmojiGeneration(
-            err instanceof Error ? err.message : "Something went wrong. Please try again."
+        if (err instanceof RateLimitError) {
+          dispatch(failEmojiGeneration("__rl__"))
+          dispatch(failEmojiGeneration(null))
+          setRateLimitInfo({ limit: err.limit, resetAt: err.resetAt, mode: "emoji" })
+        } else {
+          dispatch(
+            failEmojiGeneration(
+              err instanceof Error ? err.message : "Something went wrong. Please try again."
+            )
           )
-        )
+        }
       }
     }
   }
@@ -190,6 +217,15 @@ export default function UnifiedInput({ mode, onModeToggle }: UnifiedInputProps) 
   }
 
   return (
+    <>
+      {rateLimitInfo && (
+        <RateLimitModal
+          limit={rateLimitInfo.limit}
+          resetAt={rateLimitInfo.resetAt}
+          mode={rateLimitInfo.mode}
+          onClose={() => setRateLimitInfo(null)}
+        />
+      )}
     <div
       className={
         isBottom
@@ -336,5 +372,6 @@ export default function UnifiedInput({ mode, onModeToggle }: UnifiedInputProps) 
         )}
       </div>
     </div>
+    </>
   )
 }

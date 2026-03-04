@@ -1,6 +1,7 @@
 import { validate as isUUID } from "uuid"
 
 import type { SubmitJobResponse, PublishImageResponse } from "@customTypes/generation"
+import { RateLimitError } from "@services/errors"
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -25,6 +26,10 @@ export async function submitJob(image: File, prompt: string): Promise<SubmitJobR
   })
 
   if (!response.ok) {
+    if (response.status === 429) {
+      const body = await response.json().catch(() => ({ limit: 0, reset_at: "" }))
+      throw new RateLimitError(body.limit, body.reset_at)
+    }
     const error = await response.json().catch(() => ({ error: "Failed to submit job" }))
     throw new Error(error.error || "Failed to submit job")
   }
@@ -47,6 +52,10 @@ export async function submitRefinement(
   })
 
   if (!response.ok) {
+    if (response.status === 429) {
+      const body = await response.json().catch(() => ({ limit: 0, reset_at: "" }))
+      throw new RateLimitError(body.limit, body.reset_at)
+    }
     const error = await response.json().catch(() => ({ error: "Failed to submit refinement" }))
     throw new Error(error.error || "Failed to submit refinement")
   }
