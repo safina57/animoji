@@ -55,11 +55,13 @@ func DailyRateLimit(redisClient *cache.RedisClient, prefix string, limit int) fu
 
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusTooManyRequests)
-				_ = json.NewEncoder(w).Encode(rateLimitExceededResponse{
+				if err := json.NewEncoder(w).Encode(rateLimitExceededResponse{
 					Error:   "daily limit reached",
 					Limit:   limit,
 					ResetAt: tomorrow.Format(time.RFC3339),
-				})
+				}); err != nil {
+					logger.Warn().Err(err).Msg("Failed to write rate limit response body")
+				}
 				return
 			}
 
