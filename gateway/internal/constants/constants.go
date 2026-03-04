@@ -118,3 +118,11 @@ const (
 	RedisDB  = 0
 	RedisTTL = 24 * time.Hour // 24h matches the MinIO ILM tmp/ expiry window
 )
+
+// Rate limiting
+const (
+	DailyImageGenerationLimit = 3
+	DailyEmojiGenerationLimit = 3
+	RateLimitImagePrefix      = "image"
+	RateLimitEmojiPrefix      = "emoji"
+)

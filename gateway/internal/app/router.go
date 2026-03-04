@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	internalAuth "github.com/safina57/animoji/gateway/internal/auth"
 	"github.com/safina57/animoji/gateway/internal/cache"
+	"github.com/safina57/animoji/gateway/internal/constants"
 	authHandlers "github.com/safina57/animoji/gateway/internal/handlers/auth"
 	emojiHandlers "github.com/safina57/animoji/gateway/internal/handlers/emojis"
 	imageHandlers "github.com/safina57/animoji/gateway/internal/handlers/images"
@@ -67,13 +68,16 @@ func newRouter(
 	r.Group(func(r chi.Router) {
 		r.Use(appMiddleware.Authenticate(authConfig.PublicKey))
 
+		imageRL := appMiddleware.DailyRateLimit(redisClient, constants.RateLimitImagePrefix, constants.DailyImageGenerationLimit)
+		emojiRL := appMiddleware.DailyRateLimit(redisClient, constants.RateLimitEmojiPrefix, constants.DailyEmojiGenerationLimit)
+
 		// Auth
 		r.Get("/auth/me", authH.HandleGetMe)
 
 		// Image job lifecycle
-		r.Post("/images/jobs", imgH.HandleSubmitJob)
+		r.With(imageRL).Post("/images/jobs", imgH.HandleSubmitJob)
 		r.Get("/images/jobs/{job_id}/stream", imgH.HandleJobStatusStream(imageEventManager, storageService))
-		r.Post("/images/jobs/{job_id}/refine", imgH.HandleRefineJob)
+		r.With(imageRL).Post("/images/jobs/{job_id}/refine", imgH.HandleRefineJob)
 		r.Post("/images/jobs/{job_id}/publish", imgH.HandlePublishImage)
 
 		// User image gallery
@@ -84,8 +88,8 @@ func newRouter(
 		r.Delete("/images/{image_id}/like", imgH.HandleUnlikeImage)
 		r.Get("/images/{image_id}/liked", imgH.HandleCheckLiked)
 
-		// Emoji job lifecycle
-		r.Post("/emojis/jobs", emojiH.HandleSubmitEmojiJob)
+		// Emoji job lifecycle — only submit counts toward the limit
+		r.With(emojiRL).Post("/emojis/jobs", emojiH.HandleSubmitEmojiJob)
 		r.Get("/emojis/jobs/{job_id}/stream", emojiH.HandleEmojiStatusStream(emojiEventManager, storageService))
 		r.Post("/emojis/jobs/{job_id}/variants/{variant_id}/publish", emojiH.HandlePublishEmojiVariant)
 
