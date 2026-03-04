@@ -7,6 +7,7 @@ import {
   startGeneration,
   setJobId,
   failGeneration,
+  cancelGeneration,
 } from "@store/slices/generationSlice"
 import {
   setEmojiPrompt,
@@ -14,6 +15,7 @@ import {
   startEmojiGeneration,
   setEmojiJobId,
   failEmojiGeneration,
+  cancelEmojiGeneration,
 } from "@store/slices/emojiSlice"
 import { submitJob, submitRefinement } from "@services/generationService"
 import { submitEmojiJob } from "@services/emojiService"
@@ -152,8 +154,7 @@ export default function UnifiedInput({ mode, onModeToggle }: UnifiedInputProps) 
           await submitRefinement(animeJobId, prompt)
         } catch (err) {
           if (err instanceof RateLimitError) {
-            dispatch(failGeneration("__rl__"))
-            dispatch(failGeneration(null))
+            dispatch(cancelGeneration())
             setRateLimitInfo({ limit: err.limit, resetAt: err.resetAt, mode: "anime" })
           } else {
             dispatch(
@@ -172,8 +173,7 @@ export default function UnifiedInput({ mode, onModeToggle }: UnifiedInputProps) 
           dispatch(setJobId(res.job_id))
         } catch (err) {
           if (err instanceof RateLimitError) {
-            dispatch(failGeneration("__rl__"))
-            dispatch(failGeneration(null))
+            dispatch(cancelGeneration())
             setRateLimitInfo({ limit: err.limit, resetAt: err.resetAt, mode: "anime" })
           } else {
             dispatch(
@@ -195,8 +195,7 @@ export default function UnifiedInput({ mode, onModeToggle }: UnifiedInputProps) 
         dispatch(setEmojiJobId(res.job_id))
       } catch (err) {
         if (err instanceof RateLimitError) {
-          dispatch(failEmojiGeneration("__rl__"))
-          dispatch(failEmojiGeneration(null))
+          dispatch(cancelEmojiGeneration())
           setRateLimitInfo({ limit: err.limit, resetAt: err.resetAt, mode: "emoji" })
         } else {
           dispatch(

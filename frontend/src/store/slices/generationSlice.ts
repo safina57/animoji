@@ -91,6 +91,13 @@ const generationSlice = createSlice({
       state.error = action.payload
     },
 
+    // Abort an in-flight generation without surfacing an error to the UI.
+    // Used when the caller handles the error itself (e.g. rate-limit modal).
+    cancelGeneration(state) {
+      state.stage = GENERATION_STAGE.INPUT
+      state.error = null
+    },
+
     markResultAsPublished(state, action: PayloadAction<{ iterationNum: number; imageId: string }>) {
       const result = state.results.find((r) => r.iterationNum === action.payload.iterationNum)
       if (result) {
@@ -111,6 +118,7 @@ export const {
   setJobId,
   completeGeneration,
   failGeneration,
+  cancelGeneration,
   markResultAsPublished,
   resetGeneration,
 } = generationSlice.actions
