@@ -60,18 +60,8 @@ export default function RateLimitModal({ onClose, limit, resetAt, mode }: RateLi
           { opacity: 1, scale: 1, y: 0, duration: 0.45, ease: "back.out(1.8)" },
           "<0.1"
         )
-        .fromTo(
-          textRef.current,
-          { opacity: 0, y: 10 },
-          { opacity: 1, y: 0, duration: 0.4 },
-          "<0.1"
-        )
-        .fromTo(
-          btnRef.current,
-          { opacity: 0, y: 6 },
-          { opacity: 1, y: 0, duration: 0.3 },
-          "<0.08"
-        )
+        .fromTo(textRef.current, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4 }, "<0.1")
+        .fromTo(btnRef.current, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.3 }, "<0.08")
     })
 
     return () => ctx.revert()
