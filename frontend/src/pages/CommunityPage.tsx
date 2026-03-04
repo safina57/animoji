@@ -19,12 +19,24 @@ const loadingMoreSpinner = (
 
 export default function CommunityPage() {
   const dispatch = useAppDispatch()
-  const { images, hasMore, isLoading, isLoadingMore } = useAppSelector((s) => s.feed)
+  const { images, hasMore, isLoading, isLoadingMore, error } = useAppSelector((s) => s.feed)
 
   const [selectedImage, setSelectedImage] = useState<ImageFeedItem | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
 
   const sentinelRef = useRef<HTMLDivElement>(null)
+
+  const hasMoreRef = useRef(hasMore)
+  const isLoadingRef = useRef(isLoading)
+  const isLoadingMoreRef = useRef(isLoadingMore)
+  const errorRef = useRef(error)
+
+  useEffect(() => {
+    hasMoreRef.current = hasMore
+    isLoadingRef.current = isLoading
+    isLoadingMoreRef.current = isLoadingMore
+    errorRef.current = error
+  })
 
   // Initial load + deep-link: open the dialog for ?image={id} on page load
   useEffect(() => {
@@ -44,14 +56,22 @@ export default function CommunityPage() {
     }
   }, [dispatch])
 
-  // Infinite scroll sentinel
+  // Infinite scroll sentinel — created once; reads live state via refs so that
+  // loading-state changes never trigger observer recreation (and an immediate
+  // spurious callback that would cause infinite retries on error).
   useEffect(() => {
     const el = sentinelRef.current
     if (!el) return
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !isLoadingMore && !isLoading) {
+        if (
+          entries[0].isIntersecting &&
+          hasMoreRef.current &&
+          !isLoadingMoreRef.current &&
+          !isLoadingRef.current &&
+          !errorRef.current
+        ) {
           dispatch(loadMoreFeed())
         }
       },
@@ -60,7 +80,7 @@ export default function CommunityPage() {
 
     observer.observe(el)
     return () => observer.disconnect()
-  }, [dispatch, hasMore, isLoading, isLoadingMore])
+  }, [dispatch])
 
   const handleCardClick = useCallback((item: ImageFeedItem) => {
     setSelectedImage(item)
