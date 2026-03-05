@@ -290,7 +290,11 @@
     # DEPLOY — Log into GHCR and start the stack for the first time
     # =========================================================================
 
-
+    - name: Log into GHCR Docker registry
+      ansible.builtin.shell: |
+        echo "{{ ghcr_token }}" | docker login ghcr.io -u {{ github_username }} --password-stdin
+      become_user: "{{ vm_user }}"
+      tags: [deploy]
     - name: Pull all Docker images from GHCR
       ansible.builtin.shell: |
         docker compose -f /home/{{ vm_user }}/animoji/docker-compose.prod.yml pull

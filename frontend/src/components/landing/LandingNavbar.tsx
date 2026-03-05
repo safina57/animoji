@@ -78,7 +78,7 @@ export default function LandingNavbar() {
       </ul>
 
       {/* Cat sign-in button */}
-      <Link to="/auth" className="nav-cat-btn hidden md:flex" aria-label="Sign In">
+      <Link to="/login" className="nav-cat-btn hidden md:flex" aria-label="Sign In">
         <DotLottieReact src={catLottieUrl} autoplay loop style={{ width: 56, height: 56 }} />
       </Link>
 
@@ -112,7 +112,7 @@ export default function LandingNavbar() {
               {label}
             </a>
           ))}
-          <Link to="/auth" onClick={() => setMenuOpen(false)} className="nav-drawer-cta">
+          <Link to="/login" onClick={() => setMenuOpen(false)} className="nav-drawer-cta">
             Sign In
           </Link>
         </div>

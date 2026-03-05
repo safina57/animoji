@@ -148,7 +148,7 @@ export default function Navbar() {
             ) : (
               <Button
                 onClick={() => {
-                  if (location.pathname !== "/auth") navigate("/auth")
+                  if (location.pathname !== "/login") navigate("/login")
                 }}
                 variant="outline"
                 className="h-8 px-4 text-sm border-primary/20 hover:border-primary/40 hover:bg-primary/5 text-gray-900 dark:text-white hover:text-primary dark:hover:text-primary"
@@ -247,7 +247,7 @@ export default function Navbar() {
                 ) : (
                   <Button
                     onClick={() => {
-                      navigate("/auth")
+                      navigate("/login")
                       setDrawerOpen(false)
                     }}
                     variant="outline"

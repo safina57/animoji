@@ -28,7 +28,7 @@ export const ImageCard = memo(function ImageCard({ item, onClick, onLikeToggle }
     async (e: React.MouseEvent) => {
       e.stopPropagation()
       if (!isAuthenticated) {
-        window.location.href = "/auth"
+        window.location.href = "/login"
         return
       }
       if (likeLoading) return
@@ -62,7 +62,7 @@ export const ImageCard = memo(function ImageCard({ item, onClick, onLikeToggle }
     async (e: React.MouseEvent) => {
       e.stopPropagation()
       try {
-        await navigator.clipboard.writeText(`${window.location.origin}?image=${item.id}`)
+        await navigator.clipboard.writeText(`${window.location.origin}/community?image=${item.id}`)
         setShareCopied(true)
         setTimeout(() => setShareCopied(false), 2000)
       } catch {

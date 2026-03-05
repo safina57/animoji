@@ -41,7 +41,7 @@ export default function PublishButton({ jobId, result }: PublishButtonProps) {
       )
       setOpen(false)
       dispatch(resetGeneration())
-      navigate(`/?image=${response.image_id}`)
+      navigate(`/community?image=${response.image_id}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to publish")
     } finally {

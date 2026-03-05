@@ -42,7 +42,7 @@ function AppShell() {
       <Suspense fallback={<PageFallback />}>
         <Routes>
           <Route path="/community" element={<CommunityPage />} />
-          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/login" element={<AuthPage />} />
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
           <Route
             path="/create"

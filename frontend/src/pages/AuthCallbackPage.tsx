@@ -18,7 +18,7 @@ export default function AuthCallbackPage() {
       } catch (error) {
         console.error("Failed to fetch user:", error)
         dispatch(loginFailure("Failed to authenticate"))
-        navigate("/auth")
+        navigate("/login")
       }
     }
 
