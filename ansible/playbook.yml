@@ -295,6 +295,33 @@
         echo "{{ ghcr_token }}" | docker login ghcr.io -u {{ github_username }} --password-stdin
       become_user: "{{ vm_user }}"
       tags: [deploy]
+
+    - name: Ensure /root/.docker/config.json is not a directory (Docker bug)
+      ansible.builtin.file:
+        path: /root/.docker/config.json
+        state: absent
+      tags: [deploy]
+
+    - name: Create /root/.docker directory
+      ansible.builtin.file:
+        path: /root/.docker
+        state: directory
+        mode: "0700"
+      tags: [deploy]
+
+    - name: Copy GHCR credentials for Watchtower
+      ansible.builtin.copy:
+        src: /home/{{ vm_user }}/.docker/config.json
+        dest: /root/.docker/config.json
+        remote_src: true
+        mode: "0600"
+      tags: [deploy]
+    
+    - name: Log into GHCR Docker registry
+      ansible.builtin.shell: |
+        echo "{{ ghcr_token }}" | docker login ghcr.io -u {{ github_username }} --password-stdin
+      become_user: "{{ vm_user }}"
+      tags: [deploy]
     - name: Pull all Docker images from GHCR
       ansible.builtin.shell: |
         docker compose -f /home/{{ vm_user }}/animoji/docker-compose.prod.yml pull
