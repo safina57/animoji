@@ -192,6 +192,10 @@ services:
     image: containrrr/watchtower:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - /root/.docker/config.json:/watchtower-config/config.json:ro
+    environment:
+      - DOCKER_API_VERSION=1.44
+      - DOCKER_CONFIG=/watchtower-config
     command: --interval 30 --cleanup --label-enable
     restart: unless-stopped
 
